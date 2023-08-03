@@ -364,7 +364,6 @@ dependencies:
   - r-gridextra=2.3=r43hc72bb7e_1005
   - r-gtable=0.3.3=r43hc72bb7e_1
   - r-gtools=3.9.4=r43h57805ef_1
-  - r-harmony=0.1=r43h4ac6f70_6
   - r-haven=2.5.3=r43ha503ecb_0
   - r-here=1.0.1=r43hc72bb7e_2
   - r-hexbin=1.28.3=r43h61816a4_1

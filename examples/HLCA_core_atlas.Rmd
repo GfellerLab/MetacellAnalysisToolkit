@@ -42,8 +42,9 @@ for d in datasets:
 
 ```
 
-# Identify metacell per sample in each dataset with SuperCell through MetacellToolkit command line
+# Identify metacell 
 
+We identify metacells per sample in each dataset with SuperCell through MetacellToolkit command line.
 We use .h5ad adata output format as it is faster to wright and lighter to store than .rds Seurat object.
 
 This step takes around 17 min with multiple cores (32 GB of memory required for 6 cores).
@@ -75,7 +76,7 @@ metacells <- lapply(X = metacellFiles, function(X){
 
 ## STACAS integration
 
-In the original study datasets were integrated using SCANVI semi-supervised integration with the `"original_anno_level_3"` level of annotation. Here we propose to use STACAS semi-supervised integration using the final level 3 of annotation provided in the metadata.
+In the original study, datasets were integrated using SCANVI semi-supervised integration with the `"original_anno_level_3"` level of annotation. Here we propose to use STACAS semi-supervised integration using the final level 3 of annotation provided in the metadata.
 
 ```{r}
 remotes::install_github("carmonalab/STACAS")
@@ -122,7 +123,6 @@ gc()
 ```{r}
 sum(combined.mc$size)
 ```
-
 We can now use the classical Seurat workflow on the integrated object
 
 ```{r}
@@ -170,7 +170,7 @@ VlnPlot(combined.mc,features = c("nCount_RNA","nFeature_RNA"),ncol = 2,pt.size =
 
 ## Marker analysis at the metacell level
 
-We identify at the metacell level the markers for the rare cell type Smooth muscle FAM83D+ and Migratory DCs and check if we correctly retrieve the genes highlithed in the original study.
+We identify at the metacell level the markers for the rare cell type Smooth muscle FAM83D+ and Migratory DCs and check if we correctly retrieve the genes highlighted in the original study.
 
 ```{r fig.height=4,fig.width=6}
 DefaultAssay(combined.mc) <- "RNA"
@@ -200,8 +200,6 @@ VlnPlot(combined.mc,features = c("CCR7", "LAD1", "CCL19"),ncol = 2)
 ```
 
 ```{r}
-
-
 DendriticCells <- combined.mc[,combined.mc$DC_type != "other cells"]
 DefaultAssay(DendriticCells) <- "integrated"
 DendriticCells <- ScaleData(DendriticCells, verbose = T)
@@ -214,12 +212,22 @@ FeaturePlot(DendriticCells,"MKI67")
 
 Now we will use [Harmony](https://www.nature.com/articles/s41592-019-0619-0), an other integration method. We will use it inside the [Seurat framework](https://htmlpreview.github.io/?https://github.com/satijalab/seurat.wrappers/blob/master/docs/harmony.html).
 
+```{r}
+install.packages("harmony")
+```
+
+
 ```{r message=FALSE}
+library(harmony)
 DefaultAssay(combined.mc) <- "RNA"
+combined.mc <- NormalizeData(combined.mc,features = features)
 combined.mc <- ScaleData(combined.mc,features = features)
 combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE,features = features)
 
-combined.mc <- harmony::RunHarmony(combined.mc,c("dataset"))
+# harmony requires the batch column to be defined as factor
+combined.mc@meta.data$dataset <- as.factor(combined.mc@meta.data$dataset)
+combined.mc <- RunHarmony(combined.mc,group.by.vars = c("dataset"))
+
 combined.mc <- RunUMAP(combined.mc,reduction = "harmony",
                       reduction.name = "umap.harmony",
                       dims = 1:30)
