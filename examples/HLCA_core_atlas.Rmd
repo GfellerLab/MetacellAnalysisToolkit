@@ -1,0 +1,271 @@
+---
+title: "Integration of the human lung cell atlas with metacells"
+author: "Leonard Herault"
+date: '2023-07-18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{bash}
+<!-- curl -o local.rds "https://corpora-data-prod.s3.amazonaws.com/4e08dac3-2ecb-4906-a7a9-21c980c97e61/local.rds?AWSAccessKeyId=ASIATLYQ5N5X3DHC3JUT&Signature=01nSR0u3FCRBDAvLLMlbiHv4yZQ%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDylUsdmowl%2BHEvEDfO%2BNyUt4A%2Bwcr8izE%2B2o2vhLmLEgIhAIcoiESy%2BuzwyglXBg2NWD58xoewsrkSt1ViXxkCPxykKusDCGwQARoMMjMxNDI2ODQ2NTc1IgxuQ7O%2FbDC650ECvPMqyAPYlfzq20p2%2Ba3eC7weaURlQWt7Av%2B4715bhRKykcXA7j2fMACLtpYfF31NxkgWn71F%2BGznKL%2F%2FMPnU1D0yjGlcqeIGaURgvwqaFUdtBbSxlpAVB7yJZPQr4FcmZBStgXw3cnK87d8OX13kBzxi2Y0MTytM1w3bMOe%2F2othusWa02VNHN%2FQdv20rEPcxfZ0OmjoPLx4DRyOT1H40EHHCVWfdfrnpR9FMPuWgr8dmRUXzhQB4BFYMsgv%2B8SXnLfiU10TCeIvDIJREHFaqwv9eTqIi2j0qmDVHk1DjfitUiltgQGFArw6gmo6fVo7Cinwpn5K3KF92t7b%2B99Obpu1YjnhoiXKA08AZ8qpUm8tO0CfuGkMNAW%2Fyt0v4svpaLJwkq1e4Rn3icHo%2BtliecQVE2YkbnBLoHvzdLAP9IYqNqPxMMIJnUCtr%2BAJAoqxnCD3Uh62S703JZd2VnVULkyaCPEwnv74FuAAbZ2CoSFOQnJyxQ7sDGQInT8w3I5QSK6Nnn3iDCfXDWMJMXAF%2F0a%2BpnPZYn%2F4ubv%2FZARxRgneL8emyMrtSajX1v3%2Bfb14PcPqUd8HvT3juoJQaagZNlC67xAskue3Dc1rlHIw4f3XpQY6pAFNXTeQy7dvl3TH3S5byqkpo2rHfusUgOORqnNvcSkKvyXu5sEkpFtZn1wXw8ebbOUwly3MwnHtJEp4yp0IFGpH0dG6Cag3T0Eu3LdswlbpbBh3Ue99XlAs5SFr70QdDETmBiIaAz82MKx6oz8Zkzotttud3uFR9SAukbClWiKCHoxSNVuAscl3%2FiPRdI3DTrIyue%2FGb2NgacDWWQ2FHhgkORtt7Q%3D%3D&Expires=1690272618" -->
+```
+
+```{r}
+library(Seurat)
+library(anndata)
+library(SuperCell)
+library(reticulate)
+use_condaenv("~/bin/miniconda3/envs/MetacellToolkit/bin/python")
+#library(STACAS)
+```
+
+## Splitting atlas per datasets
+
+Around 10 mins
+
+```{python}
+import scanpy as sc
+import os
+
+os.makedirs("data/HCLA/datasets",exist_ok=True)
+adata = sc.read_h5ad("data/HCLA/local.h5ad",backed = True)
+datasets =  adata.obs['dataset'].unique()
+for d in datasets:
+  adata = sc.read_h5ad("data/HCLA/local.h5ad",backed = True)
+  # adata.var_names = adata.var['feature_name'].to_list()
+  adataDataset = adata[adata.obs['dataset']==d,]
+  os.makedirs("data/HCLA/datasets/"+d,exist_ok=True)
+  adataDataset.write_h5ad("data/HCLA/datasets/"+d+"/sc_adata.h5ad")
+
+```
+
+# Identify metacell per sample in each dataset with SuperCell through MetacellToolkit command line
+
+We use .h5ad adata output format as it is faster to wright and lighter to store than .rds Seurat object.
+
+This step takes around 17 min with multiple cores (32 GB of memory required for 6 cores).
+
+```{bash}
+for d in data/HCLA/datasets/*;
+do Rscript MetacellToolkit/cli/SuperCellCL_light.R -i $d/sc_adata.h5ad -o $d -a sample -l 6 -m 50 -n 30 -f 2000 -k 30 -g 50 -s adata;
+done
+```
+
+# Load metacell objects
+
+We load .h5ad object and directly convert them in Seurat object to use them with STACAS.
+
+```{r}
+metacellFiles <- list.files("../../data/HCLA/datasets/",recursive = T,pattern = "mc_adata.h5ad",full.names = T) 
+#metacellFiles <- list.files("data/HCLA/datasets/",recursive = T,pattern = "mc_adata.h5ad",full.names = T) 
+
+metacells <- lapply(X = metacellFiles, function(X){
+  adata <- anndata::read_h5ad(X)
+  countMatrix <- Matrix::t(adata$X)
+  colnames(countMatrix) <- adata$obs_names
+  rownames(countMatrix) <- adata$var_names
+  sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+  return(sobj)
+  })
+
+```
+
+## STACAS integration
+
+In the original study datasets were integrated using SCANVI semi-supervised integration with the `"original_anno_level_3"` level of annotation. Here we propose to use STACAS semi-supervised integration using the final level 3 of annotation provided in the metadata.
+
+```{r}
+remotes::install_github("carmonalab/STACAS")
+```
+
+```{r}
+library(STACAS)
+
+t0_integration <- Sys.time()
+
+# normalize and identify variable features for each dataset independently
+allMetacellDatasets <- lapply(X = metacells, FUN = function(x) {
+  DefaultAssay(x) <- "RNA";
+  x <- RenameCells(x, add.cell.id = unique(x$sample))
+  x <- NormalizeData(x)
+  return(x)})
+gc()
+# select features that are repeatedly variable across datasets for integration run PCA on each
+# dataset using these features
+features <- SelectIntegrationFeatures(object.list = allMetacellDatasets)
+allMetacellDatasets <- lapply(X = allMetacellDatasets, FUN = function(x) {
+  x <- ScaleData(x,features = features,verbose =F);
+  x <- RunPCA(x,features = features,verbose =F)
+})
+
+rna.anchors <- FindAnchors.STACAS(object.list = allMetacellDatasets, 
+                                  anchor.features = features,
+                                  cell.labels = "ann_level_3",
+                                  reference = c(1,2,5,9,11), # the 5 biggest datasets are used as reference
+                                  dims = 1:30)
+```
+
+```{r}
+remove(allMetacellDatasets)
+gc()
+
+combined.mc <- IntegrateData.STACAS(anchorset = rna.anchors)
+
+remove(rna.anchors)
+gc()
+
+```
+
+```{r}
+sum(combined.mc$size)
+```
+
+We can now use the classical Seurat workflow on the integrated object
+
+```{r}
+DefaultAssay(combined.mc) = "integrated"
+combined.mc <- ScaleData(combined.mc, verbose = T)
+combined.mc <- RunPCA(combined.mc, verbose = FALSE,reduction.name = "pca.stacas")
+combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca.stacas",reduction.name = "umap")
+
+```
+
+We check that our integration correctly mixed the different samples in the reduced space by preserving differences between the different cell types.
+
+```{r}
+library(ggplot2)
+UMAPPlot(combined.mc,group.by = "ann_level_1")
+
+UMAPPlot(combined.mc,group.by = "ann_level_2",label = T)
+
+UMAPPlot(combined.mc,group.by = "ann_level_3",label = T) + NoLegend()
+```
+
+```{r fig.height=4,fig.width=4}
+UMAPPlot(combined.mc,group.by = "ann_finest_level",label = T) + NoLegend()
+```
+
+```{r}
+UMAPPlot(combined.mc,group.by = "dataset")
+
+```
+
+```{r}
+ggplot(combined.mc@meta.data,aes(y = ann_level_1_purity)) + geom_boxplot()
+ggplot(combined.mc@meta.data,aes(y = ann_level_2_purity)) + geom_boxplot()
+ggplot(combined.mc@meta.data,aes(y = ann_level_3_purity)) + geom_boxplot()
+ggplot(combined.mc@meta.data,aes(y = ann_finest_level_purity)) + geom_boxplot()
+```
+
+```{r}
+Idents(combined.mc) <- "Metacells"
+VlnPlot(combined.mc,features = c("size","ann_finest_level_purity"),ncol = 2,pt.size = 0)
+
+VlnPlot(combined.mc,features = c("nCount_RNA","nFeature_RNA"),ncol = 2,pt.size = 0)
+
+```
+
+## Marker analysis at the metacell level
+
+We identify at the metacell level the markers for the rare cell type Smooth muscle FAM83D+ and Migratory DCs and check if we correctly retrieve the genes highlithed in the original study.
+
+```{r fig.height=4,fig.width=6}
+DefaultAssay(combined.mc) <- "RNA"
+Idents(combined.mc) <- "ann_level_3"
+markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T)
+
+head(markersSmoothMuscle)
+
+markersSmoothMuscle[c("MYH11","CNN1","FAM83D"),]
+
+VlnPlot(combined.mc,features = c("MYH11","CNN1","FAM83D"),ncol = 2)
+```
+
+```{r fig.width=5,fig.height=4}
+DCs <- combined.mc$ann_finest_level %in% c("Interstitial Mph perivascular","DC1","DC2","Migratory DCs")
+combined.mc$DC_type <- "other cells"
+combined.mc$DC_type[DCs] <- combined.mc$ann_finest_level[DCs]
+
+Idents(combined.mc) <- "DC_type"
+MigratoryDCmarkers <- FindMarkers(combined.mc,ident.1 = "Migratory DCs",only.pos = T)
+
+head(MigratoryDCmarkers)
+
+MigratoryDCmarkers[c("CCR7", "LAD1", "CCL19"),]
+
+VlnPlot(combined.mc,features = c("CCR7", "LAD1", "CCL19"),ncol = 2)
+```
+
+```{r}
+
+
+DendriticCells <- combined.mc[,combined.mc$DC_type != "other cells"]
+DefaultAssay(DendriticCells) <- "integrated"
+DendriticCells <- ScaleData(DendriticCells, verbose = T)
+DendriticCells <- RunPCA(DendriticCells, verbose = FALSE)
+DendriticCells <- RunUMAP(DendriticCells, dims = 1:30)
+
+UMAPPlot(DendriticCells)
+FeaturePlot(DendriticCells,"MKI67")
+```
+
+Now we will use [Harmony](https://www.nature.com/articles/s41592-019-0619-0), an other integration method. We will use it inside the [Seurat framework](https://htmlpreview.github.io/?https://github.com/satijalab/seurat.wrappers/blob/master/docs/harmony.html).
+
+```{r message=FALSE}
+DefaultAssay(combined.mc) <- "RNA"
+combined.mc <- ScaleData(combined.mc,features = features)
+combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE,features = features)
+
+combined.mc <- harmony::RunHarmony(combined.mc,c("dataset"))
+combined.mc <- RunUMAP(combined.mc,reduction = "harmony",
+                      reduction.name = "umap.harmony",
+                      dims = 1:30)
+```
+
+```{r fig.height=4,fig.width=4}
+DimPlot(combined.mc,group.by = "ann_finest_level",label = T,reduction = "umap.harmony") + NoLegend()
+```
+
+```{r}
+DimPlot(combined.mc,group.by = "dataset",reduction = "umap.harmony")
+
+```
+
+# Unintegrated analysis
+
+```{r}
+combined.mc <- RunUMAP(combined.mc,reduction = "pca",
+                      reduction.name = "umap.unintegrated",
+                      dims = 1:30)
+
+DimPlot(combined.mc,group.by = "ann_finest_level",label = T,reduction = "umap.unintegrated") + NoLegend()
+DimPlot(combined.mc,group.by = "dataset",reduction = "umap.unintegrated")
+
+```
+
+```{r}
+# library(scIntegrationMetrics)
+# 
+# integrationMetrics <- list()
+# integrationMetrics[["STACAS"]] <- getIntegrationMetrics(object=combined.mc,
+#                                                       metrics = c("CiLISI","celltype_ASW"),
+#                                                       meta.label = "ann_level_3",
+#                                                       meta.batch = "dataset",
+#                                                       method.reduction = "pca")
+# 
+# integrationMetrics[["harmony"]] <- getIntegrationMetrics(object=object_integrated,
+#                                                       metrics = c("CiLISI","celltype_ASW"),
+#                                                       meta.label = "ann_level_3",
+#                                                       meta.batch = "dataset",
+#                                                       method.reduction = "harmony")
+# 
+# integrationMetrics[["unintegrated"]] <- getIntegrationMetrics(object=object_integrated_ss,
+#                                                       metrics = c("CiLISI","celltype_ASW"),
+#                                                       meta.label = "ann_level_3",
+#                                                       meta.batch = "dataset",
+#                                                       method.reduction = "pca")
+
+```
