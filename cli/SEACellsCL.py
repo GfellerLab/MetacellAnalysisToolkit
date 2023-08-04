@@ -121,6 +121,20 @@ def main(argv):
 
     for anno in adata.obs[annotations].unique():
         adata_label = adata[adata.obs[annotations] == anno,]
+        n_SEACells = round(len(adata_label)/gamma)
+        
+        if n_SEACells < min_metacells:
+            n_SEACells = min_metacells
+            
+        if n_SEACells == 1:
+            adata_label.obs['SEACell'] = "SEACell-1_"+ anno
+            if anno == adata.obs[annotations].unique()[0]:
+                seacells_res = adata_label.obs["SEACell"]
+            else:
+                seacells_res = pd.concat([seacells_res,adata_label.obs["SEACell"]])
+            continue
+        
+        print("Identify "+ str(n_SEACells) + " metacells using SEACells...")
     
         if (prePro or reduction_key not in adata_label.obsm.keys()):
             print("Preprocess the data...")
@@ -135,14 +149,11 @@ def main(argv):
         
         build_kernel_on = reduction_key
         adata_label.obsm[build_kernel_on] = adata_label.obsm[build_kernel_on][:,range(int(dim_str_list[0])-1, int(dim_str_list[1]))]
-        n_SEACells = round(len(adata_label)/gamma)
+        
     
         min_metacells = min(min_metacells,adata_label.n_obs)
     
-        if n_SEACells < min_metacells:
-            n_SEACells = min_metacells
         
-        print("Identify "+ str(n_SEACells) + " metacells using SEACells...")
         
         if n_SEACells < n_waypoint_eigs:
             n_waypoint_eigs_label = n_SEACells
@@ -188,7 +199,7 @@ def main(argv):
 
     print("Assign metadata to metacells and compute purities...")
     for c in adata.obs.select_dtypes(exclude='number').columns:
-        if c != "SEACell" or c != "SEACell_batch":
+        if c != "SEACell" and c != "SEACell_batch":
             SEACell_purity = SEACells.evaluate.compute_celltype_purity(adata, c)
             adata_mc.obs = adata_mc.obs.join(SEACell_purity)
 
