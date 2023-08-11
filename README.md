@@ -46,15 +46,24 @@ You can identifify metacells according to a given annotation (e.g. cell types, s
     #Using SEACells
     python cli/SEACellsCL.py -i data/cd34_multiome_rna.h5ad -o testCLI/SEACells_per_celltype_min_5_MC/cd34_multiome_rna/input_raw_adata/ -a celltype -m 5 -n 50 -f 2000 -k 30 -g 75 -s adata
 
-With SuperCell it is possible to use parallel processing for this using the -l arguments which gives the number of cores to use
+With SuperCell it is possible to use parallel processing for this using the -l argument which gives the number of cores to use
 
-    #SuperCell parallel metacell identification in each cell types
-    Rscript SuperCellCL.R -i data/cd34_multiome_rna.adata -o testCLI/SuperCell_per_celltype/cd34_multiome_rna/input_raw_adata/ -n 50 -f 2000 -k 30 -g 75 -s adata -a celltype -l 6
+    #SuperCell parallel metacell identification in each cell type
+    Rscript cli/SuperCellCL.R -i data/cd34_multiome_rna.adata -o testCLI/SuperCell_per_celltype/cd34_multiome_rna/input_raw_adata/ -n 50 -f 2000 -k 30 -g 75 -s adata -a celltype -l 6
+
+## Main bash CLI
+    
+    #Allow to execute
+    chmod a+x cli/MetacellToolkit.sh
+    #Print help 
+    cli/MetacellToolkit.sh -h
+    # Using SuperCEll
+    cli/MetacellToolkit.sh -t SuperCell i data/cd34_multiome_rna.rds - test_output/SuperCell/cd34_multiome_rna/input_raw_rds/ -n 50 -f 2000 -k 30 -g 75 -s adata
+
 
 ## COMING SOON:
 
 -   MetaCell2
--   Main bash script command line to call the different tools
 
 # Quality control visualization
 
@@ -64,4 +73,4 @@ With SuperCell it is possible to use parallel processing for this using the -l a
 # Advanced examples
 
 -   Regulons analysis in CD34+ cells at the metacell level using SCENIC (TO COME)
--   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS semi supervised integration.
+-   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS semi-supervised integration.
