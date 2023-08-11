@@ -79,7 +79,7 @@ metacells <- lapply(X = metacellFiles, function(X){
 In the original study, datasets were integrated using SCANVI semi-supervised integration with the `"original_anno_level_3"` level of annotation. Here we propose to use STACAS semi-supervised integration using the final level 3 of annotation provided in the metadata.
 
 ```{r}
-remotes::install_github("carmonalab/STACAS")
+if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
 ```
 
 ```{r}
@@ -213,7 +213,7 @@ FeaturePlot(DendriticCells,"MKI67")
 Now we will use [Harmony](https://www.nature.com/articles/s41592-019-0619-0), an other integration method. We will use it inside the [Seurat framework](https://htmlpreview.github.io/?https://github.com/satijalab/seurat.wrappers/blob/master/docs/harmony.html).
 
 ```{r}
-install.packages("harmony")
+if (!requireNamespace("harmony")) install.packages("harmony")
 ```
 
 
