@@ -30,7 +30,9 @@ Imports:
   SuperCell,
   anndata,
   assertthat,
-  Matrix
+  Matrix,
+  ggplot2,
+  RColorBrewer
 Suggests:
   testthat,
   knitr,
