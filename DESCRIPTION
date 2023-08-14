@@ -1,0 +1,39 @@
+Package: MetacellToolkit
+Type: Package
+Title: Visualize metacells and evaluate their quality
+Version: 1.0
+Authors@R: as.person(c(
+  "Léonard Hérault <leonard.herault@unil.ch> [aut, cre]",
+  "Mariia Bilous <mariia.bilous@unil.ch> [aut]",
+  "Aurélie Gabriel <aurelie.gabriel@unil.ch> [aut]",
+  "David Gfeller <david.gfeller@unil.ch> [aut]"
+  ))
+Description: Package allowing users to perform quality controls on metacells data (evaluation of metacells purity, compactness, separation, iner-variance).
+reticulate:
+  list(
+    packages = list(
+      list(package = "scipy")
+    )
+  )
+Depends:
+  R (>= 4.0)
+License: file LICENSE
+Encoding: UTF-8
+LazyData: TRUE
+LazyDataCompression: xz
+RoxygenNote: 7.2.3
+biocViews: 
+  Software
+Imports:
+  reticulate,
+  Seurat,
+  SuperCell,
+  anndata,
+  assertthat,
+  Matrix
+Suggests:
+  testthat,
+  knitr,
+  rmarkdown,
+  remotes
+VignetteBuilder: knitr

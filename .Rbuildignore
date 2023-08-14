@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+cli/
+logs/
+examples/
+install.R
+MetacellToolkit_env.yml
+data_raw/
