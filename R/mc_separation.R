@@ -44,6 +44,8 @@ mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.l
       sc.obj <- Seurat::ScaleData(sc.obj)
       sc.obj <- Seurat::RunPCA(sc.obj)
       sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
+    }else{
+      sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
     } 
   } else if(!(is.data.frame(sc.reduction) | is.matrix(sc.reduction)) ){
     stop("sc.reduction should be a string indicating the name of the embedding to use in the reduction slot of sc.obj or a dataframe (or matrix) containing the components (columns) of single-cell embedding")

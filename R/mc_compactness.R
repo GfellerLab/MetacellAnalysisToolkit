@@ -17,7 +17,7 @@
 #' 
 # mc_compactness(sc.obj = MetacellToolkit::CD34_sc, sc.reduction = "pca", cell.membership = MetacellToolkit::CD34_mc@misc$cell_membership)
 # CD34_mc@meta.data["compactness"] <- mc_compactness(sc.obj = MetacellToolkit::CD34_sc,
-#                                                   sc.reduction = CD34_sc@reductions$pca@cell.embeddings, 
+#                                                   sc.reduction = CD34_sc@reductions$pca@cell.embeddings,
 #                                                   cell.membership = MetacellToolkit::CD34_mc@misc$cell_membership)
 # head(CD34_mc@meta.data)
 # CD34_mc@meta.data["compactness"] <- mc_compactness(sc.obj = MetacellToolkit::CD34_sc,
@@ -43,7 +43,9 @@ mc_compactness <- function(cell.membership, sc.obj, sc.reduction = "pca", group.
       sc.obj <- Seurat::ScaleData(sc.obj)
       sc.obj <- Seurat::RunPCA(sc.obj)
       sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
-    } 
+    }else{
+      sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
+    }  
   } else if(!(is.data.frame(sc.reduction) | is.matrix(sc.reduction)) ){
     stop("sc.reduction should be a string indicating the name of the embedding to use in the reduction slot of sc.obj or a dataframe (or matrix) containing the components (columns) of single-cell embedding")
   }  
