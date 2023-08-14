@@ -14,10 +14,8 @@ mc_compactness(
 )
 }
 \arguments{
-\item{cell.membership}{(optional, default is NULL) A data frame containing at least one column assigning each single-cell to a metacell (or other cell grouping) and 
-single-cell IDs as rownames. 
-If *cell.membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
-was generated using the MetacellToolkit command lines (see format of the *MetacellToolkit::CD34_mc* object).}
+\item{cell.membership}{A data frame containing at least one column assigning each single-cell to a metacell (or other cell grouping) and 
+single-cell IDs as rownames.}
 
 \item{sc.obj}{A Seurat object containing the single-cell data from which the metacells were built.}
 
@@ -29,8 +27,6 @@ a data frame containing a pre-computed embedding of the single-cell data.}
 \item{diffusion.components}{(optional, default is TRUE) A boolean indicating if compactness should be computed on diffusion components computed based on the low dimensionnal embedding provided in *sc.reduction*.}
 
 \item{n.components}{(optional, default is 10) Number of embedding components that should be used to compute the compactness.}
-
-\item{mc.obj}{A Seurat object containing the metacells data.}
 }
 \value{
 An updated metacell Seurat object with an additional column in the *meta.data* slot containing the compactness of each metacell.
@@ -40,5 +36,5 @@ An updated metacell Seurat object with an additional column in the *meta.data* s
 This function computes the compactness of metacells.
 }
 \examples{
-mc_compactness(cell.membership = MetacellToolkit::CD34_mc@misc$cell_membership, sc.obj = MetacellToolkit::CD34_sc)
+mc_compactness(cell.membership = CD34_mc@misc$cell_membership, sc.obj = CD34_sc)
 }
