@@ -48,7 +48,7 @@
 # mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, sc.label = "celltype", metacell.label = "celltype", mc.color = colors)
 
 mc_projection <- function(sc.obj,
-                          mc.obj,
+                          mc.obj = NULL,
                           membership = NULL,
                           metacell.label = NULL,
                           sc.label = NULL,
@@ -62,6 +62,9 @@ mc_projection <- function(sc.obj,
                           continuous_metric = F,
                           seed = 1234) {
   
+  if(is.null(mc.obj) & is.null(membership)){
+    stop("A membership vector should be provided either through the membership parameter or should be available in mc.obj as described in the documentation.")
+  } 
   if(is.null(membership)){
     membership <- mc.obj@misc$cell_membership$membership
   } 
@@ -76,10 +79,10 @@ mc_projection <- function(sc.obj,
       sc.obj <- Seurat::NormalizeData(sc.obj, normalization.method = "LogNormalize")
       sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = 1000)
       sc.obj <- Seurat::ScaleData(sc.obj)
-      sc.obj <- Seurat::RunPCA(sc.obj)
+      sc.obj <- Seurat::RunPCA(sc.obj, verbose = F)
       message("Running UMAP ...")
-      sc.obj <- Seurat::RunUMAP(sc.obj, reduction = "pca", dims = c(1:10), n.neighbors = 10)
-      scCoord <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
+      sc.obj <- Seurat::RunUMAP(sc.obj, reduction = "pca", dims = c(1:10), n.neighbors = 10, verbose = F)
+      scCoord <- Seurat::Embeddings(sc.obj@reductions[["umap"]])
     } else{
       scCoord <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
     } 

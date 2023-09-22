@@ -61,8 +61,8 @@ This function plots metacells in a single-cell space (pca, umap,..) taking the a
 }
 \examples{
 mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc)
-mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, metric = "celltype_purity", continuous_metric = T)
-mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, metric = "celltype_purity", continuous_metric = T, sc.label = "celltype")
+mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, metric = "celltype_purity", continuous_metric = TRUE)
+mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, metric = "celltype_purity", continuous_metric = TRUE, sc.label = "celltype")
 mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, sc.label = "celltype", metacell.label = "celltype")
 
 }
