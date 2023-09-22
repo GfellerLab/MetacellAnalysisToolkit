@@ -42,7 +42,7 @@ mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.l
       sc.obj <- Seurat::NormalizeData(sc.obj, normalization.method = "LogNormalize")
       sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = 1000)
       sc.obj <- Seurat::ScaleData(sc.obj)
-      sc.obj <- Seurat::RunPCA(sc.obj)
+      sc.obj <- Seurat::RunPCA(sc.obj, verbose = F)
       sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
     }else{
       sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
@@ -51,6 +51,8 @@ mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.l
     stop("sc.reduction should be a string indicating the name of the embedding to use in the reduction slot of sc.obj or a dataframe (or matrix) containing the components (columns) of single-cell embedding")
   }  
   
+  # Complete membership if not all single-cell found in the membership data frame
+  cell.membership[colnames(sc.obj)[!colnames(sc.obj) %in% rownames(cell.membership)],] <- NA
   
   # create single-cell anndata to compute separation using the python function
   sc_ad <- anndata::AnnData(
