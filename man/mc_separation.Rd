@@ -10,7 +10,8 @@ mc_separation(
   sc.reduction = "pca",
   group.label = "membership",
   diffusion.components = TRUE,
-  n.components = 10,
+  n.components = 30,
+  n.features = 2000,
   nth.nbr = 1
 )
 }
@@ -21,13 +22,16 @@ single-cell IDs as rownames.}
 \item{sc.obj}{A Seurat object containing the single-cell data from which the metacells were built.}
 
 \item{sc.reduction}{(optional, default is "pca") A string indicating which low embedding from sc.obj should be used to compute the separation metric or
-a data frame containing a pre-computed embedding of the single-cell data.}
+a data frame containing a pre-computed embedding of the single-cell data. If sc.reduction is a string and sc.reduction is not found in the sc.obj embeddings
+used to run PCA.}
 
 \item{group.label}{(optional, default is "membership") A string indicating the column name from *cell.membership* that should be used to compute the separation metric.}
 
 \item{diffusion.components}{(optional, default is TRUE) A boolean indicating if separation should be computed on diffusion components computed based on the low dimensionnal embedding provided in *sc.reduction*.}
 
 \item{n.components}{(optional, default is 10) Number of embedding components that should be used to compute the separation metric.}
+
+\item{n.features}{(optional, default is 2000) Number of features that should be used to run PCA if sc.reduction is not found.}
 
 \item{nth.nbr}{(optional, default is 1) Number of nearest neighbors used to compute the separation metric.}
 }

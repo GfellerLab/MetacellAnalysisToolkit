@@ -6,7 +6,7 @@
 \usage{
 mc_projection(
   sc.obj,
-  mc.obj,
+  mc.obj = NULL,
   membership = NULL,
   metacell.label = NULL,
   sc.label = NULL,
