@@ -32,7 +32,8 @@ Imports:
   assertthat,
   Matrix,
   ggplot2,
-  RColorBrewer
+  RColorBrewer,
+  dplyr
 Suggests:
   testthat,
   knitr,
