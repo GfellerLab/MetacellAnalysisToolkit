@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import palantir
 import warnings
+import scipy
 
 # adapted from https://github.com/dpeerlab/SEACells/blob/main/SEACells/evaluate.py
 
@@ -113,3 +114,65 @@ def separation(
         res['low_dim_embedding'] = 'DC'
         
     return res
+
+
+# adapted from https://github.com/tanaylab/metacells/blob/master/metacells/tools/quality.py 
+
+def mc_gene_var(
+	ad, 
+	MC_label,
+	):
+		
+		"""
+		Get mc gene variance
+		"""
+		if scipy.sparse.issparse(ad.X):
+			X = pd.DataFrame(ad.X.A, index=ad.obs_names)
+		else:
+			X = pd.DataFrame(ad.X, index=ad.obs_names)
+
+		X = pd.DataFrame(X.join(ad.obs[MC_label]).groupby(MC_label).var())
+		# X = X.groupby(ad.obs[MC_label].to_list()).var()
+		X = X.set_axis(ad.var_names, axis=1, copy=False)
+		return X
+
+def mc_gene_mean(
+	ad, 
+	MC_label
+):
+		
+	"""
+	Get mc gene variance
+	"""
+	if scipy.sparse.issparse(ad.X):
+	 	X = pd.DataFrame(ad.X.A, index=ad.obs_names)
+	else:
+		X = pd.DataFrame(ad.X, index=ad.obs_names)
+	
+	X = pd.DataFrame(X.join(ad.obs[MC_label]).groupby(MC_label).mean())
+	# X = X.groupby(ad.obs[MC_label].to_list()).mean()
+	X = X.set_axis(ad.var_names, axis=1, copy=False)
+	return X
+
+def mc_inner_normalized_var(
+		ad,
+		MC_label
+):
+	"""
+	Gene normalized variance within metacells
+	"""
+	# print(ad.obs_names)
+	v = mc_gene_var(ad, MC_label)
+	m = mc_gene_mean(ad, MC_label)
+	
+	zeros_mask = m == 0
+	res = np.reciprocal(m)#, where = zeros_mask 
+	res[zeros_mask] = 0
+	
+	res *= v
+	res[zeros_mask] = np.nan
+	
+	INV_val = pd.DataFrame(res.quantile(0.95, axis=1, numeric_only=True))
+	
+	return INV_val
+
