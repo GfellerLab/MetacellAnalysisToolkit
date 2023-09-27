@@ -1,23 +1,25 @@
 #' mc_projection of metacells in the single cell space  
 #' 
 #' \code{mc_projection} 
-#' This function plots metacells in a single-cell space (pca, umap,..) taking the average coordinates of single cells in each metacell
+#' This function plots metacells in a single-cell space (pca, umap,..) taking the average coordinates of single cells in each metacell. 
 #' @param sc.obj A Seurat object containing the single-cell data from which the metacells were built.
-#' @param mc.obj A Seurat object containing the metacells data.
-#' @param membership (optional, default is NULL) A vector containing the assignment of each single-cell to a metacell. 
+#' @param mc.obj A Seurat object containing the metacells data. If NULL, memberhsip should be provided as a data frame.
+#' @param membership A data frame containing the assignment of each single-cell to a metacell in a columns named "membership" and single-cell names
+#' as rownames. 
 #' If *membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
 #' was generated using the MetacellToolkit command lines (see format of the *MetacellToolkit::CD34_mc* object).
-#' @param metacell.label String corresponding to the name of the metadata column in mc.obj that should be used to color metacells.
+#' @param metacell.label String corresponding to the name of the metadata column in mc.obj that should be used to color metacells. 
+#' If mc.obj is NULL, this parameter will be ignored.
 #' @param sc.label String corresponding to the name of the metadata column in sc.obj that should be used to color single cells.
 #' @param dims Numerical vector (of length 2) indicating which components should be used in the 2D visualization of the data.
-#' @param sc.reduction (optional, default is "umap") A string indicating which low embedding from sc.obj should be used for the 2D visualization of the data
+#' @param sc.reduction (optional, default is "umap") Either a string indicating which low embedding from sc.obj should be used for the 2D visualization of the data
 #' or a data frame containing a pre-computed embedding of the single-cell data. If *sc.reduction* is a string which does not correspond to any embedding from sc.obj
 #' PCA will be performed on the single-cell data and UMAP will be run to obtain the 2D representation. 
 #' @param mc.color Colors for metacell idents
 #' @param sc.color Colors for single-cell idents
 #' @param alpha Transparency value for the single-cell points
 #' @param pt_size Size the single-cell points
-#' @param metric Column name of a continuous metric to use either to color the metacells (if continuous_metric is TRUE) or to define metacells sizes (if continuous_metric is TRUE).
+#' @param metric Column name of a continuous metric to use either to color the metacells (if continuous_metric is TRUE) or to define metacells sizes (if continuous_metric is FALSE).
 #' @param continuous_metric Bolean indicating if the metric variable is continuous or not. If TRUE a continuous color scale will be used for the metacell colors.
 #' @return A plot of metacells projected in the single cell space.
 #' @examples
@@ -59,8 +61,7 @@ mc_projection <- function(sc.obj,
                           alpha = 1,
                           pt_size = 0,
                           metric = "size",
-                          continuous_metric = F,
-                          seed = 1234) {
+                          continuous_metric = F) {
   
   if(is.null(mc.obj) & is.null(membership)){
     stop("A membership vector should be provided either through the membership parameter or should be available in mc.obj as described in the documentation.")
@@ -77,23 +78,27 @@ mc_projection <- function(sc.obj,
       message("Low dimensionnal embessing not found in sc.obj")
       message("Computing PCA ...")
       sc.obj <- Seurat::NormalizeData(sc.obj, normalization.method = "LogNormalize")
-      sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = 1000)
+      sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = 2000)
       sc.obj <- Seurat::ScaleData(sc.obj)
       sc.obj <- Seurat::RunPCA(sc.obj, verbose = F)
       message("Running UMAP ...")
-      sc.obj <- Seurat::RunUMAP(sc.obj, reduction = "pca", dims = c(1:10), n.neighbors = 10, verbose = F)
+      sc.obj <- Seurat::RunUMAP(sc.obj, reduction = "pca", dims = c(1:30), n.neighbors = 15, verbose = F)
       scCoord <- Seurat::Embeddings(sc.obj@reductions[["umap"]])
     } else{
       scCoord <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
     } 
   } else if(!(is.data.frame(sc.reduction) | is.matrix(sc.reduction)) ){
     stop("sc.reduction should be a string indicating the name of the embedding to use in the reduction slot of sc.obj or a dataframe (or matrix) containing the components (columns) of single-cell embedding")
+  } else{
+    scCoord <- sc.reduction
   }  
   
   scCoordMetacell <-  cbind(scCoord, membership)
   
   centroids <- stats::aggregate(scCoord~membership, scCoord, mean) #should be taken from object slot
   
+  # if metacell.label and metric provided, mc.obj is mandatory if mc.obj not found membership mandatory and metric set to size which we compute from membership 
+  # just add a message to warn the user 
   centroids[[metric]] <- mc.obj[[metric]][,1]
   
   if(is.null(metacell.label)) {
