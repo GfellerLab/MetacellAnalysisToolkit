@@ -1,17 +1,20 @@
 #' Compute separation of metacells.
 #'
 #' \code{mc_separation} 
-#' This function computes the separation of metacells. 
+#' This function computes the separation of metacells (relies on python functions adapted from https://github.com/dpeerlab/SEACells/blob/main/SEACells/evaluate.py).
 #' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (or other cell grouping) and 
 #' single-cell IDs as rownames. 
 #' @param sc.obj A Seurat object containing the single-cell data from which the metacells were built.
-#' @param sc.reduction (optional, default is "pca") A string indicating which low embedding from sc.obj should be used to compute the separation metric or
-#' a data frame containing a pre-computed embedding of the single-cell data. 
+#' @param sc.reduction (optional, default is "pca") Either a string indicating which low embedding from sc.obj should be used to compute the separation metric or
+#' a data frame containing a pre-computed embedding of the single-cell data. If sc.reduction is a string and sc.reduction is not found in the sc.obj embeddings
+#' PCA will be performed on the single-cell data.
 #' @param group.label (optional, default is "membership") A string indicating the column name from *cell.membership* that should be used to compute the separation metric. 
-#' @param diffusion.components (optional, default is TRUE) A boolean indicating if separation should be computed on diffusion components computed based on the low dimensionnal embedding provided in *sc.reduction*.
+#' @param diffusion.components (optional, default is TRUE) A boolean indicating if separation should be computed on diffusion components computed based on the low 
+#' dimensionnal embedding provided in *sc.reduction*.
 #' @param n.components (optional, default is 10) Number of embedding components that should be used to compute the separation metric. 
+#' @param n.features (optional, default is 2000) Number of features that should be used to run PCA if sc.reduction is not found. 
 #' @param nth.nbr (optional, default is 1) Number of nearest neighbors used to compute the separation metric. 
-#' @return  An updated metacell Seurat object with an additional column in the *meta.data* slot containing the separation metric for each metacell.
+#' @return  A vector containing the separation metric for each metacell.
 #' @examples
 #' mc_separation(cell.membership = CD34_mc@misc$cell_membership, sc.obj = CD34_sc)
 #' @export
@@ -31,7 +34,7 @@
 # 
 # head(CD34_mc@meta.data)
 
-mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.label = "membership", diffusion.components = TRUE, n.components = 10, nth.nbr = 1){
+mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.label = "membership", diffusion.components = TRUE, n.components = 30, n.features = 2000, nth.nbr = 1){
   reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellToolkit"))
   
   if(assertthat::is.string(sc.reduction)){
@@ -40,7 +43,7 @@ mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.l
       message("Low dimensionnal embessing not found in sc.obj")
       message("Computing PCA ...")
       sc.obj <- Seurat::NormalizeData(sc.obj, normalization.method = "LogNormalize")
-      sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = 1000)
+      sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = n.features)
       sc.obj <- Seurat::ScaleData(sc.obj)
       sc.obj <- Seurat::RunPCA(sc.obj, verbose = F)
       sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])

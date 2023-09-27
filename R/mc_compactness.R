@@ -1,16 +1,19 @@
 #' Compute compactness of metacells.
 #'
 #' \code{mc_compactness} 
-#' This function computes the compactness of metacells. 
-#' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (or other cell grouping) and 
-#' single-cell IDs as rownames. 
+#' This function computes the compactness of metacells (relies on python functions adapted from https://github.com/dpeerlab/SEACells/blob/main/SEACells/evaluate.py). 
+#' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (named "membership" is no other label is provided in group.label)
+#' andsingle-cell IDs as rownames. 
 #' @param sc.obj A Seurat object containing the single-cell data from which the metacells were built.
 #' @param sc.reduction (optional, default is "pca") A string indicating which low embedding from sc.obj should be used to compute compactness or
-#' a data frame containing a pre-computed embedding of the single-cell data. 
+#' a data frame containing a pre-computed embedding of the single-cell data. If sc.reduction is a string and sc.reduction is not found in the sc.obj embeddings
+#' PCA will be performed on the single-cell data.
 #' @param group.label (optional, default is "membership") A string indicating the column name from *cell.membership* that should be used to compute the compactness metric. 
-#' @param diffusion.components (optional, default is TRUE) A boolean indicating if compactness should be computed on diffusion components computed based on the low dimensionnal embedding provided in *sc.reduction*.
-#' @param n.components (optional, default is 10) Number of embedding components that should be used to compute the compactness. 
-#' @return  An updated metacell Seurat object with an additional column in the *meta.data* slot containing the compactness of each metacell.
+#' @param diffusion.components (optional, default is TRUE) A boolean indicating if compactness should be computed on diffusion components computed based on the low 
+#' dimensionnal embedding provided in *sc.reduction*.
+#' @param n.components (optional, default is 30) Number of embedding components that should be used to compute the compactness. 
+#' @param n.features (optional, default is 2000) Number of features that should be used to run PCA if sc.reduction is not found. 
+#' @return  A vector containing the compactness of each metacell.
 #' @examples
 #' mc_compactness(cell.membership = CD34_mc@misc$cell_membership, sc.obj = CD34_sc)
 #' @export
@@ -30,7 +33,7 @@
 # 
 # head(CD34_mc@meta.data)
 
-mc_compactness <- function(cell.membership, sc.obj, sc.reduction = "pca", group.label = "membership", diffusion.components = TRUE, n.components = 10){
+mc_compactness <- function(cell.membership, sc.obj, sc.reduction = "pca", group.label = "membership", diffusion.components = TRUE, n.components = 30, n.features = 2000){
   reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellToolkit"))
 
   if(assertthat::is.string(sc.reduction)){
@@ -39,7 +42,7 @@ mc_compactness <- function(cell.membership, sc.obj, sc.reduction = "pca", group.
       message("Low dimensionnal embessing not found in sc.obj")
       message("Computing PCA ...")
       sc.obj <- Seurat::NormalizeData(sc.obj, normalization.method = "LogNormalize")
-      sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = 1000)
+      sc.obj <- Seurat::FindVariableFeatures(sc.obj, nfeatures = n.features)
       sc.obj <- Seurat::ScaleData(sc.obj)
       sc.obj <- Seurat::RunPCA(sc.obj, verbose = F)
       sc.reduction <- Seurat::Embeddings(sc.obj@reductions[[sc.reduction]])
