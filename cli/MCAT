@@ -12,8 +12,6 @@ Expect a filtered (low quality cells removed) Seurat or Anndata object
 2 - aggregating counts data per metacell (summing raw counts)
 3 - assigning metadata to metacells and computing purities (Assigning metacells to the most aboundant label)
 
-)
-
 OPTIONS:
    -h     Show this message
    
@@ -33,7 +31,8 @@ OPTIONS:
           Proportion of number of single cells in the initial dataset to the number of metacells in the final dataset
           When using MetaCell this correspond to a target gamma (obtained gamma slightly lower)
           
-   -s     output, desired file format in output for metacells, either an Anndata object file '.h5ad' or a Seurat object file '.rds' file
+   -s     output, desired metacell file format in output, either 'adata' for a h5ad file or a 'seurat' for a rds file. 
+          Output file name will be  'mc_'{output_format}. 
    
    -r     reduction_key (only for SEACells, default "X_pca")
    
@@ -41,7 +40,8 @@ OPTIONS:
 EOF
 }
 
-SCRIPT_DIR=$(dirname $0)
+#SCRIPT_DIR=$(dirname $0)/
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 TOOL_CMD='SuperCell'
 OUTDIR==$(dirname $0)
 QUIET=""
@@ -105,11 +105,11 @@ fi
 
 echo "Identifying metacells..."
 if [ "$TOOL" == "SEACells" ]; then
-  python  "$SCRIPT_DIR/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${REDUCTION_KEY}
+  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${REDUCTION_KEY}
 elif [ "$TOOL" == "MetaCell" ]; then
-  python  "$SCRIPT_DIR/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
+  python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
 elif [ "$TOOL" == "SuperCell" ]; then
-  Rscript "$SCRIPT_DIR/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} 
+  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} 
 fi
 
 echo "Done."

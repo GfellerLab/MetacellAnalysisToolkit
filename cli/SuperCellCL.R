@@ -153,7 +153,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     targetGamma <- min(ncol(sobj.label)/minMetacells,opt$gamma)
     
-
+    
     
     
     sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
@@ -172,19 +172,27 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   }
   
   parallel::stopCluster(cluster)
-  gc()
+  gc(verbose = F)
   
 } else {
-  print("Identify Metacells sequentially...")
+  
+
   
   SCs <- list()
   if (is.null(opt$annotations)) {
     opt$annotations <- "orig.ident"
   }
   
+  if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
+    print("Identify Metacells sequentially...")
+  }
+  
   for (label in unique(sobj[[opt$annotations]][,1])) {
     
-    print(paste0("Treat ",label, " cells"))
+    if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
+      print(paste0("Treat ",label, " cells"))
+    }
+    
     sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
     
     # adapt parameters regarding number of single cells (occurs mainly when an annotation is given)
@@ -233,7 +241,7 @@ if (opt$output != "SC") {
   
   if (opt$isNorm) {
     sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = sobj@meta.data)
-    gc()
+    gc(verbose = F)
   }
   
   sobj$Metacell <- SC$membership
@@ -242,7 +250,7 @@ if (opt$output != "SC") {
                                         group.by = "Metacell",
                                         slot = "counts", verbose  = F)
   sobjMC@assays$RNA@data <- sobjMC@assays$RNA@counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
-  gc()
+  gc(verbose = F)
   
   
   print("Assign metadata to metacells and compute purities...")
