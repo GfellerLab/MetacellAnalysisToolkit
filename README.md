@@ -12,7 +12,7 @@ Then you need to create the conda environment that contains most of python and R
 
     conda env create -f MetacellToolkit_env.yml
 
-### 1.3 Install additionnal R packages
+### 1.3 Install additional R packages
 
 Then you have to install in this environment additional required R packages not available through conda
 
@@ -108,16 +108,16 @@ Here we identify metacells from the rds file of PBMCs using SEACells and save th
 
     MCAT -t MetaCell -i data/pbmc.rds -o MCAT_output/MetaCell/pbmc/ -g 50 -s seurat
 
-MetaCell does not use a knn graph from PCA based the highly variable genes but has its own parameters (including different gene list) you can set using a yaml config file and the `-y` argument. You have an example of such yaml file [here]((/cli/config/MetaCell2_config.yml)) containing the default settings of MetaCell proposed by the authors.
+MetaCell does not use a knn graph from PCA based the highly variable genes but has its own parameters (including different gene list) you can set using a yaml config file and the `-y` argument. You have an example of a such yaml file [here]((/cli/config/MetaCell2_config.yml)) containing the default settings of MetaCell proposed by the authors.
 
 ### 3.4 Supervised Metacell identification
 
-You can identifify metacells according to a given annotation (e.g. cell types, samples) present in the metadata of the object using the -a argument. You can specify a minimum number of metacells to identify (per annotation) using the -m argument.
+You can identify metacells according to a given annotation (e.g. cell types, samples) present in the metadata of the object using the `-a` argument. You can specify a minimum number of metacells to identify (per annotation) using the `-m` argument.
 
     #Using SEACells
     python cli/SEACellsCL.py -i data/cd34_multiome_rna.h5ad -o testCLI/SEACells_per_celltype_min_5_MC/cd34_multiome_rna/input_raw_adata/ -a celltype -m 5 -n 50 -f 2000 -k 30 -g 75 -s adata
 
-With SuperCell it is possible to use parallel processing for this using the -l argument which gives the number of cores to use
+With SuperCell it is possible to use parallel processing using the `-l` argument which gives the number of cores to use.
 
     #SuperCell parallel metacell identification in each cell type
     Rscript cli/SuperCellCL.R -i data/cd34_multiome_rna.adata -o testCLI/SuperCell_per_celltype/cd34_multiome_rna/input_raw_adata/ -n 50 -f 2000 -k 30 -g 75 -s adata -a celltype -l 6

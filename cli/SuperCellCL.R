@@ -14,7 +14,7 @@ spec = matrix(c(
   "gamma", "g", 1, "numeric", "gamma used for metacell identification (default 10)",
   "annotations", "a", 1, "character", "Identify metacell per label regarding a gigven annotation (column name in the metadata of the object)",
   "cores", "l", 1, "numeric", "number of cores to use for parallel identifications of metacells in each label",
-  "minMetacells", "m", 1, "numeric", "minimum number of metacells to identify (usefull and annotations is given)",
+  "minMetacells", "m", 1, "numeric", "minimum number of metacells to identify (usefull if an annotation is given)",
   "output", "s", 1, "character", "how to save the SuperCell results ('seurat' : Seurat object (.rds), 'adata' : anndata object (.h5ad), 'SC' : SuperCell object (SC.rds))"
 ), byrow=TRUE, ncol=5)
 
@@ -147,26 +147,34 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     }
     minMetacells <- min(ncol(sobj.label),opt$minMetacells)
     k.knn <- min(opt$k.knn, ncol(sobj.label)-1)
-    n.pc <- min(opt$n.pc, ncol(sobj.label)-1)
+    n.pc <- min(opt$nPCs, ncol(sobj.label)-1)
     
     
     
     targetGamma <- min(ncol(sobj.label)/minMetacells,opt$gamma)
     
     
-    
+    if (ncol(sobj.label)>4) { 
     
     sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
     
     
     
-    print(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell..."))
+    print(cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...")))
     
     SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                      n.pc = n.pc,
                                      k.knn = k.knn, # number of nearest neighbors to build kNN network
                                      gamma = targetGamma, # graining level
                                      genes.use = Seurat::VariableFeatures(sobj.label))
+  } else {
+    print(cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell."))
+    membership <- c(rep(1,ncol(sobj.label)))
+    names(membership) <- colnames(sobj.label)
+    SC.label <- list("N.SC" = 1,
+                     "membership" = membership,
+                     "supercell_size" = c(ncol(sobj.label)))
+  }
     
     #SCs[[label]] <- SC.label
   }
@@ -184,7 +192,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   }
   
   if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-    print("Identify Metacells sequentially...")
+    print(cat("Identify Metacells sequentially..."))
   }
   
   for (label in unique(sobj[[opt$annotations]][,1])) {
@@ -201,11 +209,13 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     }
     minMetacells <- min(ncol(sobj.label),opt$minMetacells)
     k.knn <- min(opt$k.knn, ncol(sobj.label)-1)
-    n.pc <- min(opt$n.pc, ncol(sobj.label)-1)
+    n.pc <- min(opt$nPCs, ncol(sobj.label)-1)
     
     
     
     targetGamma <- min(ncol(sobj.label)/minMetacells,opt$gamma)
+    
+    if (ncol(sobj.label)>4) { 
     
     sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
     
@@ -214,7 +224,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
                      FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
     fields <- names(fields[which(fields)])
     
-    print(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell..."))
+    print(cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...")))
     if (!exists("normMatrix")) {
       SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                        n.pc = n.pc,
@@ -230,6 +240,14 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
       remove(normMatrix)
       gc(verbose = F)
     }
+    } else {
+      print(cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell."))
+      membership <- c(rep(1,ncol(sobj.label)))
+      names(membership) <- colnames(sobj.label)
+      SC.label <- list("N.SC" = 1,
+                       "membership" = membership,
+                       "supercell_size" = c(ncol(sobj.label)))
+    }
     
     SCs[[label]] <- SC.label
   }
@@ -240,7 +258,9 @@ SC <- SuperCell::supercell_merge(SCs)
 if (opt$output != "SC") {
   
   if (opt$isNorm) {
-    sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = sobj@meta.data)
+    # in case normalized data was used and assigned to counts and data slot prior metacell identification,
+    # we need to return to original raw counts for data aggregation
+    sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = sobj@meta.data) 
     gc(verbose = F)
   }
   

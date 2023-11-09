@@ -34,9 +34,13 @@ OPTIONS:
    -s     output, desired metacell file format in output, either 'adata' for a h5ad file or a 'seurat' for a rds file. 
           Output file name will be  'mc_'{output_format}. 
    
-   -r     reduction_key (only for SEACells, default "X_pca")
+   -r     reduction_key (only for SEACells, default none and a PCA reduction is computed using standard scanpy workflow and stored in "X_pca")
    
    -y     yaml_file (only for MetaCell2, default None and use default options and gene lists)
+   
+   -a     annotation, to make supervised metacells according to an annotation present in the metadata of the object (only for SEACells and SuperCell, default none)
+   
+   -l     cores, number of cores to use for parallel processing if an annotation is profided (only for SuperCell)
 EOF
 }
 
@@ -49,7 +53,7 @@ PREPRO=""
 REDUCTION_KEY=""
 YAML_FILE=""
 
-while getopts "hr:t:i:o:pn:f:k:g:s:r:y:" OPTION; do
+while getopts "hr:t:i:a:o:pn:f:k:g:s:r:a:l:y:" OPTION; do
   case $OPTION in
   h)
     usage
@@ -82,6 +86,12 @@ while getopts "hr:t:i:o:pn:f:k:g:s:r:y:" OPTION; do
   r)
     REDUCTION_KEY="-r ${OPTARG}"
     ;;
+  a)
+    ANNOTATION="-a ${OPTARG}"
+    ;;
+  l)
+    N_CORES="-l ${OPTARG}"
+    ;;
   y)
     YAML_FILE="-y ${OPTARG}"
     ;;
@@ -105,11 +115,11 @@ fi
 
 echo "Identifying metacells..."
 if [ "$TOOL" == "SEACells" ]; then
-  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${REDUCTION_KEY}
+  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${REDUCTION_KEY} ${ANNOTATION} 
 elif [ "$TOOL" == "MetaCell" ]; then
   python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
 elif [ "$TOOL" == "SuperCell" ]; then
-  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} 
+  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${ANNOTATION} ${N_CORES}
 fi
 
 echo "Done."
