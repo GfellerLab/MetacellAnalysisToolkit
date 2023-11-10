@@ -100,7 +100,7 @@ This step takes around 20 min with multiple cores (`-l 6`). Be aware that parall
 
 If you are limited in memory you should still be able to process the samples by reducing the number of cores (e.g. `-l 3`) or by sequentially processing the samples (just remove the `-l`) in a slightly longer time.
 
-```{bash}
+```{bash, echo=FALSE,results='hide'}
 start=`date +%s`
 for d in ../data/HCLA/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
@@ -114,8 +114,6 @@ We load the .h5ad objects and directly convert them in Seurat objects to benefit
 
 ```{r}
 metacell.files <- sapply(datasets, FUN = function(x){paste0("../data/HCLA/datasets/",x,"/mc_adata.h5ad")})
-#metacellFiles <- list.files("data/HCLA/datasets/",recursive = T,pattern = "mc_adata.h5ad",full.names = T) 
-
 
 metacell.objs <- lapply(X = metacell.files, function(X){
   adata <- read_h5ad(X)
@@ -144,7 +142,7 @@ VlnPlot(unintegrated.mc,features = c("size","ann_level_1_purity"),group.by = 'da
 VlnPlot(unintegrated.mc,features = c("ann_level_2_purity","ann_level_3_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 ```
 
-We can also use boxplots.
+We can also use box plots.
 
 ```{r}
 ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_2_purity,fill = dataset)) + geom_boxplot() +
