@@ -105,7 +105,7 @@ If you are limited in memory you should still be able to process the samples by 
 
 This should take around 30 minutes.
 
-```{bash}
+```{bash results = FALSE, message=FALSE, warning=FALSE}
 for d in ../data/HLCA/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
 done
