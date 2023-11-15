@@ -33,12 +33,16 @@ color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#5
 
 ## Downloading the data
 
-You can download the annotated data from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293) using the following bash command line. Please note that this may take some time (\~45 mins) as the file is quite large (5.6 GB)
+You can download the annotated data from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584?944 cells).
+
+You can use a bash command line of this form to download the data directly in the `../data/HCLA` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
+
+Please note that this may take some time (\~45 mins) as the file is quite large (5.6 GB)
 
 ```{bash}
-#Uncomment to download the data in the ../data/HCLA/ directory 
-<!-- mkdir -r ../data/HCLA -->
-<!-- curl -o ../data/HCLA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XUZ222GXJ&Signature=zn0KsQ8XvuGwmSGvUCVhkdbTNdY%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEIL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIHNUUCuFTfnoiYJeBLwAtPs2%2FjFm%2B46z47lmYwxliAb0AiEA8FeP5pZw8QxyeVs61OIK4MyJAXQiQP9Ge1Z%2BgnF2ZjQq9AMIu%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgwyMzE0MjY4NDY1NzUiDLlG8eVMGLSB5ZJOPyrIA3hCl6nqmktuFeSYEHLj6uYz59kZ141ZOuCq5fNaJfdBJl5%2BQREaubznPnhUNJii7%2FNQunvZilckdlG4ylJIGbbC0V3hOHp3xNptjbFRZE%2Fry1%2Fx3%2B5isth6oP%2BFKbpvZ6T4cPcVt6pTpsrQhUDALkgdgEAoZW%2BNuGQeYBLu7B%2Fi8Vstyj7nBugnI2iX1fmHPqdD2Dt80k%2BUDhICdW2Ap3AE4%2Fh0r3zOCoxcRgDPWw%2Fd5VlD4oEjN1%2BgJhPLjjkgDOjf2K3t5k083qwl%2FYEqtWhUYszT4pc8UoZtCgZMo203HJgcS8UfsCj2ZweLqWIDSTP6B2uA4YoYpASYkIwRXfbKwMGyh1fY3vq5Kvw9%2BYAVpT%2BXf4M64MBBX%2FffvAzyFEx3yBKRhrs2e0DjivCROoiyXM9ojQMvvTDemOmtBeGewbfxoG49bi9LBTL%2BopmA546hzWt3tvm0kRnXNlIBAIGgf7XKdIzLBzz4ir5%2BRNBIXVqIIp4t5Uib3UuMYrIUepQFOejXN8urSgDNxrKeb17e7k19T8B0YLziVkXOMaaJcy%2FVr92EhVAchWRIAnjyoCAt9%2FxQ2zuQSVIGlDHiMQXnhPLz7%2BYTrjCGp62qBjqlAXTC8V%2F5sdLUsBGXjbQmRxo7VoTPXY86RcZIwquTO77XabivEileir2vO9%2BC%2BzLzIkxxyGqhMikzl3M5VXWfgSSv86FD3IHBLhjCe9UJ5Pclvih3zX0aXHdPmzDieyMdU69aTfZpRuSv4U8GiTzW6RvpDFaZcrPlMyISjiaaNKgJEvtjkW6yfuAiGIWs4qA7mDkuxiL%2B7E5F0v6mbsxLDgYw73Nbag%3D%3D&Expires=1700040394" -->
+#Uncomment to download the data in the ../data/HCLA/ directory after updating the link
+<!-- mkdir -p ../data/HCLA -->
+<!-- curl -o ../data/HCLA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555" -->
 ```
 
 First we need to specify that we will work with the MetacellAnalysisToolkit conda environment (needed for anndata relying on reticulate and the MCAT tool).
