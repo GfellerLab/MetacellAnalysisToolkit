@@ -49,7 +49,7 @@ First we need to specify that we will work with the MetacellAnalysisToolkit cond
 
 ```{r}
 library(reticulate)
-conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellToolkit","python"]
+conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
 
 use_condaenv(conda_env)
 ```
@@ -300,26 +300,26 @@ UMAPPlot(combined.mc,label=T) + NoLegend()
 
 ### Deferentially expressed gene (DEG) analysis.
 
-Now let's found the markers of the cluster 22 we've just identified.
+Now let's found the markers of the cluster 19 we've just identified.
 
 ```{r}
 DefaultAssay(combined.mc) <- "RNA"
-markers22 <- FindMarkers(combined.mc,ident.1 = 22,only.pos = T)
-markers22
+markers18 <- FindMarkers(combined.mc,ident.1 = 18,only.pos = T)
+markers18
 ```
 
 This cluster clearly present a B cell signature with marker genes such as CD19 and PAX5
 
 ```{r}
 genes <-c("CD19","PAX5") # knwon mast cells markers 
-markers22[genes,]
+markers18[genes,]
 VlnPlot(combined.mc,genes,ncol = 1)
 ```
 
-By looking at the metacell annotation (assigned from the original single-cell metadata by MCAT), we can verify that we correctly retrieved the B cell cluster
+By looking at the metacell annotation (assigned from the original single-cell metadata by MCAT), we can verify that we correctly retrieved the B cell lineage cluster
 
 ```{r fig.height=2,fig.width=4.5}
-DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 22],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
+DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 ```
 
 ### Cell type abundances analyses.
