@@ -16,10 +16,10 @@ Then you need to create the conda environment that contains most of python and R
 
 Then you have to install in this environment additional required R packages not available through conda
 
-    conda activate MetacellToolkit
+    conda activate MetacellAnalysisToolkit
     Rscript install.R
 
-### 1. Make command line script executable
+### 1.4 Make command line script executable
 
     chmod a+x cli/MCAT
     chmod a+x cli/SuperCellCL.R 
@@ -54,8 +54,8 @@ Using MCAT tool you can easily identify metacells with either SEACells, SuperCel
 
 ### 3.1 Print help
 
-    $MetacellToolkit.sh -h
-    usage: /home/leonard/Documents/reviewTutorial/MetacellToolkit/cli/MCAT options
+    $MCAT -h
+    usage: /home/your_account/path_to_cli_dir/MCAT options
 
     Constructing metacell from single cell data with SEACells (0.3.3) 'MetaCell2 (0.9.0) or SuperCell (1.0)
     Expect a filtered (low quality cells removed) Seurat or Anndata object  
@@ -125,8 +125,9 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 ## Quality control visualization
 
 -   Using scanpy and SEACells (jupyter notebook TO COME).
--   Using Seurat and MetacellToolkit QC (Rmarkdown TO COME)
+-   Using Seurat and MetacellAnalysisToolkit QC (Rmarkdown TO COME)
 
 ## Advanced analysis
 
--   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS semi-supervised integration.
+-   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca  integration.
+-   [Supervised Analysis](/examples/HCLA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS integration.

@@ -45,7 +45,7 @@ First we need to specify that we will work with the MCAT conda environment for t
 
 ```{r}
 library(reticulate)
-conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellToolkit","python"]
+conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
 
 use_condaenv(conda_env)
 ```

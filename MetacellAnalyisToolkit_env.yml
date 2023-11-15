@@ -1,4 +1,4 @@
-name: MetacellToolkit
+name: MetacellAnalysisToolkit
 channels:
   - bioconda
   - conda-forge
