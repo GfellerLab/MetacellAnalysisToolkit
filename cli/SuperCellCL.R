@@ -131,7 +131,7 @@ fields <- sapply(X = colnames(sobj@meta.data) ,
                  FUN = function(X) {is.character(sobj[[X]][,1]) | is.factor(sobj[[X]][,1])})
 fields <- names(fields[which(fields)])
 
-print(cat("Identify Metacells..."))
+cat("Identify Metacells...")
 
 
 if (opt$cores > 1 & !is.null(opt$annotations)) {
@@ -160,7 +160,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     
     
-    print(cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...")))
+    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell..."))
     
     SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                      n.pc = n.pc,
@@ -168,7 +168,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
                                      gamma = targetGamma, # graining level
                                      genes.use = Seurat::VariableFeatures(sobj.label))
   } else {
-    print(cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell."))
+    cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
     membership <- c(rep(1,ncol(sobj.label)))
     names(membership) <- colnames(sobj.label)
     SC.label <- list("N.SC" = 1,
@@ -192,13 +192,13 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   }
   
   if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-    print(cat("Identify Metacells sequentially..."))
+    cat("Identify Metacells sequentially...")
   }
   
   for (label in unique(sobj[[opt$annotations]][,1])) {
     
     if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-      print(paste0("Treat ",label, " cells"))
+      cat(paste0("Treat ",label, " cells"))
     }
     
     sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
@@ -224,7 +224,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
                      FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
     fields <- names(fields[which(fields)])
     
-    print(cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n")))
+    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
     if (!exists("normMatrix")) {
       SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                        n.pc = n.pc,
@@ -241,7 +241,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
       gc(verbose = F)
     }
     } else {
-      print(cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell."))
+      (cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
       membership <- c(rep(1,ncol(sobj.label)))
       names(membership) <- colnames(sobj.label)
       SC.label <- list("N.SC" = 1,
@@ -273,7 +273,7 @@ if (opt$output != "SC") {
   gc(verbose = F)
   
   
-  print(cat("Assign metadata to metacells and compute purities..."))
+  cat("Assign metadata to metacells and compute purities...")
   for (f in fields) {
     
     if (!all(is.na(sobj[[f]][,1]))) {
