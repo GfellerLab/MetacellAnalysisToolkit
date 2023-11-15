@@ -241,7 +241,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
       gc(verbose = F)
     }
     } else {
-      (cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
+      cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
       membership <- c(rep(1,ncol(sobj.label)))
       names(membership) <- colnames(sobj.label)
       SC.label <- list("N.SC" = 1,
