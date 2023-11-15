@@ -8,29 +8,35 @@ Toolkit for metacell analysis. It consists of the `MCAT` command line tool to ea
 
 ### 1.2 Create the conda environment
 
-Then you need to create the conda environment that contains most of python and R packages useful for metacell analyses
+Then you need to create the conda environment that contains most of python and R packages useful for metacell analyses. You need to have a conda installer such as [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/).
 
-    conda env create -f MetacellAnalysisToolkit_env.yml
+    conda env create -f env/MetacellAnalysisToolkit_env.yml
+
+Alternatively you can use [mamba](https://github.com/conda-forge/miniforge) for a faster and lighter installation
+
+    mamba env create -f env/MetacellAnalysisToolkit_env.yml
 
 ### 1.3 Install additional R packages
 
 Then you have to install in this environment additional required R packages not available through conda
 
     conda activate MetacellAnalysisToolkit
-    Rscript install.R
+    Rscript env/install.R
 
-### 1.4 Make command line script executable
+### 1.4 Make command line scripts executable
 
     chmod a+x cli/MCAT
     chmod a+x cli/SuperCellCL.R 
-    chmod a+x cli/SEACells.py
+    chmod a+x cli/SEACellsCL.py
     chmod a+x cli/MetaCell2CL.py
 
 ### 1.5 Configure PATH
 
-If you want you can finally add the value of the path to the `cli` directory of this repository to your PATH environment variable so that you can use the MCAT command line tool directly. On Linux, using bash, You can do this by adding this line to your \~/.bashrc:
+If you want, you can finally add the value of the path to the `cli` directory (of this repository) to your PATH environment variable so that you can use the MCAT command line tool directly. On Linux, using bash, You can do this by adding this line to your `~/.bashrc` (or `~/.bash_profile` on macOS):
 
-    export PATH="/home/your_account/path_to_cli_dir/:$PATH"
+    export PATH="/path/to/MetacellToolkitAnalysis/cli/:$PATH"
+
+Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS).
 
 ## 2. Download test data
 
@@ -129,5 +135,5 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 ## Advanced analysis
 
--   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca  integration.
+-   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca integration.
 -   [Supervised Analysis](/examples/HCLA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS integration.

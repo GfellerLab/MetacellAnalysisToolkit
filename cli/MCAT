@@ -33,6 +33,9 @@ OPTIONS:
           
    -s     output, desired metacell file format in output, either 'adata' for a h5ad file or a 'seurat' for a rds file. 
           Output file name will be  'mc_'{output_format}. 
+          
+   -d     normalized data in input (only for SuperCell). ADD -d to specify that data are already normalized in the data slot of the Seurat object or in .X for a adata object (default FALSE).
+          Note that in this case raw count data have to be provided in the count slot for a Seurat object or in .raw.X for an anndata object. 
    
    -r     reduction_key (only for SEACells, default none and a PCA reduction is computed using standard scanpy workflow and stored in "X_pca")
    
@@ -86,6 +89,9 @@ while getopts "hr:t:i:a:o:pn:f:k:g:s:r:a:l:y:" OPTION; do
   r)
     REDUCTION_KEY="-r ${OPTARG}"
     ;;
+  d)
+    NORMALISED_DATA="-d"
+    ;;
   a)
     ANNOTATION="-a ${OPTARG}"
     ;;
@@ -119,7 +125,7 @@ if [ "$TOOL" == "SEACells" ]; then
 elif [ "$TOOL" == "MetaCell" ]; then
   python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
 elif [ "$TOOL" == "SuperCell" ]; then
-  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${ANNOTATION} ${N_CORES}
+  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${ANNOTATION} ${N_CORES} ${NORMALISED_DATA}""
 fi
 
 echo "Done."
