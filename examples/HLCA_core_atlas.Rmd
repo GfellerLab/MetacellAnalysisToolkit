@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In this example we will work with the Human Cell Lung Atlas core [HCLA](https://www.nature.com/articles/s41591-023-02327-2) gathering around 580,000 cells from 107 individuals distributed in 166 samples.
+In this example we will work with the Human Cell Lung Atlas core [HLCA](https://www.nature.com/articles/s41591-023-02327-2) gathering around 580,000 cells from 107 individuals distributed in 166 samples.
 
 The aim of this tutorial is to show how you can use metacells to analyze a very large dataset using a reasonable amount of time and memory. For this we will use here **SuperCell** via the **MCAT** command line tool.
 
@@ -35,14 +35,14 @@ color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#5
 
 You can download the annotated data from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584?944 cells).
 
-You can use a bash command line of this form to download the data directly in the `../data/HCLA` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
+You can use a bash command line of this form to download the data directly in the `../data/HLCA` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
 
 Please note that this may take some time (\~45 mins) as the file is quite large (5.6 GB)
 
 ```{bash}
-#Uncomment to download the data in the ../data/HCLA/ directory after updating the link
-#mkdir -p ../data/HCLA 
-#curl -o ../data/HCLA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
+#Uncomment to download the data in the ../data/HLCA/ directory after updating the link
+#mkdir -p ../data/HLCA 
+#curl -o ../data/HLCA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
 ```
 
 First we need to specify that we will work with the MetacellAnalysisToolkit conda environment (needed for anndata relying on reticulate and the MCAT tool).
@@ -63,7 +63,7 @@ If you are limited in time feel free to process only a subset of the dataset
 ```{r}
 t0.split <- Sys.time()
 
-adata <- read_h5ad("../data/HCLA/local.h5ad",backed = "r")
+adata <- read_h5ad("../data/HLCA/local.h5ad",backed = "r")
 adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
 datasets <- unique(adata$obs$dat)
 
@@ -74,7 +74,7 @@ datasets <- unique(adata$obs$dat)
 print(dim(adata))
 
 lapply(datasets,FUN =  function(x) {
-  dir.create(paste0("../data/HCLA/datasets/",x),recursive = T)
+  dir.create(paste0("../data/HLCA/datasets/",x),recursive = T)
   adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
                            var = adata[adata$obs$dataset == x]$var,
                            obs = adata[adata$obs$dataset == x]$obs)
@@ -84,7 +84,7 @@ lapply(datasets,FUN =  function(x) {
   adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
   adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
   
-  write_h5ad(adata.dataset,paste0("../data/HCLA/datasets/",x,"/sc_adata.h5ad"))
+  write_h5ad(adata.dataset,paste0("../data/HLCA/datasets/",x,"/sc_adata.h5ad"))
 }
 )
 
@@ -106,7 +106,7 @@ If you are limited in memory you should still be able to process the samples by 
 
 ```{bash, echo=FALSE,results='hide'}
 start=`date +%s`
-for d in ../data/HCLA/datasets/*;
+for d in ../data/HLCA/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
 done
 echo "Duration: $((($(date +%s)-$start)/60)) minutes"
@@ -117,7 +117,7 @@ echo "Duration: $((($(date +%s)-$start)/60)) minutes"
 We load the .h5ad objects and directly convert them in Seurat objects to benefit from all the functions of this framework.
 
 ```{r}
-metacell.files <- sapply(datasets, FUN = function(x){paste0("../data/HCLA/datasets/",x,"/mc_adata.h5ad")})
+metacell.files <- sapply(datasets, FUN = function(x){paste0("../data/HLCA/datasets/",x,"/mc_adata.h5ad")})
 
 metacell.objs <- lapply(X = metacell.files, function(X){
   adata <- read_h5ad(X)
@@ -353,5 +353,5 @@ In this first example we used a fully unsupervised workflow and did not use any 
 We can save the results for comparison with the second example.
 
 ```{r}
-saveRDS(combined.mc,"../data/HCLA/combined.mc.unsup.rds")
+saveRDS(combined.mc,"../data/HLCA/combined.mc.unsup.rds")
 ```
