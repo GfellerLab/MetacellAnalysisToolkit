@@ -60,7 +60,7 @@ First we will use anndata to read in backed mode (saving a lot of memory) the wh
 
 If you are limited in time feel free to process only a subset of the dataset
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 t0.split <- Sys.time()
 
 adata <- read_h5ad("../data/HLCA/local.h5ad",backed = "r")
@@ -104,7 +104,7 @@ This step takes around 20 min with multiple cores (`-l 6`). Be aware that parall
 
 If you are limited in memory you should still be able to process the samples by reducing the number of cores (e.g. `-l 3`) or by sequentially processing the samples (just remove the `-l`) in a slightly longer time.
 
-```{bash, echo=FALSE,results='hide'}
+```{bash, results = FALSE, message=FALSE, warning=FALSE}
 start=`date +%s`
 for d in ../data/HLCA/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
@@ -116,7 +116,7 @@ echo "Duration: $((($(date +%s)-$start)/60)) minutes"
 
 We load the .h5ad objects and directly convert them in Seurat objects to benefit from all the functions of this framework.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 metacell.files <- sapply(datasets, FUN = function(x){paste0("../data/HLCA/datasets/",x,"/mc_adata.h5ad")})
 
 metacell.objs <- lapply(X = metacell.files, function(X){
@@ -139,7 +139,7 @@ Thus, we can check the purity of our metacells at different levels of annotation
 
 To do so we merge the object together and use the Seurat `VlnPlot` function.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 unintegrated.mc <- merge(metacell.objs[[1]],metacell.objs[-1])
 
 VlnPlot(unintegrated.mc,features = c("size","ann_level_1_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
@@ -148,7 +148,7 @@ VlnPlot(unintegrated.mc,features = c("ann_level_2_purity","ann_level_3_purity"),
 
 We can also use box plots.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_2_purity,fill = dataset)) + geom_boxplot() +
   scale_x_discrete(guide = guide_axis(angle = 45)) 
 
@@ -168,7 +168,7 @@ Overall metacells from the different datasets present a good purity until the th
 
 Let's first do a standard dimensionality reduction without batch correction.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 DefaultAssay(unintegrated.mc) <- "RNA"
 unintegrated.mc <- NormalizeData(unintegrated.mc)
 unintegrated.mc <- FindVariableFeatures(unintegrated.mc)
@@ -193,7 +193,7 @@ Here we will use the standard Seurat_v4 batch correction [workflow]() As in the 
 
 This should take less than 5 minutes.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 # Install package if needed
 # if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
 # 
@@ -262,7 +262,7 @@ combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.nam
 
 Now we can make the plots and visually compare the results with the unintegrated analysis.
 
-```{r fig.height=5,fig.width=5}
+```{r fig.height=10,fig.width=14}
 umap.stacas.datasets <- DimPlot(combined.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("integrated datasets")
 umap.stacas.celltypes <- DimPlot(combined.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes) + NoLegend() + ggtitle("integrated cell types")
 
@@ -275,7 +275,7 @@ Note that In the original study, datasets were integrated using SCANVI semi-supe
 
 We can navigate in the different annotation levels.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 library(ggplot2)
 
 DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",cols= color.celltypes)
@@ -291,7 +291,7 @@ DimPlot(combined.mc,group.by = "ann_level_3",reduction = "umap",label = T, repel
 
 We cluster the metacells based on the corrected PCA space by STACAS
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 DefaultAssay(combined.mc) <- "integrated"
 combined.mc <- FindNeighbors(combined.mc,reduction = "pca",dims = 1:30)
 combined.mc <- FindClusters(combined.mc,resolution = 0.5) 
@@ -305,7 +305,7 @@ Now let's found the markers of the cluster 19 we've just identified.
 ```{r}
 DefaultAssay(combined.mc) <- "RNA"
 markers18 <- FindMarkers(combined.mc,ident.1 = 18,only.pos = T)
-markers18
+head(markers18)
 ```
 
 This cluster clearly present a B cell signature with marker genes such as CD19 and PAX5
@@ -318,7 +318,7 @@ VlnPlot(combined.mc,genes,ncol = 1)
 
 By looking at the metacell annotation (assigned from the original single-cell metadata by MCAT), we can verify that we correctly retrieved the B cell lineage cluster
 
-```{r fig.height=2,fig.width=4.5}
+```{r fig.height=5,fig.width=8}
 DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 ```
 
@@ -326,7 +326,7 @@ DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann
 
 We can easily make analysis of cell type abundances for different clinical variables as we construct metacell by sample. We have to take metacell size into account for these analyses. For instance we can analyse the proportion of different epithelial cell types depending on the smoking status.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 library(reshape2)
 combined.mc.epith <- combined.mc[,combined.mc$ann_level_1 == "Epithelial"] 
 #combined.metacells$major_type <- droplevels(combined.metacells$major_type)

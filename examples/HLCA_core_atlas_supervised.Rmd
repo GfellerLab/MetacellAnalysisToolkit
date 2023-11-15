@@ -41,8 +41,8 @@ Please note that this may take some time (\~45 mins) as the file is quite large 
 
 ```{bash}
 #Uncomment to download the data in the ../data/HLCA/ directory after updating the link
-<!-- mkdir -p ../data/HLCA -->
-<!-- curl -o ../data/HLCA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555" -->
+#mkdir -p ../data/HLCA
+#curl -o ../data/HLCA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
 ```
 
 First we need to specify that we will work with the MCAT conda environment for the anndata package relying on reticulate and for the MCAT tool.
@@ -59,41 +59,40 @@ use_condaenv(conda_env)
 If you did not try the HLCA_core_atlas example first and haven't divided the atlas in one h5ad file for each dataset you can do it with the following chunk.
 
 ```{r}
-# # Uncomment and run if not already done
-# 
-# t0.split <- Sys.time()
-# 
-# adata <- read_h5ad("../data/HLCA/local.h5ad",backed = "r")
-# adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
-# datasets <- unique(adata$obs$dat)
-# 
-# # If you are limited in time you can process on half of the datasets (uncomment th following line)
-# # datasets <- datasets[1:7]
-# 
-# 
-# print(dim(adata))
-# 
-# lapply(datasets,FUN =  function(x) {
-#   dir.create(paste0("../data/HLCA/datasets/",x),recursive = T)
-#   adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
-#                            var = adata[adata$obs$dataset == x]$var,
-#                            obs = adata[adata$obs$dataset == x]$obs)
-#   #This will allow us to construct supervised metacell for each cell type in each sample later in the second example
-#   adata.dataset$obs$ann <- as.character(adata.dataset$obs$ann_level_3)
-#   # For cell without an annotation at the 3rd level we will use the second level of annotation
-#   adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
-#   adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
-#   
-#   write_h5ad(adata.dataset,paste0("../data/HLCA/datasets/",x,"/sc_adata.h5ad"))
-# }
-# )
-# 
-# remove(adata)
-# gc()
-# 
-# tf.split <- Sys.time()
-# 
-# tf.split - t0.split
+
+t0.split <- Sys.time()
+
+adata <- read_h5ad("../data/HLCA/local.h5ad",backed = "r")
+adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
+datasets <- unique(adata$obs$dat)
+
+# If you are limited in time you can process on half of the datasets (uncomment th following line)
+# datasets <- datasets[1:7]
+
+
+print(dim(adata))
+
+lapply(datasets,FUN =  function(x) {
+  dir.create(paste0("../data/HLCA/datasets/",x),recursive = T)
+  adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
+                           var = adata[adata$obs$dataset == x]$var,
+                           obs = adata[adata$obs$dataset == x]$obs)
+  #This will allow us to construct supervised metacell for each cell type in each sample later in the second example
+  adata.dataset$obs$ann <- as.character(adata.dataset$obs$ann_level_3)
+  # For cell without an annotation at the 3rd level we will use the second level of annotation
+  adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
+  adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
+
+  write_h5ad(adata.dataset,paste0("../data/HLCA/datasets/",x,"/sc_adata.h5ad"))
+}
+)
+
+remove(adata)
+gc()
+
+tf.split <- Sys.time()
+
+tf.split - t0.split
 ```
 
 ## Constructing supervised metacell
@@ -106,19 +105,17 @@ If you are limited in memory you should still be able to process the samples by 
 
 This should take around 30 minutes.
 
-```{bash, echo=FALSE,results='hide'}
-start=`date +%s`
+```{bash}
 for d in ../data/HLCA/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
 done
-echo "Duration: $((($(date +%s)-$start)/60)) minutes"
 ```
 
 ## Load metacell objects
 
 We load the .h5ad objects and directly convert them in Seurat objects to benefit from all the functions of this framework.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 datasets <- list.dirs("../data/HLCA/datasets/",full.names = F,recursive = F)
 
 metacell.files <- sapply(datasets, FUN = function(x){paste0("../data/HLCA/datasets/",x,"/sup_mc/mc_adata.h5ad")})
@@ -181,7 +178,7 @@ p_finest_unsup + p_finest
 
 Let's first do a standard dimensionality reduction without batch correction.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 DefaultAssay(unintegrated.mc) <- "RNA"
 unintegrated.mc <- NormalizeData(unintegrated.mc)
 unintegrated.mc <- FindVariableFeatures(unintegrated.mc)
@@ -203,7 +200,7 @@ In the original study, datasets were integrated using SCANVI semi-supervised int
 
 To be noted that, as in the original study, we use the dataset rather than the donor as the batch parameter. See method section [Data integration benchmarking](https://www.nature.com/articles/s41591-023-02327-2) of the original study for more details.
 
-```{r, echo=FALSE, results='hide'}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 # Install package if needed
 if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
 
@@ -252,7 +249,7 @@ sum(combined.mc$size)
 
 STACAS directly returns a pca for the slot `"integrated"` that we can use to make a UMAP of the corrected data.
 
-```{r}
+```{r results = FALSE, message=FALSE, warning=FALSE}
 DefaultAssay(combined.mc) = "integrated"
 
 combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
@@ -261,7 +258,7 @@ combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.nam
 
 Now we can make the plots and visually compare the results with the unintegrated analysis.
 
-```{r fig.height=5,fig.width=5}
+```{r fig.height=10,fig.width=14}
 umap.stacas.datasets <- DimPlot(combined.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("integrated datasets")
 umap.stacas.celltypes <- DimPlot(combined.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes) + NoLegend() + ggtitle("integrated cell types")
 
@@ -286,7 +283,7 @@ DimPlot(combined.mc,group.by = "ann_level_3",reduction = "umap",label = T, repel
 
 we can quickly visually compare these results with the unsupervised integration obtained with Seurat
 
-```{r fig.height=3, fig.width=6}
+```{r fig.height=6, fig.width=8}
 combined.mc.unsup <- readRDS("../data/HLCA/combined.mc.unsup.rds")
 
 combined.mc$ann_level_3 <- factor(combined.mc$ann_level_3)
