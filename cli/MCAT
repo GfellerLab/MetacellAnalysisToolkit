@@ -125,7 +125,7 @@ if [ "$TOOL" == "SEACells" ]; then
 elif [ "$TOOL" == "MetaCell" ]; then
   python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
 elif [ "$TOOL" == "SuperCell" ]; then
-  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${ANNOTATION} ${N_CORES} ${NORMALISED_DATA}""
+  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${ANNOTATION} ${N_CORES} ${NORMALISED_DATA}
 fi
 
 echo "Done."
