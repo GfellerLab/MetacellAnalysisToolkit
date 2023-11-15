@@ -10,7 +10,7 @@ Toolkit for metacell analysis. It consists of the `MCAT` command line tool to ea
 
 Then you need to create the conda environment that contains most of python and R packages useful for metacell analyses
 
-    conda env create -f MetacellToolkit_env.yml
+    conda env create -f MetacellAnalysisToolkit_env.yml
 
 ### 1.3 Install additional R packages
 
