@@ -1,4 +1,4 @@
-name: null
+name: MetacellAnalysisToolkit
 channels:
   - bioconda
   - conda-forge
@@ -598,7 +598,7 @@ dependencies:
     - jaxopt==0.7
     - joblib==1.3.1
     - mellon==1.3.1
-    - metacells==0.9.0.dev1
+    - metacells==0.9.0
     - ml-dtypes==0.2.0
     - msgpack==1.0.5
     - natsort==8.4.0
@@ -628,4 +628,3 @@ dependencies:
     - tabulate==0.9.0
     - threadpoolctl==3.2.0
     - umap-learn==0.5.3
-prefix: /home/leonard/bin/miniconda3/envs/MetacellToolkit
