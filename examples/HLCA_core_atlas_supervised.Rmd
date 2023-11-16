@@ -35,14 +35,14 @@ color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#5
 
 If you didn't try the unsupervised [example](./HLCA_core_atlas.Rmd) first and haven't downloaded the data yet you can do it  from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584?944 cells).
 
-You can use a bash command line of this form to download the data directly in the `../data/HLCA` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
+You can use a bash command line of this form to download the data directly in the `./HLCA_data` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
 
 Please note that this may take some time (\~45 mins) as the file is quite large (5.6 GB).
 
 ```{bash}
-#Uncomment to download the data in the ../data/HLCA/ directory after updating the link
-#mkdir -p ../data/HLCA
-#curl -o ../data/HLCA/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
+#Uncomment to download the data in the ./HLCA_data/ directory after updating the link
+#mkdir -p ./HLCA_data
+#curl -o ./HLCA_data/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
 ```
 
 First we need to specify that we will work with the MCAT conda environment for the anndata package relying on reticulate and for the MCAT tool.
@@ -62,7 +62,7 @@ If you did not try the HLCA_core_atlas example first and haven't divided the atl
 
 t0.split <- Sys.time()
 
-adata <- read_h5ad("../data/HLCA/local.h5ad",backed = "r")
+adata <- read_h5ad("./HLCA_data/local.h5ad",backed = "r")
 adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
 datasets <- unique(adata$obs$dat)
 
@@ -73,7 +73,7 @@ datasets <- unique(adata$obs$dat)
 print(dim(adata))
 
 lapply(datasets,FUN =  function(x) {
-  dir.create(paste0("../data/HLCA/datasets/",x),recursive = T)
+  dir.create(paste0("./HLCA_data/datasets/",x),recursive = T)
   adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
                            var = adata[adata$obs$dataset == x]$var,
                            obs = adata[adata$obs$dataset == x]$obs)
@@ -83,7 +83,7 @@ lapply(datasets,FUN =  function(x) {
   adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
   adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
 
-  write_h5ad(adata.dataset,paste0("../data/HLCA/datasets/",x,"/sc_adata.h5ad"))
+  write_h5ad(adata.dataset,paste0("./HLCA_data/datasets/",x,"/sc_adata.h5ad"))
 }
 )
 
@@ -106,7 +106,7 @@ If you are limited in memory you should still be able to process the samples by 
 This should take around 30 minutes.
 
 ```{bash results = FALSE, message=FALSE, warning=FALSE}
-for d in ../data/HLCA/datasets/*;
+for d in ./HLCA_data/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
 done
 ```
@@ -116,9 +116,9 @@ done
 We load the .h5ad objects and directly convert them in Seurat objects to benefit from all the functions of this framework.
 
 ```{r results = FALSE, message=FALSE, warning=FALSE}
-datasets <- list.dirs("../data/HLCA/datasets/",full.names = F,recursive = F)
+datasets <- list.dirs("./HLCA_data/datasets/",full.names = F,recursive = F)
 
-metacell.files <- sapply(datasets, FUN = function(x){paste0("../data/HLCA/datasets/",x,"/sup_mc/mc_adata.h5ad")})
+metacell.files <- sapply(datasets, FUN = function(x){paste0("./HLCA_data/datasets/",x,"/sup_mc/mc_adata.h5ad")})
 
 metacell.objs <- lapply(X = metacell.files, function(X){
   adata <- read_h5ad(X)
@@ -142,7 +142,7 @@ To do so we merge the object together and use Seurat `VlnPlot` function.
 ```{r}
 unintegrated.mc <- merge(metacell.objs[[1]],metacell.objs[-1])
 
-VlnPlot(unintegrated.mc[,unintegrated.mc$ann_level_3 != "None"],features = c("ann_level_2_purity","ann_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
+VlnPlot(unintegrated.mc[,unintegrated.mc$ann_level_3 != "None"],features = c("size","ann_level_2_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 VlnPlot(unintegrated.mc[,unintegrated.mc$ann_level_3 != "None"],features = c("ann_level_3_purity","ann_level_4_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 
 ```
@@ -161,8 +161,8 @@ p_4 + p_finest
 
 Overall using supervised metacells construction we obtain pure metacell until the 3rd level of annotaion and improve metacell purities for finer levels compare to the unsupervised approach (see previous [example](./HLCA_core_atlas_supervised.Rmd)).
 
-```{r}
-meta.data.unsup <- readRDS("../data/HLCA/combined.mc.unsup.rds")@meta.data 
+```{r fig.height=6, fig.width=14}
+meta.data.unsup <- readRDS("./HLCA_data/combined.mc.unsup.rds")@meta.data 
 
 p_4_unsup <- ggplot(meta.data.unsup,aes(x=dataset,y=ann_level_4_purity,fill = dataset)) + geom_boxplot() +
     scale_x_discrete(guide = guide_axis(angle = 45)) + ggtitle("unsup metacells level 4 purity") + NoLegend() + ylim(c(0,1))
@@ -258,7 +258,7 @@ combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.nam
 
 Now we can make the plots and visually compare the results with the unintegrated analysis.
 
-```{r fig.height=10,fig.width=14}
+```{r fig.height=12,fig.width=12}
 umap.stacas.datasets <- DimPlot(combined.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("integrated datasets")
 umap.stacas.celltypes <- DimPlot(combined.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes) + NoLegend() + ggtitle("integrated cell types")
 
@@ -283,8 +283,8 @@ DimPlot(combined.mc,group.by = "ann_level_3",reduction = "umap",label = T, repel
 
 we can quickly visually compare these results with the unsupervised integration obtained with Seurat
 
-```{r fig.height=6, fig.width=8}
-combined.mc.unsup <- readRDS("../data/HLCA/combined.mc.unsup.rds")
+```{r fig.height=6, fig.width=14}
+combined.mc.unsup <- readRDS("./HLCA_data/combined.mc.unsup.rds")
 
 combined.mc$ann_level_3 <- factor(combined.mc$ann_level_3)
 matched.color.celltypes <- color.celltypes[1:length(levels(combined.mc$ann_level_3))]
@@ -298,7 +298,7 @@ level3_sup + level3_unsup
 
 Look at epithelial cells in particular
 
-```{r}
+```{r fig.height=6, fig.width=14}
 level3_sup <- DimPlot(combined.mc[,combined.mc$ann_level_1 == "Epithelial"],group.by = "ann_level_3",reduction = "umap",label = T, repel = T,cols= matched.color.celltypes) + NoLegend() + ggtitle("Sup workflow")
 level3_unsup <- DimPlot(combined.mc.unsup[,combined.mc.unsup$ann_level_1 == "Epithelial"],group.by = "ann_level_3",reduction = "umap",label = T, repel = T,cols= matched.color.celltypes) + NoLegend() + ggtitle("Unsup workflow")
  
@@ -321,7 +321,7 @@ DimPlot(combined.mc[,combined.mc$ann_level_2 == "Smooth muscle"],group.by = "ann
 
 Using a DEG analysis we can check if we retrieve their markers. MYH11 and CNN1 genes are canonical smooth muscle markers while FAM83D was found uniquely and consistently expressed by this rare cell type in the original study
 
-```{r fig.height=4,fig.width=6}
+```{r fig.height=8,fig.width=12}
 DefaultAssay(combined.mc) <- "RNA"
 Idents(combined.mc) <- "ann"
 markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T)

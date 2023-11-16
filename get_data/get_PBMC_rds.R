@@ -2,11 +2,11 @@
 library(reticulate)
 library(Seurat)
 library(anndata)
-adata <- read_h5ad("data/pbmc.h5ad")
+adata <- read_h5ad("get_data/pbmc.h5ad")
 raw_counts <- Matrix::t(as(adata$raw$X, "CsparseMatrix"))
 colnames(raw_counts) <- rownames(adata$obs)
 rownames(raw_counts) <- rownames(adata$var)
 
 pbmc <- CreateSeuratObject(counts = raw_counts, meta.data = adata$obs)
 
-saveRDS(pbmc, file = paste0("data/pbmc.rds"))
+saveRDS(pbmc, file = paste0("get_data/pbmc.rds"))
