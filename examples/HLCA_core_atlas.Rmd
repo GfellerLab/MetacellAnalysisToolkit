@@ -35,11 +35,11 @@ color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#5
 
 ## Downloading the data
 
-You can download the annotated data from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584?944 cells).
+You can download the annotated data from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584,944 cells).
 
 You can use a bash command line of this form to download the data directly in the `./HLCA_data` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
 
-Please note that this may take some time (\~45 mins) as the file is quite large (5.6 GB)
+Please note that this may take some time as the file is quite large (~6 GB)
 
 ```{bash}
 #Uncomment to download the data in the ./HLCA_data/ directory after updating the link
@@ -245,7 +245,7 @@ Check the obtained object.
 combined.mc
 ```
 
-We can verify that the sum of metacell sizes correspond to the original number of single-cells
+We can verify that the sum of metacell sizes correspond to the original number of single-cells.
 
 ```{r}
 sum(combined.mc$size)
@@ -300,7 +300,7 @@ combined.mc <- FindClusters(combined.mc,resolution = 0.5)
 UMAPPlot(combined.mc,label=T) + NoLegend()
 ```
 
-### Deferentially expressed gene (DEG) analysis.
+### Differently expressed gene (DEG) analysis.
 
 Now let's found the markers of the cluster 19 we've just identified.
 
