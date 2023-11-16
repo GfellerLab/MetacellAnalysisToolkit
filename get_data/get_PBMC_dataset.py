@@ -17,16 +17,16 @@ raw_ad = sc.AnnData(adata.X.copy())
 raw_ad.obs_names, raw_ad.var_names = adata.obs_names, adata.var_names
 adata.raw = raw_ad
 
-directory = os.path.join("data")
+directory = os.path.join("get_data")
 
 if not os.path.exists(directory):
     os.makedirs(directory)
     
-adata.write_h5ad(os.path.join("data", "pbmc.h5ad"))
+adata.write_h5ad(os.path.join("get_data", "pbmc.h5ad"))
 
 # We keep only the file with filtered cells and raw counts
-os.remove(os.path.join("data", "pbmc3k_raw.h5ad"))
-os.remove(os.path.join("data", "pbmc3k_processed.h5ad"))
+os.remove(os.path.join("get_data", "pbmc3k_raw.h5ad"))
+os.remove(os.path.join("get_data", "pbmc3k_processed.h5ad"))
 
 
 
