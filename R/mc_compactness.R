@@ -2,8 +2,8 @@
 #'
 #' \code{mc_compactness} 
 #' This function computes the compactness of metacells (relies on python functions adapted from https://github.com/dpeerlab/SEACells/blob/main/SEACells/evaluate.py). 
-#' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (named "membership" is no other label is provided in group.label)
-#' andsingle-cell IDs as rownames. 
+#' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (named "membership" if no other label is provided in group.label)
+#' and single-cell IDs as rownames. 
 #' @param sc.obj A Seurat object containing the single-cell data from which the metacells were built.
 #' @param sc.reduction (optional, default is "pca") A string indicating which low embedding from sc.obj should be used to compute compactness or
 #' a data frame containing a pre-computed embedding of the single-cell data. If sc.reduction is a string and sc.reduction is not found in the sc.obj embeddings

@@ -1,4 +1,4 @@
-Package: MetacellToolkit
+Package: MetacellAnalysisToolkit
 Type: Package
 Title: Visualize metacells and evaluate their quality
 Version: 1.0
