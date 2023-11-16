@@ -106,7 +106,7 @@ This step takes around 20 min with multiple cores (`-l 6`). Be aware that parall
 
 If you are limited in memory you should still be able to process the samples by reducing the number of cores (e.g. `-l 3`) or by sequentially processing the samples (just remove the `-l`) in a slightly longer time.
 
-```{bash}
+```{bash  results = FALSE, message=FALSE, warning=FALSE}
 start=`date +%s`
 for d in ./HLCA_data/datasets/*;
 do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
