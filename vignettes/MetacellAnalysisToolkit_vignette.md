@@ -1,5 +1,6 @@
--   <a href="#quantitative-metrics"
-    id="toc-quantitative-metrics">Quantitative metrics</a>
+-   <a href="#load-data" id="toc-load-data">Load data</a>
+-   <a href="#compute-quantitative-metrics"
+    id="toc-compute-quantitative-metrics">Compute quantitative metrics</a>
     -   <a href="#purity" id="toc-purity">Purity</a>
     -   <a href="#compactness" id="toc-compactness">Compactness</a>
     -   <a href="#separation" id="toc-separation">Separation</a>
@@ -8,11 +9,13 @@
     id="toc-representativeness-of-metacells">Representativeness of
     metacells</a>
 
+## Load data
+
     library(MetacellAnalysisToolkit)
     mc_data <- MetacellAnalysisToolkit::CD34_mc
     sc_data <- MetacellAnalysisToolkit::CD34_sc
 
-## Quantitative metrics
+## Compute quantitative metrics
 
 ### Purity
 
@@ -122,11 +125,6 @@ each the metacell.
       sc.label = "celltype", # single cells will be colored according the sc.label
       metacell.label = "celltype" # metacells cell will be colored according the metacell.label
       )
-
-    ## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
-    ## ℹ Please use tidy evaluation ideoms with `aes()`
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 
 ![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/visualize_metacells-1.png)
 

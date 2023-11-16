@@ -15,13 +15,15 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, fig.width = 3, fig.height = 3)
 ```
 
+## Load data
+
 ```{r load_data}
 library(MetacellAnalysisToolkit)
 mc_data <- MetacellAnalysisToolkit::CD34_mc
 sc_data <- MetacellAnalysisToolkit::CD34_sc
 ```
 
-## Quantitative metrics
+## Compute quantitative metrics
 
 ### Purity
 After each metacell has been annotated to the most abundant cell category (*e.g.* cell type) composing the metacell, we can compute metacells purity. 

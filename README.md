@@ -130,8 +130,7 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 ## Quality control visualization
 
--   Using scanpy and SEACells (jupyter notebook TO COME).
--   Using Seurat and MetacellAnalysisToolkit QC (Rmarkdown TO COME)
+[Perform quality controls on metacells using MetacellAnalysisToolkit R package](https://github.com/GfellerLab/MetacellAnalysisToolkit/blob/main/vignettes/MetacellAnalysisToolkit_vignette.md)
 
 ## Advanced analysis
 
