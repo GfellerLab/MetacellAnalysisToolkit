@@ -28,11 +28,11 @@ type within the metacell.
     mc_data$purity <- mc_purity(membership = mc_data@misc$cell_membership$membership, annotation = sc_data$celltype)
     qc_boxplot(mc.obj = mc_data, qc.metrics = "purity")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_purity-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_purity-1.png)
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "purity", split.by = "celltype")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_purity-2.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_purity-2.png)
 
 ### Compactness
 
@@ -54,7 +54,7 @@ generate in the next chunk.
     sc_data <- RunUMAP(sc_data, reduction = "pca", dims = c(1:50), n.neighbors = 15, verbose = F, min.dist = 0.5)
     UMAPPlot(sc_data, group.by = "celltype", reduction = "umap")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/sc-embessing-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/sc-embessing-1.png)
 
     membership_df <- mc_data@misc$cell_membership
     mc_data$compactness <- mc_compactness(cell.membership = membership_df, sc.obj = sc_data,
@@ -64,11 +64,11 @@ generate in the next chunk.
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "compactness")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_compactness-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_compactness-1.png)
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "compactness", split.by = "celltype")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_compactness-2.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_compactness-2.png)
 
 ### Separation
 
@@ -81,11 +81,11 @@ The **separation** of a metacell is the distance to the closest metacell
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "separation")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_separation-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_separation-1.png)
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "separation", split.by = "celltype")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_separation-2.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_separation-2.png)
 
 ### INV
 
@@ -100,11 +100,11 @@ latent-space independent.
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "INV")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_INV-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_INV-1.png)
 
     qc_boxplot(mc.obj = mc_data, qc.metrics = "INV", split.by = "celltype")
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/compute_INV-2.png)
+![](./MetacellAnalysisToolkit_vignette_files/compute_INV-2.png)
 
 ## Representativeness of metacells
 
@@ -126,7 +126,7 @@ each the metacell.
       metacell.label = "celltype" # metacells cell will be colored according the metacell.label
       )
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/visualize_metacells-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/visualize_metacells-1.png)
 
     # with custom colors:
     colors <- c("HMP" = "#BC80BD", "DCPre" = "#66A61E", "HSC" = "#A6761D",
@@ -140,7 +140,7 @@ each the metacell.
       sc.color = colors,
       mc.color = colors)
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/visualize_metacells-2.png)
+![](./MetacellAnalysisToolkit_vignette_files/visualize_metacells-2.png)
 
 By default the size of the metacells dots is proportionnal to the size
 of the metacells. Metacells can also be colored by a continuous variable
@@ -156,4 +156,4 @@ such as one of the QC metrics computed in the previous chunks:
       metric = "compactness"
       )
 
-![](/mnt/c/Aurelie/postdoc_UNIL/Metacell_review/MetacellAnalysisToolkit/vignettes/MetacellAnalysisToolkit_vignette_files/figure-markdown_strict/visualize_metacells_continuous-1.png)
+![](./MetacellAnalysisToolkit_vignette_files/visualize_metacells_continuous-1.png)
