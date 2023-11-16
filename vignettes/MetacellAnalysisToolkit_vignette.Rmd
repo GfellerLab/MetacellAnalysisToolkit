@@ -2,7 +2,9 @@
 title: "MetacellAnalysisToolkit package"
 author: "Aurélie Gabriel, Léonard Hérault, Mariia Bilous and David Gfeller"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  md_document:
+    toc: true # table of content true
 vignette: >
   %\VignetteIndexEntry{MetacellAnalysisToolkit package}
   %\VignetteEngine{knitr::rmarkdown}
