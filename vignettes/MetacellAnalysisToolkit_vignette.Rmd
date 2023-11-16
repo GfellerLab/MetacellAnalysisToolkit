@@ -12,7 +12,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width = 3, fig.height = 3, fig.path = "./MetacellAnalysisToolkit_vignette_files/")
+knitr::opts_chunk$set(echo = TRUE, fig.path = "./MetacellAnalysisToolkit_vignette_files/")
 ```
 
 ## Load data
