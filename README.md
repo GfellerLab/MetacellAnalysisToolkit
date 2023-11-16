@@ -1,6 +1,6 @@
 # MetacellAnalysisToolkit (MCAT)
 
-Toolkit for metacell analysis. It consists of the `MCAT` command line tool to easily identify metacells with either SEACells, SuperCell or MetaCell2 with a joined R package for metacell quality control and visualization.
+Toolkit for metacell analysis. It consists of the `MCAT` command line tool to easily identify metacells with either [SEACells](https://github.com/dpeerlab/SEACells), [SuperCell](https://github.com/GfellerLab/SuperCell) or [MetaCell2](https://github.com/tanaylab/metacells/tree/master) with a joined R package for metacell quality control and visualization.
 
 ## 1. Installation
 
@@ -12,13 +12,13 @@ Then you need to create the conda environment that contains most of python and R
 
     conda env create -f env/MetacellAnalysisToolkit_env.yml
 
-Alternatively you can use [mamba](https://github.com/conda-forge/miniforge) for a faster and lighter installation
+Alternatively you can use [mamba](https://github.com/conda-forge/miniforge) for a faster and lighter installation.
 
     mamba env create -f env/MetacellAnalysisToolkit_env.yml
 
 ### 1.3 Install additional R packages
 
-Then you have to install in this environment additional required R packages not available through conda
+Then you have to install in this environment additional required R packages not available through conda.
 
     conda activate MetacellAnalysisToolkit
     Rscript env/install.R
@@ -36,7 +36,7 @@ If you want, you can finally add the value of the path to the `cli` directory (o
 
     export PATH="/path/to/MetacellToolkitAnalysis/cli/:$PATH"
 
-Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS).
+Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS) after.
 
 ## 2. Download test data
 
@@ -98,7 +98,7 @@ Using MCAT tool you can easily identify metacells with either SEACells, SuperCel
 
 ### 3.2 Metacell identification on Cd34+ cells using SuperCell
 
-Here we identify metacells from the h5ad file of Cd34+ cells using SuperCell and save the results in a h5ad file. We use 50 principal components, 30 neighbors for the knn and a graining level of 75.
+Here we identify metacells from the h5ad file of CD34+ cells using SuperCell and save the results in a h5ad file. We use 50 principal components, 30 neighbors for the knn and a graining level of 75.
 
     MCAT -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MCAT_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
 
@@ -110,11 +110,11 @@ Here we identify metacells from the rds file of PBMCs using SEACells and save th
 
 ### 3.3 Metacell identification on PBMCs using MetaCell
 
-Here we identify metacells from the rds file of PBMCs using SEACells and save the results in a h5ad file.
+Here we identify metacells from the rds file of PBMCs using MetaCell (v2 python version) and save the results in a h5ad file.
 
     MCAT -t MetaCell -i data/pbmc.rds -o MCAT_output/MetaCell/pbmc/ -g 50 -s seurat
 
-MetaCell does not use a knn graph from PCA based the highly variable genes but has its own parameters (including different gene list) you can set using a yaml config file and the `-y` argument. You have an example of a such yaml file [here]((/cli/config/MetaCell2_config.yml)) containing the default settings of MetaCell proposed by the authors.
+MetaCell does not use a knn graph from PCA based the highly variable genes but has its own parameters (including different gene lists) you can set using a yaml config file and the `-y` argument. You have an example of a such yaml file [here]((/cli/config/MetaCell2_config.yml)) containing the default settings of MetaCell proposed by the authors.
 
 ### 3.4 Supervised Metacell identification
 
