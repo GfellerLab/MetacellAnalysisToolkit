@@ -61,7 +61,7 @@ Using MCAT tool you can easily identify metacells with either SEACells, SuperCel
 ### 3.1 Print help
 
     $MCAT -h
-    usage: /home/your_account/path_to_cli_dir/MCAT options
+    usage: /path/to/MetacellToolkitAnalysis/cli/MCAT options
 
     Constructing metacell from single cell data with SEACells (0.3.3) 'MetaCell2 (0.9.0) or SuperCell (1.0)
     Expect a filtered (low quality cells removed) Seurat or Anndata object  
