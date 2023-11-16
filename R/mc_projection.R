@@ -4,9 +4,9 @@
 #' This function plots metacells in a single-cell space (pca, umap,..) taking the average coordinates of single cells in each metacell. 
 #' @param sc.obj A Seurat object containing the single-cell data from which the metacells were built.
 #' @param mc.obj A Seurat object containing the metacells data. If NULL, memberhsip should be provided as a data frame.
-#' @param membership A data frame containing the assignment of each single-cell to a metacell in a columns named "membership" and single-cell names
-#' as rownames. 
-#' If *membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
+#' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (named "membership" if no other label is provided in group.label)
+#' and single-cell IDs as rownames. 
+#' If *cell.membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
 #' was generated using the MetacellToolkit command lines (see format of the *MetacellToolkit::CD34_mc* object).
 #' @param metacell.label String corresponding to the name of the metadata column in mc.obj that should be used to color metacells. 
 #' If mc.obj is NULL, this parameter will be ignored.
@@ -30,7 +30,7 @@
 #' 
 #' @export
 
-# tests: 
+# tests:
 # CD34_sc <- Seurat::NormalizeData(CD34_sc, normalization.method = "LogNormalize")
 # CD34_sc <- Seurat::FindVariableFeatures(CD34_sc, nfeatures = 1000)
 # CD34_sc <- Seurat::ScaleData(CD34_sc)
@@ -43,7 +43,7 @@
 # mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, metacell.label = "celltype")
 # mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, sc.label = "celltype", metacell.label = "celltype")
 # 
-# colors <- c("HMP" = "#BC80BD", "DCPre" = "#66A61E", "HSC" = "#A6761D", 
+# colors <- c("HMP" = "#BC80BD", "DCPre" = "#66A61E", "HSC" = "#A6761D",
 #             "Ery" = "#E41A1C", "MEP" = "#B3B3B3", "cDC" = "#A6D854", "CLP" = "#1F78B4", "Mono" = "#E6AB02", "pDC" = "#B2DF8A" )
 # mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, sc.label = "celltype", metacell.label = "celltype", sc.color = colors, mc.color = colors)
 # mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc, sc.label = "celltype", metacell.label = "celltype", sc.color = colors)
@@ -51,7 +51,7 @@
 
 mc_projection <- function(sc.obj,
                           mc.obj = NULL,
-                          membership = NULL,
+                          cell.membership = NULL,
                           metacell.label = NULL,
                           sc.label = NULL,
                           dims = c(1, 2),
@@ -63,12 +63,16 @@ mc_projection <- function(sc.obj,
                           metric = "size",
                           continuous_metric = F) {
   
-  if(is.null(mc.obj) & is.null(membership)){
+  if(is.null(mc.obj) & is.null(cell.membership)){
     stop("A membership vector should be provided either through the membership parameter or should be available in mc.obj as described in the documentation.")
   } 
-  if(is.null(membership)){
+  if(is.null(cell.membership)){
     membership <- mc.obj@misc$cell_membership$membership
-  } 
+    names(membership) <- rownames(mc.obj@misc$cell_membership)
+  } else {
+    membership <- cell.membership$membership
+    names(membership) <- rownames(cell.membership)
+  }  
   
   sc.obj$Metacell <- membership
 
