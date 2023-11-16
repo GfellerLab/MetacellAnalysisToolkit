@@ -8,7 +8,7 @@ spec = matrix(c(
   'input',  'i', 1, "character", "REQUIRED : Path to seurat object (.rds) or anndata (.h5ad) object",
   'outdir',     'o', 1, "character", 'Outdir path (default ./)',
   'isNorm', 'd', 0, "logical", "Whether the data are already normalised (default FALSE and log normalize data using Seurat)",
-  "n.pc", "n", 1, "numeric", "Number of principal components to use for construction of single-cell kNN network (default 50)",
+  "nPCs", "n", 1, "numeric", "Number of principal components to use for construction of single-cell kNN network (default 50)",
   "nFeatures", "f", 1, "numeric", "number of highly variable features to use (default 2000), selected with Seurat",
   "k.knn", "k", 1, "numeric", "k for the knn used in the wnn used for metacell identification (default 30)",
   "gamma", "g", 1, "numeric", "gamma used for metacell identification (default 10)",
@@ -25,25 +25,6 @@ if ( !is.null(opt$help) | (is.null(opt$input) & is.null(opt$output))) {
   cat(getopt(spec, usage=TRUE))
   q(status=1)
 }
-
-#if help was asked, print a friendly message
-#and exit with a non-zero error code
-#test
-# setwd("~/Documents/reviewTutorial/")
-# opt <- list()
-# opt$input <- "data/HCLA/datasets/Banovich_Kropski_2020/sc_adata.h5ad"
-# #opt$doNorm <- T
-# opt$n.pc <- 30
-# opt$k.knn <- 30
-# opt$minMetacells <- 50
-# opt$outdir = "data/HCLA/datasets/Banovich_Kropski_2020"
-# opt$gamma = 50
-# opt$nFeature = 2000
-# opt$output <- "adata"
-# opt$annotations <- "sample"
-# opt$cores <- 6
-# print(opt)
-
 
 
 

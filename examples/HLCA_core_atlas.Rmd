@@ -2,7 +2,9 @@
 title: "Integration of the human lung cell atlas with metacells"
 author: "Leonard Herault"
 date: '2023-07-18'
-output: html_document
+output:
+  md_document:
+    toc: true # table of content true
 ---
 
 ```{r setup, include=FALSE}
@@ -107,7 +109,7 @@ If you are limited in memory you should still be able to process the samples by 
 ```{bash}
 start=`date +%s`
 for d in ./HLCA_data/datasets/*;
-do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
+do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
 done
 echo "Duration: $((($(date +%s)-$start)/60)) minutes"
 ```

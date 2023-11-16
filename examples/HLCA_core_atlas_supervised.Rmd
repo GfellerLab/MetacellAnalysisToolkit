@@ -2,7 +2,9 @@
 title: "Integration of the human lung cell atlas with metacells"
 author: "Leonard Herault"
 date: '2023-11-18'
-output: html_document
+output:
+  md_document:
+    toc: true # table of content true
 ---
 
 ```{r setup, include=FALSE}
@@ -56,44 +58,52 @@ use_condaenv(conda_env)
 
 # Splitting atlas by datasets
 
-If you did not try the HLCA_core_atlas example first and haven't divided the atlas in one h5ad file for each dataset you can do it with the following chunk.
-
 ```{r}
-
-t0.split <- Sys.time()
-
 adata <- read_h5ad("./HLCA_data/local.h5ad",backed = "r")
 adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
 datasets <- unique(adata$obs$dat)
-
-# If you are limited in time you can process on half of the datasets (uncomment th following line)
-# datasets <- datasets[1:7]
+```
 
 
-print(dim(adata))
+If you did not try the HLCA_core_atlas example first and haven't divided the atlas in one h5ad file for each dataset you can do it with the following chunk.
 
-lapply(datasets,FUN =  function(x) {
-  dir.create(paste0("./HLCA_data/datasets/",x),recursive = T)
-  adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
-                           var = adata[adata$obs$dataset == x]$var,
-                           obs = adata[adata$obs$dataset == x]$obs)
-  #This will allow us to construct supervised metacell for each cell type in each sample later in the second example
-  adata.dataset$obs$ann <- as.character(adata.dataset$obs$ann_level_3)
-  # For cell without an annotation at the 3rd level we will use the second level of annotation
-  adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
-  adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
+```{r}
+# #Uncoment to split atlas by datasets 
+# t0.split <- Sys.time()
+# 
 
-  write_h5ad(adata.dataset,paste0("./HLCA_data/datasets/",x,"/sc_adata.h5ad"))
-}
-)
+# 
+# # If you are limited in time you can process on half of the datasets (uncomment th following line)
+# # datasets <- datasets[1:7]
+# 
+# 
+# print(dim(adata))
+# 
+# lapply(datasets,FUN =  function(x) {
+#   dir.create(paste0("./HLCA_data/datasets/",x),recursive = T)
+#   adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
+#                            var = adata[adata$obs$dataset == x]$var,
+#                            obs = adata[adata$obs$dataset == x]$obs)
+#   #This will allow us to construct supervised metacell for each cell type in each sample later in the second example
+#   adata.dataset$obs$ann <- as.character(adata.dataset$obs$ann_level_3)
+#   # For cell without an annotation at the 3rd level we will use the second level of annotation
+#   adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
+#   adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
+# 
+#   write_h5ad(adata.dataset,paste0("./HLCA_data/datasets/",x,"/sc_adata.h5ad"))
+# }
+# )
+# 
+# tf.split <- Sys.time()
+# 
+# tf.split - t0.split
+```
 
+```{r}
 remove(adata)
 gc()
-
-tf.split <- Sys.time()
-
-tf.split - t0.split
 ```
+
 
 ## Constructing supervised metacell
 
@@ -107,7 +117,7 @@ This should take around 30 minutes.
 
 ```{bash results = FALSE, message=FALSE, warning=FALSE}
 for d in ./HLCA_data/datasets/*;
-do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -n 30 -f 2000 -k 30 -g 50 -s adata
+do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
 done
 ```
 
