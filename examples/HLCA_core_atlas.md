@@ -18,13 +18,29 @@
 -   <a href="#downstream-analysis" id="toc-downstream-analysis">Downstream
     analysis</a>
     -   <a href="#clustering" id="toc-clustering">Clustering</a>
-    -   <a href="#deferentially-expressed-gene-deg-analysis."
-        id="toc-deferentially-expressed-gene-deg-analysis.">Deferentially
-        expressed gene (DEG) analysis.</a>
+    -   <a href="#differently-expressed-gene-deg-analysis."
+        id="toc-differently-expressed-gene-deg-analysis.">Differently expressed
+        gene (DEG) analysis.</a>
     -   <a href="#cell-type-abundances-analyses."
         id="toc-cell-type-abundances-analyses.">Cell type abundances
         analyses.</a>
 -   <a href="#conclusion" id="toc-conclusion">Conclusion</a>
+
+<style type="text/css">
+.terminal {
+
+    background: rgba(56, 4, 40, 0.9);
+
+    height: calc(100% - 25px);
+
+    color: #ddd;
+
+    padding-top: 2px;
+
+    font-family: "Ubuntu mono";
+
+}
+</style>
 
 In this example we will work with the Human Cell Lung Atlas core
 [HLCA](https://www.nature.com/articles/s41591-023-02327-2) gathering
@@ -64,15 +80,15 @@ are running this Rmarkdown.
 You can download the annotated data from
 [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293).
 Choose the `.h5ad` option after clicking on the download button for the
-core atlas (3 tissues, 584?944 cells).
+core atlas (3 tissues, 584,944 cells).
 
 You can use a bash command line of this form to download the data
 directly in the `./HLCA_data` directory. You will have to update the
 link (obtained by clicking on download, .h5ad selection) as links are
 temporary.
 
-Please note that this may take some time (~45 mins) as the file is quite
-large (5.6 GB)
+Please note that this may take some time as the file is quite large (~6
+GB)
 
     #Uncomment to download the data in the ./HLCA_data/ directory after updating the link
     #mkdir -p ./HLCA_data
@@ -94,9 +110,7 @@ memory) the whole atlas and write one h5ad file for each dataset. This
 should take less than 10 minutes.
 
 If you are limited in time feel free to process only a subset of the
-dataset
-
-    t0.split <- Sys.time()
+dataset.
 
     adata <- read_h5ad("./HLCA_data/local.h5ad",backed = "r")
     adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
@@ -126,10 +140,6 @@ dataset
     remove(adata)
     gc()
 
-    tf.split <- Sys.time()
-
-    tf.split - t0.split
-
 ## Building metacell
 
 We build metacells with the MCAT command line using SuperCell
@@ -150,741 +160,9 @@ If you are limited in memory you should still be able to process the
 samples by reducing the number of cores (e.g. `-l 3`) or by sequentially
 processing the samples (just remove the `-l`) in a slightly longer time.
 
-    start=`date +%s`
     for d in ./HLCA_data/datasets/*;
     do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
     done
-    echo "Duration: $((($(date +%s)-$start)/60)) minutes"
-
-    ## SuperCell
-    ## ./HLCA_data/datasets/Banovich_Kropski_2020/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Banovich_Kropski_2020/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Banovich_Kropski_2020"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3161862  168.9    6273702  335.1   6273702  335.1
-    ## Vcells 281732323 2149.5  944483300 7205.9 755448546 5763.7
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger    (Mb)   max used   (Mb)
-    ## Ncells   3190314  170.4    6273702   335.1    6273702  335.1
-    ## Vcells 575057161 4387.4 1360231952 10377.8 1141961298 8712.5
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Barbry_Leroy_2020/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Barbry_Leroy_2020/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Barbry_Leroy_2020"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3113366  166.3    6204411  331.4   6204411  331.4
-    ## Vcells 182491490 1392.3  609000860 4646.4 483622058 3689.8
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3140852  167.8    6204411  331.4   6204411  331.4
-    ## Vcells 370466888 2826.5  877137238 6692.1 760126689 5799.4
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Jain_Misharin_2021_10Xv1/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Jain_Misharin_2021_10Xv1/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Jain_Misharin_2021_10Xv1"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##            used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells  3051224 163.0    5114078 273.2  5114078 273.2
-    ## Vcells 36979417 282.2   98207691 749.3 91437915 697.7
-    ## Normalize data...NULL
-    ## Identify Metacells...           used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  3074906 164.3    5114078  273.2   5114078  273.2
-    ## Vcells 70570589 538.5  145695173 1111.6 142055304 1083.8
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Jain_Misharin_2021_10Xv2/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Jain_Misharin_2021_10Xv2/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Jain_Misharin_2021_10Xv2"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##            used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  3072019 164.1    5989752  319.9   5989752  319.9
-    ## Vcells 70366982 536.9  191239283 1459.1 182966751 1396.0
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3095827  165.4    5989752  319.9   5989752  319.9
-    ## Vcells 140370717 1071.0  286831697 2188.4 286051531 2182.4
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Krasnow_2020/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Krasnow_2020/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Krasnow_2020"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3099619  165.6    6184490  330.3   6184490  330.3
-    ## Vcells 193318403 1475.0  649750587 4957.3 511849336 3905.2
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3123478  166.9    6184490  330.3   6184490  330.3
-    ## Vcells 389842971 2974.3  942659982 7192.0 785461369 5992.6
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Lafyatis_Rojas_2019_10Xv1/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Lafyatis_Rojas_2019_10Xv1/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Lafyatis_Rojas_2019_10Xv1"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3041821 162.5    5086878 271.7  5086878 271.7
-    ## Vcells 9221887  70.4   19726290 150.5 16276218 124.2
-    ## Normalize data...NULL
-    ## Identify Metacells...           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells  3065374 163.8    5086878 271.7  5086878 271.7
-    ## Vcells 13767335 105.1   24193881 184.6 24098230 183.9
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Lafyatis_Rojas_2019_10Xv2/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Lafyatis_Rojas_2019_10Xv2/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Lafyatis_Rojas_2019_10Xv2"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##            used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  3060338 163.5    5139157  274.5   5139157  274.5
-    ## Vcells 58271718 444.6  158274579 1207.6 149341027 1139.4
-    ## Normalize data...NULL
-    ## Identify Metacells...            used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3084146 164.8    5139157  274.5   5139157  274.5
-    ## Vcells 114332280 872.3  283801305 2165.3 236316892 1803.0
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Meyer_2019/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Meyer_2019/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Meyer_2019"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##            used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  3074779 164.3    5993138  320.1   5993138  320.1
-    ## Vcells 85572482 652.9  234274769 1787.4 223502648 1705.2
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3099490  165.6    5993138  320.1   5993138  320.1
-    ## Vcells 171036610 1305.0  351766244 2683.8 350302459 2672.6
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Misharin_2021/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Misharin_2021/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Misharin_2021"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3104104  165.8    6190188  330.6   6190188  330.6
-    ## Vcells 253549539 1934.5  685799463 5232.3 674669700 5147.4
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)   max used   (Mb)
-    ## Ncells   3128557  167.1    6190188  330.6    6190188  330.6
-    ## Vcells 511193282 3900.1 1073724162 8191.9 1071851411 8177.6
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Misharin_Budinger_2018/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Misharin_Budinger_2018/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Misharin_Budinger_2018"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3080327 164.6    6143747  328.2   6143747  328.2
-    ## Vcells 129386820 987.2  360068441 2747.2 341284540 2603.8
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3104510  165.8    6143747  328.2   6143747  328.2
-    ## Vcells 259763687 1981.9  540659870 4125.0 538085462 4105.3
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Nawijn_2021/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Nawijn_2021/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Nawijn_2021"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3109656  166.1    6198112  331.1   6198112  331.1
-    ## Vcells 205652472 1569.1  690116576 5265.2 544745103 4156.1
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3134757  167.5    6198112  331.1   6198112  331.1
-    ## Vcells 415952854 3173.5  993943869 7583.2 828080878 6317.8
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Seibold_2020_10Xv2/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Seibold_2020_10Xv2/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Seibold_2020_10Xv2"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##            used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  3051353 163.0    5113128  273.1   5113128  273.1
-    ## Vcells 70000490 534.1  193347990 1475.2 190393252 1452.6
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3074909  164.3    5113128  273.1   5113128  273.1
-    ## Vcells 136566510 1042.0  288384514 2200.2 285489450 2178.2
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Seibold_2020_10Xv3/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Seibold_2020_10Xv3/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Seibold_2020_10Xv3"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3060346  163.5    5139852  274.5   5139852  274.5
-    ## Vcells 188474317 1438.0  533042124 4066.8 496618122 3788.9
-    ## Normalize data...NULL
-    ## Identify Metacells...            used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells   3084541  164.8    5139852  274.5   5139852  274.5
-    ## Vcells 374716173 2858.9  798693980 6093.6 765242410 5838.4
-    ## Assign metadata to metacells and compute purities...Done.
-    ## SuperCell
-    ## ./HLCA_data/datasets/Teichmann_Meyer_2019/sc_adata.h5ad
-    ## Identifying metacells...
-    ## $ARGS
-    ## character(0)
-    ## 
-    ## $input
-    ## [1] "./HLCA_data/datasets/Teichmann_Meyer_2019/sc_adata.h5ad"
-    ## 
-    ## $outdir
-    ## [1] "./HLCA_data/datasets/Teichmann_Meyer_2019"
-    ## 
-    ## $nPCs
-    ## [1] 50
-    ## 
-    ## $nFeatures
-    ## [1] 2000
-    ## 
-    ## $gamma
-    ## [1] 50
-    ## 
-    ## $output
-    ## [1] "adata"
-    ## 
-    ## $annotations
-    ## [1] "sample"
-    ## 
-    ## $cores
-    ## [1] 6
-    ## 
-    ## $k.knn
-    ## [1] 30
-    ## 
-    ## $isNorm
-    ## [1] FALSE
-    ## 
-    ## Loading required package: foreach
-    ## Loading required package: iterators
-    ## Loading required package: parallel
-    ## The legacy packages maptools, rgdal, and rgeos, underpinning this package
-    ## will retire shortly. Please refer to R-spatial evolution reports on
-    ## https://r-spatial.org/r/2023/05/15/evolution4.html for details.
-    ## This package is now running under evolution status 0 
-    ## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-    ##            used  (Mb) gc trigger   (Mb)  max used  (Mb)
-    ## Ncells  3050792 163.0    5113418  273.1   5113418 273.1
-    ## Vcells 48535686 370.3  131515210 1003.4 121596124 927.8
-    ## Normalize data...NULL
-    ## Identify Metacells...           used  (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  3075427 164.3    5113418  273.1   5113418  273.1
-    ## Vcells 93617248 714.3  195643553 1492.7 193590634 1477.0
-    ## Assign metadata to metacells and compute purities...Done.
-    ## Duration: 17 minutes
 
 ## Loading metacell objects
 
@@ -920,33 +198,33 @@ function.
 
     VlnPlot(unintegrated.mc,features = c("size","ann_level_1_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-7-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
     VlnPlot(unintegrated.mc,features = c("ann_level_2_purity","ann_level_3_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-7-2.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-2.png)
 
 We can also use box plots.
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_2_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-1.png)
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_3_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-2.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-2.png)
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_4_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-3.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-3.png)
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_finest_level_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-4.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-4.png)
 
 Overall metacells from the different datasets present a good purity
 until the third level of annotation.
@@ -968,7 +246,7 @@ correction.
 
     umap.unintegrated.datasets + umap.unintegrated.types
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-10-1.png)
 
     remove(unintegrated.mc) # we won't use the unintegrated object anymore
     gc()
@@ -979,7 +257,8 @@ cell types. Let’s correct it.
 
 ## Seurat integration
 
-Here we will use the standard Seurat\_v4 batch correction [workflow]()
+Here we will use the standard Seurat\_v4 batch correction
+[workflow](https://satijalab.org/seurat/archive/v4.3/integration_rpca).
 As in the original study, we use the dataset rather than the donor as
 the batch parameter. See method section “Data integration benchmarking”
 of the [original
@@ -987,13 +266,6 @@ study](https://www.nature.com/articles/s41591-023-02327-2) for more
 details.
 
 This should take less than 5 minutes.
-
-    # Install package if needed
-    # if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
-    # 
-    # library(STACAS)
-
-    t0_integration <- Sys.time()
 
     # normalize each dataset 
     metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
@@ -1021,12 +293,6 @@ This should take less than 5 minutes.
 
     combined.mc <- IntegrateData(anchorset = anchors,k.weight = 50) # we have to update the k.weight parameters because the smallest dataset contain less than 100 metacells
 
-
-
-    tf_integration <- Sys.time()
-
-    tf_integration - t0_integration
-
 Check the obtained object.
 
     combined.mc
@@ -1037,7 +303,7 @@ Check the obtained object.
     ##  1 other assay present: RNA
 
 We can verify that the sum of metacell sizes correspond to the original
-number of single-cells
+number of single-cells.
 
     sum(combined.mc$size)
 
@@ -1051,55 +317,55 @@ downstream analysis.
     combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
     combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
 
-    ## 17:18:05 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 13:57:46 UMAP embedding parameters a = 0.9922 b = 1.112
 
-    ## 17:18:05 Read 11706 rows and found 30 numeric columns
+    ## 13:57:46 Read 11706 rows and found 30 numeric columns
 
-    ## 17:18:05 Using Annoy for neighbor search, n_neighbors = 30
+    ## 13:57:46 Using Annoy for neighbor search, n_neighbors = 30
 
-    ## 17:18:05 Building Annoy index with metric = cosine, n_trees = 50
+    ## 13:57:46 Building Annoy index with metric = cosine, n_trees = 50
 
     ## 0%   10   20   30   40   50   60   70   80   90   100%
 
     ## [----|----|----|----|----|----|----|----|----|----|
 
     ## **************************************************|
-    ## 17:18:07 Writing NN index file to temp file /tmp/35267733/RtmpcpF1U0/file2301e270dfeb8
-    ## 17:18:07 Searching Annoy index using 1 thread, search_k = 3000
-    ## 17:18:10 Annoy recall = 100%
-    ## 17:18:10 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 17:18:11 Initializing from normalized Laplacian + noise (using irlba)
-    ## 17:18:12 Commencing optimization for 200 epochs, with 484456 positive edges
-    ## 17:18:18 Optimization finished
+    ## 13:57:47 Writing NN index file to temp file /tmp/35284296/RtmpbiAJdn/file30ee335d617326
+    ## 13:57:47 Searching Annoy index using 1 thread, search_k = 3000
+    ## 13:57:51 Annoy recall = 100%
+    ## 13:57:51 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 13:57:51 Initializing from normalized Laplacian + noise (using irlba)
+    ## 13:57:53 Commencing optimization for 200 epochs, with 484456 positive edges
+    ## 13:57:58 Optimization finished
 
     combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
-    ## 17:18:18 UMAP embedding parameters a = 0.9922 b = 1.112
-    ## 17:18:18 Read 11706 rows and found 30 numeric columns
-    ## 17:18:18 Using Annoy for neighbor search, n_neighbors = 30
-    ## 17:18:18 Building Annoy index with metric = cosine, n_trees = 50
+    ## 13:57:58 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 13:57:58 Read 11706 rows and found 30 numeric columns
+    ## 13:57:58 Using Annoy for neighbor search, n_neighbors = 30
+    ## 13:57:58 Building Annoy index with metric = cosine, n_trees = 50
     ## 0%   10   20   30   40   50   60   70   80   90   100%
     ## [----|----|----|----|----|----|----|----|----|----|
     ## **************************************************|
-    ## 17:18:19 Writing NN index file to temp file /tmp/35267733/RtmpcpF1U0/file2301e22d1f31c0
-    ## 17:18:19 Searching Annoy index using 1 thread, search_k = 3000
-    ## 17:18:22 Annoy recall = 100%
-    ## 17:18:22 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 17:18:23 Initializing from normalized Laplacian + noise (using irlba)
-    ## 17:18:25 Commencing optimization for 200 epochs, with 484456 positive edges
-    ## 17:18:30 Optimization finished
+    ## 13:58:00 Writing NN index file to temp file /tmp/35284296/RtmpbiAJdn/file30ee33fb064ed
+    ## 13:58:00 Searching Annoy index using 1 thread, search_k = 3000
+    ## 13:58:03 Annoy recall = 100%
+    ## 13:58:03 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 13:58:04 Initializing from normalized Laplacian + noise (using irlba)
+    ## 13:58:05 Commencing optimization for 200 epochs, with 484456 positive edges
+    ## 13:58:11 Optimization finished
 
 Now we can make the plots and visually compare the results with the
 unintegrated analysis.
 
-    umap.stacas.datasets <- DimPlot(combined.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("integrated datasets")
-    umap.stacas.celltypes <- DimPlot(combined.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes) + NoLegend() + ggtitle("integrated cell types")
+    umap.integrated.datasets <- DimPlot(combined.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("integrated datasets")
+    umap.integrated.celltypes <- DimPlot(combined.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes) + NoLegend() + ggtitle("integrated cell types")
 
-    umap.stacas.datasets + umap.stacas.celltypes + umap.unintegrated.datasets + umap.unintegrated.types
+    umap.integrated.datasets + umap.integrated.celltypes + umap.unintegrated.datasets + umap.unintegrated.types
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-14-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-1.png)
 
-STACAS efficiently corrected the batch effect in the data while keeping
+Seurat efficiently corrected the batch effect in the data while keeping
 the cell type separated, but other batch correction methods such as
 harmony would have also done the job.
 
@@ -1107,39 +373,39 @@ Note that In the original study, datasets were integrated using SCANVI
 semi-supervised integration using partial annotation obtained for each
 dataset prior integration. If you are interested in such supervised
 approach at the metacell level in R you can have a look to our second
-[example](./HLCA_core_atlas_supervised.Rmd) using the
+[example](./HLCA_core_atlas_supervised.md) using the
 [STACAS](https://github.com/carmonalab/STACAS) package.
 
 We can navigate in the different annotation levels.
 
     library(ggplot2)
 
-    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",cols= color.celltypes)
+    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",label = T,repel = T,cols= color.celltypes) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-1.png)
 
-    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes)
+    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-2.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-2.png)
 
     DimPlot(combined.mc,group.by = "ann_level_3",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-3.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-3.png)
 
 ## Downstream analysis
 
 ### Clustering
 
-We cluster the metacells based on the corrected PCA space by STACAS
+We cluster the metacells based on the corrected PCA space by Seurat.
 
     DefaultAssay(combined.mc) <- "integrated"
     combined.mc <- FindNeighbors(combined.mc,reduction = "pca",dims = 1:30)
     combined.mc <- FindClusters(combined.mc,resolution = 0.5) 
     UMAPPlot(combined.mc,label=T) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-17-1.png)
 
-### Deferentially expressed gene (DEG) analysis.
+### Differently expressed gene (DEG) analysis.
 
 Now let’s found the markers of the cluster 19 we’ve just identified.
 
@@ -1178,7 +444,7 @@ as CD19 and PAX5
 
     VlnPlot(combined.mc,genes,ncol = 1)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-18-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 
 By looking at the metacell annotation (assigned from the original
 single-cell metadata by MCAT), we can verify that we correctly retrieved
@@ -1186,7 +452,7 @@ the B cell lineage cluster
 
     DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
 
 ### Cell type abundances analyses.
 
@@ -1209,7 +475,7 @@ the smoking status.
 
     ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + xlab("% epithelial cells")
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-21-1.png)
 
 Samples from smokers seem to present more AT2 cells but this quick
 analysis is for illustrative purposes only. In practice it’s far more
@@ -1232,7 +498,7 @@ computers.
 In this first example we used a fully unsupervised workflow and did not
 use any prior biological knowledge. Authors of the original study made a
 remarkable work annotating the hundreds of thousands cells of the atlas.
-In the second [example](./HLCA_core_atlas_supervised.Rmd) we propose a
+In the second [example](./HLCA_core_atlas_supervised.md) we propose a
 supervised workflow using this annotation to guide both the metacell
 identification and the batch correction.
 

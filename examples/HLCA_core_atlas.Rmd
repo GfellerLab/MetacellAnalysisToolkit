@@ -1,4 +1,3 @@
-Integration of the human lung cell atlas with metacells
 ---
 title: "Integration of the human lung cell atlas with metacells"
 author: "Leonard Herault, Aurelie Gabriel, Mariia Bilous, David Gfeller"
@@ -7,7 +6,6 @@ output:
   md_document:
     toc: true # table of content true
 ---
-=====================
 
 ```{css, echo=FALSE}
 .terminal {
