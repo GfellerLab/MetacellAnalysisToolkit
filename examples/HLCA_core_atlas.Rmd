@@ -6,22 +6,8 @@ output:
   md_document:
     toc: true # table of content true
 ---
-
-```{css, echo=FALSE}
-.terminal {
-
-    background: rgba(56, 4, 40, 0.9);
-
-    height: calc(100% - 25px);
-
-    color: #ddd;
-
-    padding-top: 2px;
-
-    font-family: "Ubuntu mono";
-
-}
-```
+Integration of the human lung cell atlas with metacells
+=======================================================
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

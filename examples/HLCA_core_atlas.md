@@ -1,46 +1,35 @@
--   <a href="#setting-up-the-environment"
-    id="toc-setting-up-the-environment">Setting up the environment</a>
--   <a href="#downloading-the-data"
-    id="toc-downloading-the-data">Downloading the data</a>
--   <a href="#splitting-atlas-by-datasets"
-    id="toc-splitting-atlas-by-datasets">Splitting atlas by datasets</a>
--   <a href="#building-metacell" id="toc-building-metacell">Building
-    metacell</a>
--   <a href="#loading-metacell-objects"
-    id="toc-loading-metacell-objects">Loading metacell objects</a>
--   <a href="#merging-objects-and-basic-quality-control"
-    id="toc-merging-objects-and-basic-quality-control">Merging objects and
-    basic quality control</a>
--   <a href="#unintegrated-analysis"
-    id="toc-unintegrated-analysis">Unintegrated analysis</a>
--   <a href="#seurat-integration" id="toc-seurat-integration">Seurat
-    integration</a>
--   <a href="#downstream-analysis" id="toc-downstream-analysis">Downstream
-    analysis</a>
-    -   <a href="#clustering" id="toc-clustering">Clustering</a>
-    -   <a href="#differently-expressed-gene-deg-analysis."
-        id="toc-differently-expressed-gene-deg-analysis.">Differently expressed
-        gene (DEG) analysis.</a>
-    -   <a href="#cell-type-abundances-analyses."
-        id="toc-cell-type-abundances-analyses.">Cell type abundances
-        analyses.</a>
--   <a href="#conclusion" id="toc-conclusion">Conclusion</a>
+-   <a href="#integration-of-the-human-lung-cell-atlas-with-metacells"
+    id="toc-integration-of-the-human-lung-cell-atlas-with-metacells">Integration
+    of the human lung cell atlas with metacells</a>
+    -   <a href="#setting-up-the-environment"
+        id="toc-setting-up-the-environment">Setting up the environment</a>
+    -   <a href="#downloading-the-data"
+        id="toc-downloading-the-data">Downloading the data</a>
+    -   <a href="#splitting-atlas-by-datasets"
+        id="toc-splitting-atlas-by-datasets">Splitting atlas by datasets</a>
+    -   <a href="#building-metacell" id="toc-building-metacell">Building
+        metacell</a>
+    -   <a href="#loading-metacell-objects"
+        id="toc-loading-metacell-objects">Loading metacell objects</a>
+    -   <a href="#merging-objects-and-basic-quality-control"
+        id="toc-merging-objects-and-basic-quality-control">Merging objects and
+        basic quality control</a>
+    -   <a href="#unintegrated-analysis"
+        id="toc-unintegrated-analysis">Unintegrated analysis</a>
+    -   <a href="#seurat-integration" id="toc-seurat-integration">Seurat
+        integration</a>
+    -   <a href="#downstream-analysis" id="toc-downstream-analysis">Downstream
+        analysis</a>
+        -   <a href="#clustering" id="toc-clustering">Clustering</a>
+        -   <a href="#differently-expressed-gene-deg-analysis."
+            id="toc-differently-expressed-gene-deg-analysis.">Differently expressed
+            gene (DEG) analysis.</a>
+        -   <a href="#cell-type-abundances-analyses."
+            id="toc-cell-type-abundances-analyses.">Cell type abundances
+            analyses.</a>
+    -   <a href="#conclusion" id="toc-conclusion">Conclusion</a>
 
-<style type="text/css">
-.terminal {
-
-    background: rgba(56, 4, 40, 0.9);
-
-    height: calc(100% - 25px);
-
-    color: #ddd;
-
-    padding-top: 2px;
-
-    font-family: "Ubuntu mono";
-
-}
-</style>
+# Integration of the human lung cell atlas with metacells
 
 In this example we will work with the Human Cell Lung Atlas core
 [HLCA](https://www.nature.com/articles/s41591-023-02327-2) gathering
@@ -198,33 +187,33 @@ function.
 
     VlnPlot(unintegrated.mc,features = c("size","ann_level_1_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 
     VlnPlot(unintegrated.mc,features = c("ann_level_2_purity","ann_level_3_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-2.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-7-2.png)
 
 We can also use box plots.
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_2_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_3_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-2.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-2.png)
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_4_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-3.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-3.png)
 
     ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_finest_level_purity,fill = dataset)) + geom_boxplot() +
       scale_x_discrete(guide = guide_axis(angle = 45)) 
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-4.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-8-4.png)
 
 Overall metacells from the different datasets present a good purity
 until the third level of annotation.
@@ -246,7 +235,7 @@ correction.
 
     umap.unintegrated.datasets + umap.unintegrated.types
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-10-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-9-1.png)
 
     remove(unintegrated.mc) # we won't use the unintegrated object anymore
     gc()
@@ -317,43 +306,43 @@ downstream analysis.
     combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
     combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
 
-    ## 13:57:46 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 14:43:22 UMAP embedding parameters a = 0.9922 b = 1.112
 
-    ## 13:57:46 Read 11706 rows and found 30 numeric columns
+    ## 14:43:22 Read 11706 rows and found 30 numeric columns
 
-    ## 13:57:46 Using Annoy for neighbor search, n_neighbors = 30
+    ## 14:43:22 Using Annoy for neighbor search, n_neighbors = 30
 
-    ## 13:57:46 Building Annoy index with metric = cosine, n_trees = 50
+    ## 14:43:22 Building Annoy index with metric = cosine, n_trees = 50
 
     ## 0%   10   20   30   40   50   60   70   80   90   100%
 
     ## [----|----|----|----|----|----|----|----|----|----|
 
     ## **************************************************|
-    ## 13:57:47 Writing NN index file to temp file /tmp/35284296/RtmpbiAJdn/file30ee335d617326
-    ## 13:57:47 Searching Annoy index using 1 thread, search_k = 3000
-    ## 13:57:51 Annoy recall = 100%
-    ## 13:57:51 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 13:57:51 Initializing from normalized Laplacian + noise (using irlba)
-    ## 13:57:53 Commencing optimization for 200 epochs, with 484456 positive edges
-    ## 13:57:58 Optimization finished
+    ## 14:43:24 Writing NN index file to temp file /tmp/35284735/RtmpnWEIkG/file3633692c325f
+    ## 14:43:24 Searching Annoy index using 1 thread, search_k = 3000
+    ## 14:43:27 Annoy recall = 100%
+    ## 14:43:27 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 14:43:28 Initializing from normalized Laplacian + noise (using irlba)
+    ## 14:43:29 Commencing optimization for 200 epochs, with 484456 positive edges
+    ## 14:43:35 Optimization finished
 
     combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
-    ## 13:57:58 UMAP embedding parameters a = 0.9922 b = 1.112
-    ## 13:57:58 Read 11706 rows and found 30 numeric columns
-    ## 13:57:58 Using Annoy for neighbor search, n_neighbors = 30
-    ## 13:57:58 Building Annoy index with metric = cosine, n_trees = 50
+    ## 14:43:35 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 14:43:35 Read 11706 rows and found 30 numeric columns
+    ## 14:43:35 Using Annoy for neighbor search, n_neighbors = 30
+    ## 14:43:35 Building Annoy index with metric = cosine, n_trees = 50
     ## 0%   10   20   30   40   50   60   70   80   90   100%
     ## [----|----|----|----|----|----|----|----|----|----|
     ## **************************************************|
-    ## 13:58:00 Writing NN index file to temp file /tmp/35284296/RtmpbiAJdn/file30ee33fb064ed
-    ## 13:58:00 Searching Annoy index using 1 thread, search_k = 3000
-    ## 13:58:03 Annoy recall = 100%
-    ## 13:58:03 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 13:58:04 Initializing from normalized Laplacian + noise (using irlba)
-    ## 13:58:05 Commencing optimization for 200 epochs, with 484456 positive edges
-    ## 13:58:11 Optimization finished
+    ## 14:43:36 Writing NN index file to temp file /tmp/35284735/RtmpnWEIkG/file3633694727d392
+    ## 14:43:36 Searching Annoy index using 1 thread, search_k = 3000
+    ## 14:43:39 Annoy recall = 100%
+    ## 14:43:39 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 14:43:40 Initializing from normalized Laplacian + noise (using irlba)
+    ## 14:43:42 Commencing optimization for 200 epochs, with 484456 positive edges
+    ## 14:43:47 Optimization finished
 
 Now we can make the plots and visually compare the results with the
 unintegrated analysis.
@@ -363,7 +352,7 @@ unintegrated analysis.
 
     umap.integrated.datasets + umap.integrated.celltypes + umap.unintegrated.datasets + umap.unintegrated.types
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
 Seurat efficiently corrected the batch effect in the data while keeping
 the cell type separated, but other batch correction methods such as
@@ -382,15 +371,15 @@ We can navigate in the different annotation levels.
 
     DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",label = T,repel = T,cols= color.celltypes) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-1.png)
 
     DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-2.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-2.png)
 
     DimPlot(combined.mc,group.by = "ann_level_3",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-3.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-15-3.png)
 
 ## Downstream analysis
 
@@ -403,7 +392,7 @@ We cluster the metacells based on the corrected PCA space by Seurat.
     combined.mc <- FindClusters(combined.mc,resolution = 0.5) 
     UMAPPlot(combined.mc,label=T) + NoLegend()
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-17-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-16-1.png)
 
 ### Differently expressed gene (DEG) analysis.
 
@@ -444,7 +433,7 @@ as CD19 and PAX5
 
     VlnPlot(combined.mc,genes,ncol = 1)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-18-1.png)
 
 By looking at the metacell annotation (assigned from the original
 single-cell metadata by MCAT), we can verify that we correctly retrieved
@@ -452,7 +441,7 @@ the B cell lineage cluster
 
     DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 
 ### Cell type abundances analyses.
 
@@ -475,7 +464,7 @@ the smoking status.
 
     ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + xlab("% epithelial cells")
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-21-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
 
 Samples from smokers seem to present more AT2 cells but this quick
 analysis is for illustrative purposes only. In practice it’s far more
