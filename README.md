@@ -134,5 +134,5 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 ## Advanced analysis
 
--   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca integration.
--   [Supervised Analysis](/examples/HCLA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS integration.
+-   [Analysis](/examples/HLCA_core_atlas.md) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca integration.
+-   [Supervised Analysis](/examples/HCLA_core_atlas.md) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS integration.
