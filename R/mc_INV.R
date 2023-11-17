@@ -11,14 +11,14 @@
 #' be used to compute INV values.
 #' @return  A vector containing the INV value of each metacell.
 #' @examples
-#' mc_INV(sc.obj = MetacellToolkit::CD34_sc, cell.membership = CD34_mc@misc$cell_membership)
+#' mc_INV(sc.obj = MetacellAnalysisToolkit::CD34_sc, cell.membership = CD34_mc@misc$cell_membership)
 #' @export
 
 mc_INV <- function(sc.obj, 
                    cell.membership, 
                    assay = "RNA",
                    group.label = "membership"){
-  reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellToolkit"))
+  reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellAnalysisToolkit"))
   
   if(identical(sc.obj[[assay]]@counts@x, sc.obj[[assay]]@data@x)){
     message("Counts and data slots are identical.")

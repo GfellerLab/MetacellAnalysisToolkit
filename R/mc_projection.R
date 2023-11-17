@@ -7,7 +7,7 @@
 #' @param cell.membership A data frame containing at least one column assigning each single-cell to a metacell (named "membership" if no other label is provided in group.label)
 #' and single-cell IDs as rownames. 
 #' If *cell.membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
-#' was generated using the MetacellToolkit command lines (see format of the *MetacellToolkit::CD34_mc* object).
+#' was generated using the MetacellAnalysisToolkit command lines (see format of the *MetacellAnalysisToolkit::CD34_mc* object).
 #' @param metacell.label String corresponding to the name of the metadata column in mc.obj that should be used to color metacells. 
 #' If mc.obj is NULL, this parameter will be ignored.
 #' @param sc.label String corresponding to the name of the metadata column in sc.obj that should be used to color single cells.
