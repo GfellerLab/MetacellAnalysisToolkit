@@ -35,7 +35,7 @@ color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#5
 
 ## Downloading the data (done in the previous example)
 
-If you didn't try the unsupervised [example](./HLCA_core_atlas.Rmd) first and haven't downloaded the data yet you can do it  from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584?944 cells).
+If you didn't try the unsupervised [example](./HLCA_core_atlas.Rmd) first and haven't downloaded the data yet you can do it  from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584,944 cells).
 
 You can use a bash command line of this form to download the data directly in the `./HLCA_data` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
 
@@ -169,7 +169,7 @@ p_finest <- ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_finest_level_pu
 p_4 + p_finest
 ```
 
-Overall using supervised metacells construction we obtain pure metacell until the 3rd level of annotaion and improve metacell purities for finer levels compare to the unsupervised approach (see previous [example](./HLCA_core_atlas_supervised.Rmd)).
+Overall using supervised metacells construction we obtain pure metacell until the 3rd level of annotaion and improve metacell purities for finer levels compared to the unsupervised approach (see previous [example](./HLCA_core_atlas_supervised.Rmd)).
 
 ```{r fig.height=6, fig.width=14}
 meta.data.unsup <- readRDS("./HLCA_data/combined.mc.unsup.rds")@meta.data 
