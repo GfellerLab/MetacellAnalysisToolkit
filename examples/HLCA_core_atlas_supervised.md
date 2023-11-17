@@ -1,10 +1,15 @@
--   <a href="#setting-up-the-environment"
-    id="toc-setting-up-the-environment">Setting up the environment</a>
--   <a href="#downloading-the-data-done-in-the-previous-example"
-    id="toc-downloading-the-data-done-in-the-previous-example">Downloading
-    the data (done in the previous example)</a>
--   <a href="#splitting-atlas-by-datasets"
-    id="toc-splitting-atlas-by-datasets">Splitting atlas by datasets</a>
+-   <a
+    href="#integration-of-the-human-lung-cell-atlas-with-metacells-using-a-supervised-workflow"
+    id="toc-integration-of-the-human-lung-cell-atlas-with-metacells-using-a-supervised-workflow">Integration
+    of the human lung cell atlas with metacells using a supervised
+    workflow</a>
+    -   <a href="#setting-up-the-environment"
+        id="toc-setting-up-the-environment">Setting up the environment</a>
+    -   <a href="#downloading-the-data-done-in-the-previous-example"
+        id="toc-downloading-the-data-done-in-the-previous-example">Downloading
+        the data (done in the previous example)</a>
+    -   <a href="#splitting-atlas-by-datasets"
+        id="toc-splitting-atlas-by-datasets">Splitting atlas by datasets</a>
     -   <a href="#constructing-supervised-metacell"
         id="toc-constructing-supervised-metacell">Constructing supervised
         metacell</a>
@@ -23,6 +28,8 @@
     -   <a href="#downstream-analysis" id="toc-downstream-analysis">Downstream
         analysis</a>
     -   <a href="#conclusion" id="toc-conclusion">Conclusion</a>
+
+# Integration of the human lung cell atlas with metacells using a supervised workflow
 
 In this example we will work with the Human Cell Lung Atlas core
 [HLCA](%5Bhttps://www.nature.com/articles/s41591-023-02327-2) gathering
@@ -86,7 +93,7 @@ MCAT tool.
 
     use_condaenv(conda_env)
 
-# Splitting atlas by datasets
+## Splitting atlas by datasets
 
     adata <- read_h5ad("./HLCA_data/local.h5ad",backed = "r")
     adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
@@ -130,8 +137,8 @@ the following chunk.
     gc()
 
     ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3080169 164.5    5535525 295.7  5535525 295.7
-    ## Vcells 5749569  43.9   32314323 246.6 36480285 278.4
+    ## Ncells 3084544 164.8    5504727 294.0  5504727 294.0
+    ## Vcells 5758731  44.0   32322984 246.7 36489447 278.4
 
 ## Constructing supervised metacell
 
@@ -146,7 +153,7 @@ each sample.
 
 If you are limited in memory you should still be able to process the
 samples by reducing the number of cores (e.g. `-l 3`) or by sequentially
-processing the samples (just remove the `-l`) in a slightly longer time
+processing the samples (just remove the `-l`) in a slightly longer time.
 
 This should take around 30 minutes.
 
@@ -273,11 +280,10 @@ benchmarking](https://www.nature.com/articles/s41591-023-02327-2) of the
 original study for more details.
 
     # Install package if needed
-    if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
+    if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS",upgrade = "never")
 
     library(STACAS)
 
-    t0_integration <- Sys.time()
 
     # normalize and identify variable features for each dataset independently
     metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
@@ -296,10 +302,6 @@ original study for more details.
                               cell.labels = "ann", # Note that by not you can use STACAS in its unsupervised mode
                               reference = c(1,2,5,9,11), # the 5 biggest datasets are used as reference
                               dims = 1:30)
-
-    tf_integration <- Sys.time()
-
-    tf_integration - t0_integration
 
     remove(metacell.objs) # We don't need the object list anymore
     gc()

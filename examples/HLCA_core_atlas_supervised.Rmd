@@ -1,11 +1,14 @@
 ---
-title: "Integration of the human lung cell atlas with metacells"
-author: "Leonard Herault"
-date: '2023-11-18'
+title: "Integration of the human lung cell atlas with metacells using a supervised workflow"
+author: "Leonard Herault, Aurelie Gabriel, Mariia Bilous, David Gfeller"
+date: "`r Sys.Date()`"
 output:
   md_document:
     toc: true # table of content true
 ---
+Integration of the human lung cell atlas with metacells using a supervised workflow
+===================================================================================
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -56,7 +59,7 @@ conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToo
 use_condaenv(conda_env)
 ```
 
-# Splitting atlas by datasets
+## Splitting atlas by datasets
 
 ```{r}
 adata <- read_h5ad("./HLCA_data/local.h5ad",backed = "r")
@@ -111,7 +114,7 @@ Sikkema et al made a remarkable job in finely annotating hundreds thousands of c
 
 We added previously a ann_sample column in the metadata of the single cell object. We now can use it to build metacell for each cell type in each sample.
 
-If you are limited in memory you should still be able to process the samples by reducing the number of cores (e.g. `-l 3`) or by sequentially processing the samples (just remove the `-l`) in a slightly longer time
+If you are limited in memory you should still be able to process the samples by reducing the number of cores (e.g. `-l 3`) or by sequentially processing the samples (just remove the `-l`) in a slightly longer time.
 
 This should take around 30 minutes.
 
@@ -212,11 +215,10 @@ To be noted that, as in the original study, we use the dataset rather than the d
 
 ```{r results = FALSE, message=FALSE, warning=FALSE}
 # Install package if needed
-if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
+if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS",upgrade = "never")
 
 library(STACAS)
 
-t0_integration <- Sys.time()
 
 # normalize and identify variable features for each dataset independently
 metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
@@ -235,10 +237,6 @@ combined.mc <- Run.STACAS(object.list = metacell.objs,
                           cell.labels = "ann", # Note that by not you can use STACAS in its unsupervised mode
                           reference = c(1,2,5,9,11), # the 5 biggest datasets are used as reference
                           dims = 1:30)
-
-tf_integration <- Sys.time()
-
-tf_integration - t0_integration
 
 remove(metacell.objs) # We don't need the object list anymore
 gc()
