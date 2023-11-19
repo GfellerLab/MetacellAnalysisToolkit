@@ -85,6 +85,7 @@ def separation(
     if DO_DC:
         dm_res = palantir.utils.run_diffusion_maps(components, n_components=max(10, n_comp))
         dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=n_comp)
+	dc.index=components.index
     else:
         dc = components
         
