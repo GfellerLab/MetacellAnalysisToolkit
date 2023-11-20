@@ -257,7 +257,7 @@ def main(argv):
     
         ro.r('''
         sobj.mc <- CreateSeuratObject(counts = assay(adata_mc),meta.data = data.frame(colData(adata_mc)))
-        sobj.mc@misc$membership <- membership  
+        sobj.mc@misc$cell_membership <- membership  
         ''')
     
         ro.r(f'saveRDS(sobj.mc, file="{seurat_out}")')
