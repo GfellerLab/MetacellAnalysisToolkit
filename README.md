@@ -71,29 +71,37 @@ Using MCAT tool you can easily identify metacells with either SEACells, SuperCel
 
     OPTIONS:
        -h     Show this message
-
+   
        -t     tool, either 'SEACells', 'MetaCell' or 'SuperCell' 
-
+   
        -i     input_file, either an Anndata object file '.h5ad' or a Seurat object file '.rds' file
-
+   
        -o     outdir, output directory (default ./)
 
        -n     dims, number of principal components to use (only for SEACells and SuperCell, default 50) 
-
+   
        -f     n_features, number of highly variable genes use to compute the initial PCA (only for SEACells and SuperCell, default 2000) 
-
+   
        -k     k_knn, number of neighbors to construct the knn graph (only for SEACells and SuperCell, default 30)
-
-       -g     gamma, graining level of data 
+   
+       -g     gamma,        graining level of data 
               Proportion of number of single cells in the initial dataset to the number of metacells in the final dataset
               When using MetaCell this correspond to a target gamma (obtained gamma slightly lower)
           
        -s     output, desired metacell file format in output, either 'adata' for a h5ad file or a 'seurat' for a rds file. 
               Output file name will be  'mc_'{output_format}. 
-              
-       -r     reduction_key (only for SEACells, default "X_pca")
-
+          
+       -d     normalized data in input (only for SuperCell). ADD -d to specify that data are already normalized in the data slot of the Seurat object or in .X for a adata object (default FALSE).
+              Note that in this case raw count data have to be provided in the count slot for a Seurat object or in .raw.X for an anndata object. 
+   
+       -r     reduction_key (only for SEACells, default none and a PCA reduction is computed using standard scanpy workflow and stored in "X_pca")
+   
        -y     yaml_file (only for MetaCell2, default None and use default options and gene lists)
+   
+       -a     annotation, to make supervised metacells according to an annotation present in the metadata of the object (only for SEACells and SuperCell, default none)
+   
+       -l     cores, number of cores to use for parallel processing if an annotation is profided (only for SuperCell)
+
 
 ### 3.2 Metacell identification on Cd34+ cells using SuperCell
 
@@ -133,5 +141,5 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 ## Advanced analysis
 
--   [Analysis](/examples/HLCA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca integration.
--   [Supervised Analysis](/examples/HCLA_core_atlas.Rmd) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and STACAS integration.
+-   [Analysis](/examples/HLCA_core_atlas.md) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca integration.
+-   [Supervised Analysis](/examples/HLCA_core_atlas_supervised.md) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and [STACAS](https://github.com/carmonalab/STACAS) integration.

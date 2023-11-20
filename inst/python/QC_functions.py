@@ -33,6 +33,7 @@ def compactness(ad, low_dim_embedding = 'X_pca', MC_label = None, DO_DC = True, 
     if DO_DC:
         dm_res = palantir.utils.run_diffusion_maps(components,  n_components=n_comp)
         emb = palantir.utils.determine_multiscale_space(dm_res, n_eigs=n_comp)
+        emb.index=components.index
     else:
         emb = components
     
@@ -84,6 +85,7 @@ def separation(
     if DO_DC:
         dm_res = palantir.utils.run_diffusion_maps(components, n_components=max(10, n_comp))
         dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=n_comp)
+        dc.index=components.index
     else:
         dc = components
         

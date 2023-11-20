@@ -21,7 +21,7 @@
 #' 
 # mc_separation(sc.obj = CD34_sc, sc.reduction = "pca", cell.membership = CD34_mc@misc$cell_membership)
 # CD34_mc@meta.data["separation"] <- mc_separation(sc.obj = CD34_sc,
-#                                                  sc.reduction = CD34_sc@reductions$pca@cell.embeddings, cell.membership = MetacellToolkit::CD34_mc@misc$cell_membership)
+#                                                  sc.reduction = CD34_sc@reductions$pca@cell.embeddings, cell.membership = MetacellAnalysisToolkit::CD34_mc@misc$cell_membership)
 # head(CD34_mc@meta.data)
 # CD34_mc@meta.data["separation"] <- mc_separation(
 #   sc.obj = CD34_sc,
@@ -35,7 +35,7 @@
 # head(CD34_mc@meta.data)
 
 mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.label = "membership", diffusion.components = TRUE, n.components = 30, n.features = 2000, nth.nbr = 1){
-  reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellToolkit"))
+  reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellAnalysisToolkit"))
   
   if(assertthat::is.string(sc.reduction)){
     # if sc_reduction does not exist compute pca:

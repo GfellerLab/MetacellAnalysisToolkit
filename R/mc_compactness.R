@@ -18,23 +18,23 @@
 #' mc_compactness(cell.membership = CD34_mc@misc$cell_membership, sc.obj = CD34_sc)
 #' @export
 #' 
-# mc_compactness(sc.obj = MetacellToolkit::CD34_sc, sc.reduction = "pca", cell.membership = MetacellToolkit::CD34_mc@misc$cell_membership)
-# CD34_mc@meta.data["compactness"] <- mc_compactness(sc.obj = MetacellToolkit::CD34_sc,
+# mc_compactness(sc.obj = MetacellAnalysisToolkit::CD34_sc, sc.reduction = "pca", cell.membership = MetacellAnalysisToolkit::CD34_mc@misc$cell_membership)
+# CD34_mc@meta.data["compactness"] <- mc_compactness(sc.obj = MetacellAnalysisToolkit::CD34_sc,
 #                                                   sc.reduction = CD34_sc@reductions$pca@cell.embeddings,
-#                                                   cell.membership = MetacellToolkit::CD34_mc@misc$cell_membership)
+#                                                   cell.membership = MetacellAnalysisToolkit::CD34_mc@misc$cell_membership)
 # head(CD34_mc@meta.data)
-# CD34_mc@meta.data["compactness"] <- mc_compactness(sc.obj = MetacellToolkit::CD34_sc,
+# CD34_mc@meta.data["compactness"] <- mc_compactness(sc.obj = MetacellAnalysisToolkit::CD34_sc,
 #                                                   sc.reduction = CD34_sc@reductions$pca@cell.embeddings,
 #                                                   cell.membership = data.frame(
-#                                                     row.names = rownames(MetacellToolkit::CD34_mc@misc$cell_membership),
-#                                                     grouping = MetacellToolkit::CD34_mc@misc$cell_membership$membership
+#                                                     row.names = rownames(MetacellAnalysisToolkit::CD34_mc@misc$cell_membership),
+#                                                     grouping = MetacellAnalysisToolkit::CD34_mc@misc$cell_membership$membership
 #                                                   ),
 #                                                   group.label = "grouping")
 # 
 # head(CD34_mc@meta.data)
 
 mc_compactness <- function(cell.membership, sc.obj, sc.reduction = "pca", group.label = "membership", diffusion.components = TRUE, n.components = 30, n.features = 2000){
-  reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellToolkit"))
+  reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellAnalysisToolkit"))
 
   if(assertthat::is.string(sc.reduction)){
     # if sc_reduction does not exist compute pca:
