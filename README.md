@@ -44,15 +44,14 @@ MCAT takes as input/output either an Anndata .h5ad objects or Seurat .rds object
 
 ### 2.1 CD34+ scRNA-seq dataset (6,900 cells) from Dana's Peer lab (.h5ad file).
 
-    mkdir data/
-    wget https://dp-lab-data-public.s3.amazonaws.com/SEACells-multiome/cd34_multiome_rna.h5ad -O data/cd34_multiome_rna.h5ad
+    wget https://dp-lab-data-public.s3.amazonaws.com/SEACells-multiome/cd34_multiome_rna.h5ad -O get_data/cd34_multiome_rna.h5ad
 
 ### 2.2 PBMC scRNA-seq (6,900 cells) dataset from scanpy datasets
 
 Here we use short python and R scripts to get a .h5ad and a .rds object
 
-    python data/get_PBMC_dataset.py
-    Rscript data/get_PBMC_rds.R
+    python get_data/get_PBMC_dataset.py
+    Rscript get_data/get_PBMC_rds.R
 
 ## 3. Usage
 
