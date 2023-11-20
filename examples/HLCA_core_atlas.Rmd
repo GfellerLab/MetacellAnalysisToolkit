@@ -55,7 +55,7 @@ First we need to specify that we will work with the MetacellAnalysisToolkit cond
 library(reticulate)
 conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
 
-use_condaenv(conda_env)
+Sys.setenv(RETICULATE_PYTHON = conda_env)
 ```
 
 ## Splitting atlas by datasets
@@ -190,6 +190,12 @@ Here we will use the standard Seurat_v4 batch correction [workflow](https://sati
 This should take less than 5 minutes.
 
 ```{r results = FALSE, message=FALSE, warning=FALSE}
+
+n.metacells <- sapply(metacell.objs,FUN = function(x){ncol(x)})
+names(n.metacells) <- datasets
+ref.names <- sort(n.metacells,decreasing = T)[1:5]
+ref.index <- which(datasets %in% names(ref.names))
+
 # normalize each dataset 
 metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
   DefaultAssay(x) <- "RNA";
@@ -208,7 +214,7 @@ metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
 anchors <- FindIntegrationAnchors(object.list = metacell.objs, 
                                        anchor.features = features, 
                                        reduction = "rpca",
-                                       reference = c(1,2,5,9,11), # the 5 biggest datasets (in term of metacell number) are used as reference
+                                       reference = ref.index, # the 5 biggest datasets (in term of metacell number) are used as reference
                                        dims = 1:30)
 
 remove(metacell.objs) # We don't need the object list anymore
@@ -280,26 +286,26 @@ UMAPPlot(combined.mc,label=T) + NoLegend()
 
 ### Differently expressed gene (DEG) analysis.
 
-Now let's found the markers of the cluster 19 we've just identified.
+Now let's found the markers of the cluster 22 we've just identified.
 
 ```{r}
 DefaultAssay(combined.mc) <- "RNA"
-markers18 <- FindMarkers(combined.mc,ident.1 = 18,only.pos = T)
-head(markers18)
+markers22 <- FindMarkers(combined.mc,ident.1 = 22,only.pos = T)
+head(markers22)
 ```
 
 This cluster clearly present a B cell signature with marker genes such as CD19 and PAX5
 
 ```{r}
 genes <-c("CD19","PAX5") # knwon mast cells markers 
-markers18[genes,]
+markers22[genes,]
 VlnPlot(combined.mc,genes,ncol = 1)
 ```
 
 By looking at the metacell annotation (assigned from the original single-cell metadata by MCAT), we can verify that we correctly retrieved the B cell lineage cluster
 
 ```{r fig.height=5,fig.width=12}
-DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
+DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 22],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 ```
 
 ### Cell type abundances analyses.
