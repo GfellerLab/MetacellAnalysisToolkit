@@ -191,7 +191,7 @@ p_finest_unsup + p_finest
 
 Let's first do a standard dimensionality reduction without batch correction.
 
-```{r fig.height=6, fig.width=14 results = FALSE, message=FALSE, warning=FALSE}
+```{r fig.height=6, fig.width=14, results = FALSE, message=FALSE, warning=FALSE}
 DefaultAssay(unintegrated.mc) <- "RNA"
 unintegrated.mc <- NormalizeData(unintegrated.mc)
 unintegrated.mc <- FindVariableFeatures(unintegrated.mc)
