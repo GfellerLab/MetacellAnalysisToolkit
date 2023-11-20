@@ -104,7 +104,7 @@ if(is.null(opt$cores)){
 } 
 
 if (!opt$isNorm) {
-  print(cat("Normalize data..."))
+  cat("Normalize data...")
   sobj <- Seurat::NormalizeData(sobj,verbose = F)
 }
 
@@ -112,7 +112,7 @@ fields <- sapply(X = colnames(sobj@meta.data) ,
                  FUN = function(X) {is.character(sobj[[X]][,1]) | is.factor(sobj[[X]][,1])})
 fields <- names(fields[which(fields)])
 
-cat("Identify Metacells...")
+cat("Identify Metacells...\n")
 
 
 if (opt$cores > 1 & !is.null(opt$annotations)) {
@@ -141,7 +141,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     
     
-    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell..."))
+    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
     
     SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                      n.pc = n.pc,
@@ -173,13 +173,13 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   }
   
   if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-    cat("Identify Metacells sequentially...")
+    cat("Identify Metacells sequentially...\n")
   }
   
   for (label in unique(sobj[[opt$annotations]][,1])) {
     
     if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-      cat(paste0("Treat ",label, " cells"))
+      cat(paste0("Treat ",label, " cells\n"))
     }
     
     sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
@@ -254,7 +254,7 @@ if (opt$output != "SC") {
   gc(verbose = F)
   
   
-  cat("Assign metadata to metacells and compute purities...")
+  cat("Assign metadata to metacells and compute purities...\n")
   for (f in fields) {
     
     if (!all(is.na(sobj[[f]][,1]))) {
