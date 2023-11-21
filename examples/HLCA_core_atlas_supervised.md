@@ -137,8 +137,8 @@ the following chunk.
     gc()
 
     ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3083499 164.7    5504718 294.0  5504718 294.0
-    ## Vcells 5756148  44.0   32320600 246.6 36486864 278.4
+    ## Ncells 3083503 164.7    5504718 294.0  5504718 294.0
+    ## Vcells 5756190  44.0   32320632 246.6 36486906 278.4
 
 ## Constructing supervised metacell
 
@@ -284,6 +284,11 @@ original study for more details.
 
     library(STACAS)
 
+    n.metacells <- sapply(metacell.objs,FUN = function(x){ncol(x)})
+    names(n.metacells) <- datasets
+    ref.names <- sort(n.metacells,decreasing = T)[1:5]
+    ref.index <- which(datasets %in% names(ref.names))
+
 
     # normalize and identify variable features for each dataset independently
     metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
@@ -300,7 +305,7 @@ original study for more details.
                               min.sample.size = 80,
                               k.weight = 80, #smallest dataset contains 86 metacells
                               cell.labels = "ann", # Note that by not you can use STACAS in its unsupervised mode
-                              reference = c(1,2,5,9,11), # the 5 biggest datasets are used as reference
+                              reference = ref.index, # the 5 biggest datasets are used as reference
                               dims = 1:30)
 
     remove(metacell.objs) # We don't need the object list anymore
@@ -347,11 +352,11 @@ We can navigate in the different annotation levels.
 
     library(ggplot2)
 
-    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
+    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",cols= color.celltypes)
 
 ![](HLCA_core_atlas_supervised_files/figure-markdown_strict/unnamed-chunk-18-1.png)
 
-    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
+    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes)
 
 ![](HLCA_core_atlas_supervised_files/figure-markdown_strict/unnamed-chunk-18-2.png)
 
