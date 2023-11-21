@@ -90,7 +90,7 @@ reticulate and the MCAT tool).
     library(reticulate)
     conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
 
-    use_condaenv(conda_env)
+    Sys.setenv(RETICULATE_PYTHON = conda_env)
 
 ## Splitting atlas by datasets
 
@@ -256,6 +256,11 @@ details.
 
 This should take less than 5 minutes.
 
+    n.metacells <- sapply(metacell.objs,FUN = function(x){ncol(x)})
+    names(n.metacells) <- datasets
+    ref.names <- sort(n.metacells,decreasing = T)[1:5]
+    ref.index <- which(datasets %in% names(ref.names))
+
     # normalize each dataset 
     metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
       DefaultAssay(x) <- "RNA";
@@ -274,13 +279,13 @@ This should take less than 5 minutes.
     anchors <- FindIntegrationAnchors(object.list = metacell.objs, 
                                            anchor.features = features, 
                                            reduction = "rpca",
-                                           reference = c(1,2,5,9,11), # the 5 biggest datasets (in term of metacell number) are used as reference
+                                           reference = ref.index, # the 5 biggest datasets (in term of metacell number) are used as reference
                                            dims = 1:30)
 
     remove(metacell.objs) # We don't need the object list anymore
     gc()
 
-    combined.mc <- IntegrateData(anchorset = anchors,k.weight = 50) # we have to update the k.weight parameters because the smallest dataset contain less than 100 metacells
+    combined.mc <- IntegrateData(anchorset = anchors,k.weight = 40) # we have to update the k.weight parameters because the smallest dataset contain less than 100 metacells
 
 Check the obtained object.
 
@@ -306,43 +311,43 @@ downstream analysis.
     combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
     combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
 
-    ## 14:43:22 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 13:45:15 UMAP embedding parameters a = 0.9922 b = 1.112
 
-    ## 14:43:22 Read 11706 rows and found 30 numeric columns
+    ## 13:45:15 Read 11706 rows and found 30 numeric columns
 
-    ## 14:43:22 Using Annoy for neighbor search, n_neighbors = 30
+    ## 13:45:15 Using Annoy for neighbor search, n_neighbors = 30
 
-    ## 14:43:22 Building Annoy index with metric = cosine, n_trees = 50
+    ## 13:45:15 Building Annoy index with metric = cosine, n_trees = 50
 
     ## 0%   10   20   30   40   50   60   70   80   90   100%
 
     ## [----|----|----|----|----|----|----|----|----|----|
 
     ## **************************************************|
-    ## 14:43:24 Writing NN index file to temp file /tmp/35284735/RtmpnWEIkG/file3633692c325f
-    ## 14:43:24 Searching Annoy index using 1 thread, search_k = 3000
-    ## 14:43:27 Annoy recall = 100%
-    ## 14:43:27 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 14:43:28 Initializing from normalized Laplacian + noise (using irlba)
-    ## 14:43:29 Commencing optimization for 200 epochs, with 484456 positive edges
-    ## 14:43:35 Optimization finished
+    ## 13:45:17 Writing NN index file to temp file /tmp/35396656/RtmpuO1bzA/file1aba87e699b20
+    ## 13:45:17 Searching Annoy index using 1 thread, search_k = 3000
+    ## 13:45:20 Annoy recall = 100%
+    ## 13:45:20 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 13:45:21 Initializing from normalized Laplacian + noise (using irlba)
+    ## 13:45:22 Commencing optimization for 200 epochs, with 479450 positive edges
+    ## 13:45:27 Optimization finished
 
     combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
-    ## 14:43:35 UMAP embedding parameters a = 0.9922 b = 1.112
-    ## 14:43:35 Read 11706 rows and found 30 numeric columns
-    ## 14:43:35 Using Annoy for neighbor search, n_neighbors = 30
-    ## 14:43:35 Building Annoy index with metric = cosine, n_trees = 50
+    ## 13:45:27 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 13:45:27 Read 11706 rows and found 30 numeric columns
+    ## 13:45:27 Using Annoy for neighbor search, n_neighbors = 30
+    ## 13:45:27 Building Annoy index with metric = cosine, n_trees = 50
     ## 0%   10   20   30   40   50   60   70   80   90   100%
     ## [----|----|----|----|----|----|----|----|----|----|
     ## **************************************************|
-    ## 14:43:36 Writing NN index file to temp file /tmp/35284735/RtmpnWEIkG/file3633694727d392
-    ## 14:43:36 Searching Annoy index using 1 thread, search_k = 3000
-    ## 14:43:39 Annoy recall = 100%
-    ## 14:43:39 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 14:43:40 Initializing from normalized Laplacian + noise (using irlba)
-    ## 14:43:42 Commencing optimization for 200 epochs, with 484456 positive edges
-    ## 14:43:47 Optimization finished
+    ## 13:45:28 Writing NN index file to temp file /tmp/35396656/RtmpuO1bzA/file1aba896f5224
+    ## 13:45:28 Searching Annoy index using 1 thread, search_k = 3000
+    ## 13:45:32 Annoy recall = 100%
+    ## 13:45:32 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 13:45:33 Initializing from normalized Laplacian + noise (using irlba)
+    ## 13:45:33 Commencing optimization for 200 epochs, with 479450 positive edges
+    ## 13:45:39 Optimization finished
 
 Now we can make the plots and visually compare the results with the
 unintegrated analysis.
@@ -396,10 +401,10 @@ We cluster the metacells based on the corrected PCA space by Seurat.
 
 ### Differently expressed gene (DEG) analysis.
 
-Now let’s found the markers of the cluster 19 we’ve just identified.
+Now let’s found the markers of the cluster 23 we’ve just identified.
 
     DefaultAssay(combined.mc) <- "RNA"
-    markers18 <- FindMarkers(combined.mc,ident.1 = 18,only.pos = T)
+    markers23 <- FindMarkers(combined.mc,ident.1 = 23,only.pos = T)
 
     ## For a more efficient implementation of the Wilcoxon Rank Sum Test,
     ## (default method for FindMarkers) please install the limma package
@@ -411,25 +416,25 @@ Now let’s found the markers of the cluster 19 we’ve just identified.
     ## efficient implementation (no further action necessary).
     ## This message will be shown once per session
 
-    head(markers18)
+    head(markers23)
 
-    ##          p_val avg_log2FC pct.1 pct.2 p_val_adj
-    ## TNFRSF17     0  0.9274364 0.762 0.029         0
-    ## TCL1A        0  1.0045973 0.481 0.019         0
-    ## CD79A        0  2.9087361 1.000 0.133         0
-    ## FCRLA        0  0.7458042 0.801 0.018         0
-    ## BLK          0  0.8766954 0.845 0.054         0
-    ## FCRL5        0  0.8790523 0.934 0.020         0
+    ##       p_val avg_log2FC pct.1 pct.2 p_val_adj
+    ## TCL1A     0  1.3939674 0.695 0.020         0
+    ## FCRLA     0  1.0703400 0.962 0.022         0
+    ## BLK       0  1.2192942 0.990 0.058         0
+    ## FCRL5     0  0.7934100 0.895 0.026         0
+    ## PNOC      0  0.5477793 0.924 0.050         0
+    ## PAX5      0  0.6089985 0.886 0.024         0
 
 This cluster clearly present a B cell signature with marker genes such
 as CD19 and PAX5
 
     genes <-c("CD19","PAX5") # knwon mast cells markers 
-    markers18[genes,]
+    markers23[genes,]
 
     ##              p_val avg_log2FC pct.1 pct.2     p_val_adj
-    ## CD19 3.323011e-222  0.7754585 0.812 0.111 9.312405e-218
-    ## PAX5  0.000000e+00  0.3968396 0.630 0.022  0.000000e+00
+    ## CD19 1.599543e-207  1.1037564 0.990 0.114 4.482558e-203
+    ## PAX5  0.000000e+00  0.6089985 0.886 0.024  0.000000e+00
 
     VlnPlot(combined.mc,genes,ncol = 1)
 
@@ -439,7 +444,7 @@ By looking at the metacell annotation (assigned from the original
 single-cell metadata by MCAT), we can verify that we correctly retrieved
 the B cell lineage cluster
 
-    DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 18],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
+    DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 23],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 
 ![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 

@@ -220,7 +220,7 @@ anchors <- FindIntegrationAnchors(object.list = metacell.objs,
 remove(metacell.objs) # We don't need the object list anymore
 gc()
 
-combined.mc <- IntegrateData(anchorset = anchors,k.weight = 50) # we have to update the k.weight parameters because the smallest dataset contain less than 100 metacells
+combined.mc <- IntegrateData(anchorset = anchors,k.weight = 40) # we have to update the k.weight parameters because the smallest dataset contain less than 100 metacells
 ```
 
 Check the obtained object.
@@ -286,26 +286,26 @@ UMAPPlot(combined.mc,label=T) + NoLegend()
 
 ### Differently expressed gene (DEG) analysis.
 
-Now let's found the markers of the cluster 22 we've just identified.
+Now let's found the markers of the cluster 23 we've just identified.
 
 ```{r}
 DefaultAssay(combined.mc) <- "RNA"
-markers22 <- FindMarkers(combined.mc,ident.1 = 22,only.pos = T)
-head(markers22)
+markers23 <- FindMarkers(combined.mc,ident.1 = 23,only.pos = T)
+head(markers23)
 ```
 
 This cluster clearly present a B cell signature with marker genes such as CD19 and PAX5
 
 ```{r}
 genes <-c("CD19","PAX5") # knwon mast cells markers 
-markers22[genes,]
+markers23[genes,]
 VlnPlot(combined.mc,genes,ncol = 1)
 ```
 
 By looking at the metacell annotation (assigned from the original single-cell metadata by MCAT), we can verify that we correctly retrieved the B cell lineage cluster
 
 ```{r fig.height=5,fig.width=12}
-DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 22],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
+DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 23],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
 ```
 
 ### Cell type abundances analyses.
