@@ -91,7 +91,7 @@ MCAT tool.
     library(reticulate)
     conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
 
-    use_condaenv(conda_env)
+    Sys.setenv(RETICULATE_PYTHON = conda_env)
 
 ## Splitting atlas by datasets
 
@@ -137,8 +137,8 @@ the following chunk.
     gc()
 
     ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3084544 164.8    5504727 294.0  5504727 294.0
-    ## Vcells 5758731  44.0   32322984 246.7 36489447 278.4
+    ## Ncells 3083499 164.7    5504718 294.0  5504718 294.0
+    ## Vcells 5756148  44.0   32320600 246.6 36486864 278.4
 
 ## Constructing supervised metacell
 
@@ -347,11 +347,11 @@ We can navigate in the different annotation levels.
 
     library(ggplot2)
 
-    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",cols= color.celltypes)
+    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 
 ![](HLCA_core_atlas_supervised_files/figure-markdown_strict/unnamed-chunk-18-1.png)
 
-    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes)
+    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 
 ![](HLCA_core_atlas_supervised_files/figure-markdown_strict/unnamed-chunk-18-2.png)
 
