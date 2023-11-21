@@ -137,7 +137,7 @@ the following chunk.
     gc()
 
     ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3083503 164.7    5504718 294.0  5504718 294.0
+    ## Ncells 3083503 164.7    5504675 294.0  5504675 294.0
     ## Vcells 5756190  44.0   32320632 246.6 36486906 278.4
 
 ## Constructing supervised metacell
