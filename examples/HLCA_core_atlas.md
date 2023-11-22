@@ -311,43 +311,43 @@ downstream analysis.
     combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
     combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
 
-    ## 13:45:15 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 15:05:12 UMAP embedding parameters a = 0.9922 b = 1.112
 
-    ## 13:45:15 Read 11706 rows and found 30 numeric columns
+    ## 15:05:12 Read 11706 rows and found 30 numeric columns
 
-    ## 13:45:15 Using Annoy for neighbor search, n_neighbors = 30
+    ## 15:05:12 Using Annoy for neighbor search, n_neighbors = 30
 
-    ## 13:45:15 Building Annoy index with metric = cosine, n_trees = 50
+    ## 15:05:12 Building Annoy index with metric = cosine, n_trees = 50
 
     ## 0%   10   20   30   40   50   60   70   80   90   100%
 
     ## [----|----|----|----|----|----|----|----|----|----|
 
     ## **************************************************|
-    ## 13:45:17 Writing NN index file to temp file /tmp/35396656/RtmpuO1bzA/file1aba87e699b20
-    ## 13:45:17 Searching Annoy index using 1 thread, search_k = 3000
-    ## 13:45:20 Annoy recall = 100%
-    ## 13:45:20 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 13:45:21 Initializing from normalized Laplacian + noise (using irlba)
-    ## 13:45:22 Commencing optimization for 200 epochs, with 479450 positive edges
-    ## 13:45:27 Optimization finished
+    ## 15:05:13 Writing NN index file to temp file /tmp/35418471/RtmpEK6kr0/file539d15bd5e511
+    ## 15:05:13 Searching Annoy index using 1 thread, search_k = 3000
+    ## 15:05:16 Annoy recall = 100%
+    ## 15:05:16 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 15:05:17 Initializing from normalized Laplacian + noise (using irlba)
+    ## 15:05:18 Commencing optimization for 200 epochs, with 479450 positive edges
+    ## 15:05:23 Optimization finished
 
     combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
-    ## 13:45:27 UMAP embedding parameters a = 0.9922 b = 1.112
-    ## 13:45:27 Read 11706 rows and found 30 numeric columns
-    ## 13:45:27 Using Annoy for neighbor search, n_neighbors = 30
-    ## 13:45:27 Building Annoy index with metric = cosine, n_trees = 50
+    ## 15:05:24 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 15:05:24 Read 11706 rows and found 30 numeric columns
+    ## 15:05:24 Using Annoy for neighbor search, n_neighbors = 30
+    ## 15:05:24 Building Annoy index with metric = cosine, n_trees = 50
     ## 0%   10   20   30   40   50   60   70   80   90   100%
     ## [----|----|----|----|----|----|----|----|----|----|
     ## **************************************************|
-    ## 13:45:28 Writing NN index file to temp file /tmp/35396656/RtmpuO1bzA/file1aba896f5224
-    ## 13:45:28 Searching Annoy index using 1 thread, search_k = 3000
-    ## 13:45:32 Annoy recall = 100%
-    ## 13:45:32 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 13:45:33 Initializing from normalized Laplacian + noise (using irlba)
-    ## 13:45:33 Commencing optimization for 200 epochs, with 479450 positive edges
-    ## 13:45:39 Optimization finished
+    ## 15:05:25 Writing NN index file to temp file /tmp/35418471/RtmpEK6kr0/file539d1623d915b
+    ## 15:05:25 Searching Annoy index using 1 thread, search_k = 3000
+    ## 15:05:28 Annoy recall = 100%
+    ## 15:05:28 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 15:05:29 Initializing from normalized Laplacian + noise (using irlba)
+    ## 15:05:30 Commencing optimization for 200 epochs, with 479450 positive edges
+    ## 15:05:36 Optimization finished
 
 Now we can make the plots and visually compare the results with the
 unintegrated analysis.
@@ -467,7 +467,7 @@ the smoking status.
     remove(combined.mc.epith)
     gc()
 
-    ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + xlab("% epithelial cells")
+    ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
 
 ![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
 
