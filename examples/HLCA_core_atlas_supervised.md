@@ -137,8 +137,8 @@ the following chunk.
     gc()
 
     ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3083503 164.7    5504675 294.0  5504675 294.0
-    ## Vcells 5756190  44.0   32320632 246.6 36486906 278.4
+    ## Ncells 3083503 164.7    5504718 294.0  5504718 294.0
+    ## Vcells 5756193  44.0   32320616 246.6 36486909 278.4
 
 ## Constructing supervised metacell
 
@@ -352,11 +352,11 @@ We can navigate in the different annotation levels.
 
     library(ggplot2)
 
-    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",cols= color.celltypes)
+    DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 
 ![](HLCA_core_atlas_supervised_files/figure-markdown_strict/unnamed-chunk-18-1.png)
 
-    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes)
+    DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 
 ![](HLCA_core_atlas_supervised_files/figure-markdown_strict/unnamed-chunk-18-2.png)
 
@@ -462,8 +462,8 @@ integration workflow should be preferred.
 
 To be noted that we used an intermediary level of annotation to
 supervise our analysis, using a finer level for this data would have
-resulted in a longer time for metacell building. PLus, we would have
-obtained to few metacells per cell type in the different sample to be
+resulted in a longer time for metacell building. Plus, we would have
+obtained to few metacells per cell type in the different samples to be
 able to make an efficient supervised batch correction with STACAS.
 
 To be more precise at the cost of computational efficiency one could
@@ -471,8 +471,8 @@ also try to reduce the graining level of the analysis (using a graining
 level of 20 for instance),
 
 To conclude, keep in mind that in one hand, for certain analysis such as
-rare cell type analysis, we will never achieve the same level of
-sensitivity with metacells compared to single-cells. On the other hand,
-you certainly won’t be able to analyze so many single-cells so easily,
-and you may not need extremely fine cell-type resolution for many
-analyses.
+very rare cell type analysis, we will struggle to achieve the same level
+of sensitivity with metacells compared to single-cells. On the other
+hand, you certainly won’t be able to analyze so many single-cells so
+easily, and you may not need extremely fine cell-type resolution for
+many analyses.
