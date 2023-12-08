@@ -86,7 +86,8 @@ if (endsWith(x = opt$input,suffix = ".h5ad")) {
     colnames(normMatrix) <- adata$obs_names
     rownames(normMatrix) <- adata$var_names
     sobj <- Seurat::CreateSeuratObject(counts = normMatrix,meta.data = adata$obs)
-    sobj@assays$RNA@data <- sobj@assays$RNA@counts # countMatrix will be use for aggregation after metacell identification
+    sobj@assays$RNA@layers$data <- sobj@assays$RNA@layers$counts # countMatrix will be use for aggregation after metacell identification
+    #sobj <- SetAssayData(sobj,layer = "data",new.data = GetAssayData(sobj,assay = "RNA",layer = "counts"),assay = "RNA")
     remove(normMatrix)
   }
   remove(adata)
@@ -136,18 +137,20 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     
     if (ncol(sobj.label)>4) { 
-    
+    print(ncol(sobj.label))
+    sobj.label <- sobj.label[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) > 2),]  
     sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
-    
+    genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) <= 2)]
     
     
     cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
     
-    SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
+    
+    SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,layer = "data"),  # normalized gene expression matrix 
                                      n.pc = n.pc,
                                      k.knn = k.knn, # number of nearest neighbors to build kNN network
                                      gamma = targetGamma, # graining level
-                                     genes.use = Seurat::VariableFeatures(sobj.label))
+                                     genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
   } else {
     cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
     membership <- c(rep(1,ncol(sobj.label)))
@@ -183,6 +186,8 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     }
     
     sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
+    sobj.label <- sobj.label[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) > 2),]
+    
     
     # adapt parameters regarding number of single cells (occurs mainly when an annotation is given)
     if (is.null(opt$minMetacells)) {
@@ -199,7 +204,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     if (ncol(sobj.label)>4) { 
     
     sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
-    
+    genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) <= 2)]
     
     fields <- sapply(X = colnames(sobj.label@meta.data) , 
                      FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
@@ -207,17 +212,18 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
     if (!exists("normMatrix")) {
-      SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
+      SC.label <- SuperCell::SCimplify(Seurat::GetAssayData(sobj.label,layer = "data"),  # normalized gene expression matrix 
                                        n.pc = n.pc,
                                        k.knn = k.knn, # number of nearest neighbors to build kNN network
                                        gamma = targetGamma, # graining level
-                                       genes.use = Seurat::VariableFeatures(sobj.label))
+                                       genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
     } else {
       SC.label <- SuperCell::SCimplify(normMatrix,  # normalized gene expression matrix in case of normalized anndata object as input
                                        n.pc = n.pc,
                                        k.knn = k.knn, # number of nearest neighbors to build kNN network
                                        gamma = targetGamma, # graining level
-                                       genes.use = Seurat::VariableFeatures(sobj.label))
+                                       genes.use = Seurat::VariableFeatures(sobj.label),
+                                       genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
       remove(normMatrix)
       gc(verbose = F)
     }
@@ -250,7 +256,9 @@ if (opt$output != "SC") {
                                         return.seurat = T,
                                         group.by = "Metacell",
                                         slot = "counts", verbose  = F)
-  sobjMC@assays$RNA@data <- sobjMC@assays$RNA@counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
+  sobjMC@assays$RNA@layers$data <- sobjMC@assays$RNA@layers$counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
+  #sobjMC <- Seurat::SetAssayData(sobjMC,layer = "data",new.data = Seurat::GetAssayData(sobjMC,assay = "RNA",layer = "counts"),assay = "RNA")
+  rownames(sobjMC@meta.data) <- paste0(1:nrow(sobjMC@meta.data))
   gc(verbose = F)
   
   
@@ -278,7 +286,7 @@ if (opt$output != "SC") {
   
   
   if (opt$output == "adata") {
-    adataMC <- anndata::AnnData(X = Matrix::t(Seurat::GetAssayData(object = sobjMC,slot = "counts")),
+    adataMC <- anndata::AnnData(X = Matrix::t(Seurat::GetAssayData(object = sobjMC,layer = "counts")),
                                 obs = sobjMC@meta.data,
                                 uns =  list(cell_membership = membershipDF))
     anndata::write_h5ad(anndata = adataMC,filename = paste0(opt$outdir,"/mc_adata.h5ad"))

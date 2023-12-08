@@ -20,17 +20,19 @@ mc_INV <- function(sc.obj,
                    group.label = "membership"){
   reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellAnalysisToolkit"))
   
-  if(identical(sc.obj[[assay]]@counts@x, sc.obj[[assay]]@data@x)){
+  if(identical(sc.obj@assays[["RNA"]]@layers[["counts"]]@x, sc.obj@assays[["RNA"]]@layers[["data"]]@x)){
     message("Counts and data slots are identical.")
     message("Normalizing data ...")
     sc.obj <- Seurat::NormalizeData(sc.obj, normalization.method = "LogNormalize")
   } 
   
-  # create single-cell anndata to compute INV using the python function
+  #create single-cell anndata to compute INV using the python function
   sc_ad <- anndata::AnnData(
-    X = Matrix::t(Seurat::GetAssayData(sc.obj, slot = "data")),
-    obs = cell.membership
+   X = Matrix::t(sc.obj@assays[["RNA"]]@layers[["data"]]),
+   obs = cell.membership
   )
+  
+  
 
   # compute separation
   message("Computing INV ...")

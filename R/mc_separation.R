@@ -59,7 +59,7 @@ mc_separation <- function(cell.membership, sc.obj, sc.reduction = "pca", group.l
   
   # create single-cell anndata to compute separation using the python function
   sc_ad <- anndata::AnnData(
-    X = Matrix::t(Seurat::GetAssayData(sc.obj, slot = "counts")),
+    X = Matrix::t(Seurat::GetAssayData(sc.obj, layer = "counts")),
     obs = cell.membership,
     obsm = list(sc_reduction =  sc.reduction)
   )
