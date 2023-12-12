@@ -251,14 +251,20 @@ if (opt$output != "SC") {
     gc(verbose = F)
   }
   
+  print(head(SC$membership))
+  membershipNames <- names(SC$membership)
+  SC$membership <- paste0("mc",SC$membership)
+  print(head(SC$membership))
+  names(SC$membership) <- membershipNames
+  print(head(SC$membership))
   sobj$Metacell <- SC$membership
   sobjMC <- Seurat::AggregateExpression(sobj,
                                         return.seurat = T,
                                         group.by = "Metacell",
-                                        slot = "counts", verbose  = F)
-  sobjMC@assays$RNA@layers$data <- sobjMC@assays$RNA@layers$counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
+                                        verbose  = F)
+  #sobjMC@assays$RNA@layers$data <- sobjMC@assays$RNA@layers$counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
   #sobjMC <- Seurat::SetAssayData(sobjMC,layer = "data",new.data = Seurat::GetAssayData(sobjMC,assay = "RNA",layer = "counts"),assay = "RNA")
-  rownames(sobjMC@meta.data) <- paste0(1:nrow(sobjMC@meta.data))
+  rownames(sobjMC@meta.data) <- colnames(sobjMC)
   gc(verbose = F)
   
   
