@@ -138,7 +138,6 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     if (ncol(sobj.label)>4) { 
     print(ncol(sobj.label))
-    sobj.label <- sobj.label[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) > 2),]  
     sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
     genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) <= 2)]
     
@@ -186,7 +185,6 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     }
     
     sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
-    sobj.label <- sobj.label[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) > 2),]
     
     
     # adapt parameters regarding number of single cells (occurs mainly when an annotation is given)
