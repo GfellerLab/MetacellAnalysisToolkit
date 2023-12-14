@@ -28,6 +28,9 @@ library(anndata)
 library(SuperCell)
 library(ggplot2)
 
+if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); print("you are using seurat v5 with assay option v4")}
+
+
 color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
                       '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
                       '#9FA3A8', '#E0D4CA', '#5F3D69', '#58A4C3', "#b20000",'#E4C755', '#F7F398',
@@ -139,6 +142,7 @@ metacell.objs <- lapply(X = metacell.files, function(X){
   colnames(countMatrix) <- adata$obs_names
   rownames(countMatrix) <- adata$var_names
   sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+  if(packageVersion("Seurat") >= 5) {sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay")}
   sobj <- RenameCells(sobj, add.cell.id = unique(sobj$sample)) # we give unique name to metacells
   return(sobj)
 })

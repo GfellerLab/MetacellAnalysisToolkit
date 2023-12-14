@@ -56,7 +56,7 @@ if (is.null(opt$isNorm)) {
 
 print(opt)
 
-if(!is.null(opt$cores) & !is.null(opt$annotations)){
+if((!is.null(opt$cores) & opt$cores> 1) & !is.null(opt$annotations)){
   
   library(doParallel)
   library(parallel)
@@ -137,26 +137,26 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     
     if (ncol(sobj.label)>4) { 
-    
-    sobj.label <- FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
-    
-    
-    
-    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
-    
-    SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
-                                     n.pc = n.pc,
-                                     k.knn = k.knn, # number of nearest neighbors to build kNN network
-                                     gamma = targetGamma, # graining level
-                                     genes.use = VariableFeatures(sobj.label))
-  } else {
-    cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
-    membership <- c(rep(1,ncol(sobj.label)))
-    names(membership) <- colnames(sobj.label)
-    SC.label <- list("N.SC" = 1,
-                     "membership" = membership,
-                     "supercell_size" = c(ncol(sobj.label)))
-  }
+      
+      sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
+      genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)] 
+      
+      print(length(Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude]))
+      cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
+      
+      SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
+                                       n.pc = n.pc,
+                                       k.knn = k.knn, # number of nearest neighbors to build kNN network
+                                       gamma = targetGamma, # graining level
+                                       genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
+    } else {
+      cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
+      membership <- c(rep(1,ncol(sobj.label)))
+      names(membership) <- colnames(sobj.label)
+      SC.label <- list("N.SC" = 1,
+                       "membership" = membership,
+                       "supercell_size" = c(ncol(sobj.label)))
+    }
     
     #SCs[[label]] <- SC.label
   }
@@ -166,7 +166,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   
 } else {
   
-
+  
   
   SCs <- list()
   if (is.null(opt$annotations)) {
@@ -198,30 +198,24 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     targetGamma <- min(ncol(sobj.label)/minMetacells,opt$gamma)
     
     if (ncol(sobj.label)>4) { 
-    
-    sobj.label <- FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
-    
-    
-    fields <- sapply(X = colnames(sobj.label@meta.data) , 
-                     FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
-    fields <- names(fields[which(fields)])
-    
-    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
-    if (!exists("normMatrix")) {
+      
+      sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
+      genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)]
+      
+      print(length(Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude]))
+      
+      
+      fields <- sapply(X = colnames(sobj.label@meta.data) , 
+                       FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
+      fields <- names(fields[which(fields)])
+      
+      cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
       SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                        n.pc = n.pc,
                                        k.knn = k.knn, # number of nearest neighbors to build kNN network
                                        gamma = targetGamma, # graining level
-                                       genes.use = VariableFeatures(sobj.label))
-    } else {
-      SC.label <- SuperCell::SCimplify(normMatrix,  # normalized gene expression matrix in case of normalized anndata object as input
-                                       n.pc = n.pc,
-                                       k.knn = k.knn, # number of nearest neighbors to build kNN network
-                                       gamma = targetGamma, # graining level
-                                       genes.use = VariableFeatures(sobj.label))
-      remove(normMatrix)
+                                       genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
       gc(verbose = F)
-    }
     } else {
       cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
       membership <- c(rep(1,ncol(sobj.label)))
@@ -246,21 +240,27 @@ if (opt$output != "SC") {
     gc(verbose = F)
   }
   
-  print(options("Seurat.object.assay.version"))
-  
+  membershipNames <- names(SC$membership)
+  SC$membership <- paste0("mc",SC$membership)
+  names(SC$membership) <- membershipNames
   sobj$Metacell <- SC$membership
+  
   if (packageVersion("Seurat") < 5) {
-  sobjMC <- AggregateExpression(sobj,
-                                        return.seurat = T,
-                                        group.by = "Metacell",
-                                        slot = "counts", 
-                                        verbose  = F)
-  sobjMC@assays$RNA@data <- sobjMC@assays$RNA@counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
-  } else {
     sobjMC <- AggregateExpression(sobj,
                                   return.seurat = T,
                                   group.by = "Metacell",
+                                  slot = "counts", 
                                   verbose  = F)
+    sobjMC@assays$RNA@data <- sobjMC@assays$RNA@counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
+  } else {
+    sobjMC <- Seurat::AggregateExpression(sobj,
+                                          return.seurat = T,
+                                          group.by = "Metacell",
+                                          verbose  = F)  #sobjMC@assays$RNA@layers$data <- sobjMC@assays$RNA@layers$counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
+    #sobjMC <- Seurat::SetAssayData(sobjMC,layer = "data",new.data = Seurat::GetAssayData(sobjMC,assay = "RNA",layer = "counts"),assay = "RNA")
+    rownames(sobjMC@meta.data) <- colnames(sobjMC)
+    
+    
     sobjMC[["RNA"]] <- as(object = sobjMC[["RNA"]], Class = "Assay")
   }
   gc(verbose = F)
