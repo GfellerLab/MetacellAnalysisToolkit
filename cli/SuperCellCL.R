@@ -2,7 +2,7 @@ library(Seurat)
 library(getopt)
 #library(doParallel)
 # library(SuperCell)
-if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); print("you are using seurat v5 with assay option v4")}
+if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); message("you are using seurat v5 with assay option v4")}
 
 spec = matrix(c(
   'help',        'h', 0, "logical",   "Help about the program",
@@ -120,8 +120,6 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   
   SCs <- foreach::foreach(sobj.label = SplitObject(sobj,split.by = opt$annotations)) %dopar% {
     
-    #print(paste0("Treat ",label, " cells"))
-    #sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
     
     # adapt parameters regarding number of single cells (occurs mainly when an annotation is given)
     if (is.null(opt$minMetacells)) {
@@ -141,8 +139,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
       sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
       genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)] 
       
-      print(length(Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude]))
-      cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
+      message(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
       
       SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                        n.pc = n.pc,
@@ -150,7 +147,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
                                        gamma = targetGamma, # graining level
                                        genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
     } else {
-      cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
+      message("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
       membership <- c(rep(1,ncol(sobj.label)))
       names(membership) <- colnames(sobj.label)
       SC.label <- list("N.SC" = 1,
@@ -174,13 +171,13 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   }
   
   if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-    cat("Identify Metacells sequentially...\n")
+    message("Identify Metacells sequentially...\n")
   }
   
   for (label in unique(sobj[[opt$annotations]][,1])) {
     
     if(length(unique(sobj[[opt$annotations]][,1]))> 1) {
-      cat(paste0("Treat ",label, " cells\n"))
+      message(paste0("Treat ",label, " cells\n"))
     }
     
     sobj.label <- sobj[,sobj[[opt$annotations]][,1] == label]
@@ -202,14 +199,12 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
       sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
       genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)]
       
-      print(length(Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude]))
-      
       
       fields <- sapply(X = colnames(sobj.label@meta.data) , 
                        FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
       fields <- names(fields[which(fields)])
       
-      cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
+      message(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
       SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
                                        n.pc = n.pc,
                                        k.knn = k.knn, # number of nearest neighbors to build kNN network
@@ -217,7 +212,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
                                        genes.use = Seurat::VariableFeatures(sobj.label)[ !Seurat::VariableFeatures(sobj.label) %in% genes_exclude])
       gc(verbose = F)
     } else {
-      cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
+      message("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
       membership <- c(rep(1,ncol(sobj.label)))
       names(membership) <- colnames(sobj.label)
       SC.label <- list("N.SC" = 1,
