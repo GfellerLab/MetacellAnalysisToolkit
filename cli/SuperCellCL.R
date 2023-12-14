@@ -53,6 +53,10 @@ if (is.null(opt$isNorm)) {
   opt$isNorm <- FALSE
 }
 
+if(is.null(opt$cores)){
+  opt$cores = 1
+} 
+
 
 print(opt)
 
@@ -96,13 +100,6 @@ if (endsWith(x = opt$input,suffix = ".h5ad")) {
 } else {
   sobj <- readRDS(opt$input)
 }
-
-
-
-
-if(is.null(opt$cores)){
-  opt$cores = 1
-} 
 
 if (!opt$isNorm) {
   cat("Normalize data...")
