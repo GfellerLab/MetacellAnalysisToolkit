@@ -1,6 +1,6 @@
-# MetacellAnalysisToolkit (MCAT)
+# MetacellAnalysisToolkit (MATK)
 
-Toolkit for metacell analysis. It consists of the `MCAT` command line tool to easily identify metacells with either [SEACells](https://github.com/dpeerlab/SEACells), [SuperCell](https://github.com/GfellerLab/SuperCell) or [MetaCell2](https://github.com/tanaylab/metacells/tree/master) with a joined R package for metacell quality control and visualization.
+Toolkit for metacell analysis. It consists of the `MATK` command line tool to easily identify metacells with either [SEACells](https://github.com/dpeerlab/SEACells), [SuperCell](https://github.com/GfellerLab/SuperCell) or [MetaCell2](https://github.com/tanaylab/metacells/tree/master) with a joined R package for metacell quality control and visualization.
 
 ## 1. Installation
 
@@ -25,14 +25,14 @@ Then you have to install in this environment additional required R packages not 
 
 ### 1.4 Make command line scripts executable
 
-    chmod a+x cli/MCAT
+    chmod a+x cli/MATK
     chmod a+x cli/SuperCellCL.R 
     chmod a+x cli/SEACellsCL.py
     chmod a+x cli/MetaCell2CL.py
 
 ### 1.5 Configure PATH
 
-If you want, you can finally add the value of the path to the `cli` directory (of this repository) to your PATH environment variable so that you can use the MCAT command line tool directly. On Linux, using bash, You can do this by adding this line to your `~/.bashrc` (or `~/.bash_profile` on macOS):
+If you want, you can finally add the value of the path to the `cli` directory (of this repository) to your PATH environment variable so that you can use the MATK command line tool directly. On Linux, using bash, You can do this by adding this line to your `~/.bashrc` (or `~/.bash_profile` on macOS):
 
     export PATH="/path/to/MetacellToolkitAnalysis/cli/:$PATH"
 
@@ -40,7 +40,7 @@ Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS) after.
 
 ## 2. Download test data
 
-MCAT takes as input/output either an Anndata .h5ad objects or Seurat .rds object.
+MATK takes as input/output either an Anndata .h5ad objects or Seurat .rds object.
 
 ### 2.1 CD34+ scRNA-seq dataset (6,900 cells) from Dana's Peer lab (.h5ad file).
 
@@ -55,12 +55,12 @@ Here we use short python and R scripts to get a .h5ad and a .rds object
 
 ## 3. Usage
 
-Using MCAT tool you can easily identify metacells with either SEACells, SuperCell or MetaCell2 using various common and method-specific options
+Using MATK tool you can easily identify metacells with either SEACells, SuperCell or MetaCell2 using various common and method-specific options
 
 ### 3.1 Print help
 
-    $MCAT -h
-    usage: /path/to/MetacellToolkitAnalysis/cli/MCAT options
+    $MATK -h
+    usage: /path/to/MetacellToolkitAnalysis/cli/MATK options
 
     Constructing metacell from single cell data with SEACells (0.3.3) 'MetaCell2 (0.9.0) or SuperCell (1.0)
     Expect a filtered (low quality cells removed) Seurat or Anndata object  
@@ -107,19 +107,19 @@ Using MCAT tool you can easily identify metacells with either SEACells, SuperCel
 
 Here we identify metacells from the h5ad file of CD34+ cells using SuperCell and save the results in a h5ad file. We use 50 principal components, 30 neighbors for the knn and a graining level of 75.
 
-    MCAT -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MCAT_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
 
 ### 3.2 Metacell identification on PBMCs using SEACells
 
 Here we identify metacells from the rds file of PBMCs using SEACells and save the results in a rds file. We use here a graining level of 50.
 
-    MCAT -t SEACells -i data/pbmc.rds -o MCAT_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 50 -s seurat
+    MATK -t SEACells -i data/pbmc.rds -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 50 -s seurat
 
 ### 3.3 Metacell identification on PBMCs using MetaCell
 
 Here we identify metacells from the rds file of PBMCs using MetaCell (v2 python version) and save the results in a h5ad file.
 
-    MCAT -t MetaCell -i data/pbmc.rds -o MCAT_output/MetaCell/pbmc/ -g 50 -s seurat
+    MATK -t MetaCell -i data/pbmc.rds -o MATK_output/MetaCell/pbmc/ -g 50 -s seurat
 
 MetaCell does not use a knn graph from PCA based the highly variable genes but has its own parameters (including different gene lists) you can set using a yaml config file and the `-y` argument. You have an example of a such yaml file [here]((/cli/config/MetaCell2_config.yml)) containing the default settings of MetaCell proposed by the authors.
 
