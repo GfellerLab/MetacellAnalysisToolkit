@@ -137,7 +137,11 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     if (ncol(sobj.label)>4) { 
       
       sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
-      genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)] 
+      if(packageVersion("Seurat") >= 5) {
+        genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)] 
+      } else {
+        genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, slot = "data") != 0) < 2)] 
+      }
       
       message(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
       
@@ -197,7 +201,12 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     if (ncol(sobj.label)>4) { 
       
       sobj.label <- Seurat::FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
-      genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)]
+      
+      if(packageVersion("Seurat") >= 5) {
+        genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, layer = "data") != 0) < 2)] 
+      } else {
+        genes_exclude <- rownames(sobj.label)[which(Matrix::rowSums(Seurat::GetAssayData(sobj.label, slot = "data") != 0) < 2)] 
+      }
       
       
       fields <- sapply(X = colnames(sobj.label@meta.data) , 
