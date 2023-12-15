@@ -28,8 +28,11 @@ library(anndata)
 library(SuperCell)
 library(ggplot2)
 
-if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); print("you are using seurat v5 with assay option v4")}
-
+wilcox.test <- "wilcox"
+if(packageVersion("Seurat") >= 5) {
+  options(Seurat.object.assay.version = "v4") 
+  wilcox.test <- "wilcox_limma"
+  print("you are using seurat v5 with assay option v4")}
 
 color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
                       '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
@@ -341,7 +344,7 @@ Using a DEG analysis we can check if we retrieve their markers. MYH11 and CNN1 g
 ```{r fig.height=8,fig.width=12}
 DefaultAssay(combined.mc) <- "RNA"
 Idents(combined.mc) <- "ann"
-markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T, logfc.threshold = 0.25)
+markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T, logfc.threshold = 0.25,test.use =  wilcox.test)
 
 head(markersSmoothMuscle)
 

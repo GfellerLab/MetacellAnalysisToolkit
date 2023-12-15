@@ -26,7 +26,11 @@ library(Seurat)
 library(anndata)
 library(SuperCell)
 library(ggplot2)
-if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); print("you are using seurat v5 with assay option v4")}
+wilcox.test <- "wilcox"
+if(packageVersion("Seurat") >= 5) {
+  options(Seurat.object.assay.version = "v4") 
+  wilcox.test <- "wilcox_limma"
+  print("you are using seurat v5 with assay option v4")}
 
 color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
                       '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
@@ -302,7 +306,8 @@ Now let's found the markers of this cluster.
 ```{r}
 DefaultAssay(combined.mc) <- "RNA"
 
-markersB<- FindMarkers(combined.mc,ident.1 = b.clust,only.pos = T,logfc.threshold = 0.25)
+
+markersB<- FindMarkers(combined.mc,ident.1 = b.clust,only.pos = T,logfc.threshold = 0.25,test.use =  wilcox.test)
 head(markersB)
 ```
 
