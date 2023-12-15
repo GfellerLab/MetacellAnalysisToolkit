@@ -2,7 +2,7 @@ library(Seurat)
 library(getopt)
 #library(doParallel)
 # library(SuperCell)
-if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); message("you are using seurat v5 with assay option v4")}
+if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v3"); message("you are using seurat v5 with assay option v3")}
 
 spec = matrix(c(
   'help',        'h', 0, "logical",   "Help about the program",
@@ -60,15 +60,7 @@ if(is.null(opt$cores)){
 
 print(opt)
 
-if((!is.null(opt$cores) & opt$cores> 1) & !is.null(opt$annotations)){
-  
-  library(doParallel)
-  library(parallel)
-  
-  cluster <- parallel::makeCluster(opt$cores)
-  
-  doParallel::registerDoParallel(cluster)
-}
+
 
 
 dir.create(opt$outdir,recursive = T,showWarnings = F)
@@ -85,12 +77,14 @@ if (endsWith(x = opt$input,suffix = ".h5ad")) {
   rownames(countMatrix) <- adata$var_names
   if (!opt$isNorm) {
     sobj <- CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+    if(packageVersion("Seurat") >= 5) { sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay") }
     remove(countMatrix)
   } else { # we assume norm counts are in .X and raw counts in .raw.X
     normMatrix <-  Matrix::t(adata$X)
     colnames(normMatrix) <- adata$obs_names
     rownames(normMatrix) <- adata$var_names
     sobj <- CreateSeuratObject(counts = normMatrix,meta.data = adata$obs)
+    if(packageVersion("Seurat") >= 5) { sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay") }
     sobj@assays$RNA@data <- sobj@assays$RNA@counts # countMatrix will be use for aggregation after metacell identification
     remove(normMatrix)
   }
@@ -100,6 +94,7 @@ if (endsWith(x = opt$input,suffix = ".h5ad")) {
 } else {
   sobj <- readRDS(opt$input)
 }
+
 
 if (!opt$isNorm) {
   cat("Normalize data...")
@@ -114,7 +109,13 @@ cat("Identify Metacells...\n")
 
 
 if (opt$cores > 1 & !is.null(opt$annotations)) {
+  library(doParallel)
+  library(parallel)
   
+  cluster <- parallel::makeCluster(opt$cores)
+  
+  doParallel::registerDoParallel(cluster)
+  print('do for each')
   SCs <- foreach::foreach(sobj.label = SplitObject(sobj,split.by = opt$annotations)) %dopar% {
     
     
