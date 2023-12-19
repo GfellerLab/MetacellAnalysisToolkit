@@ -57,6 +57,12 @@ running this Rmarkdown.
     library(SuperCell)
     library(ggplot2)
 
+    wilcox.test <- "wilcox"
+    if(packageVersion("Seurat") >= 5) {
+      options(Seurat.object.assay.version = "v4") 
+      wilcox.test <- "wilcox_limma"
+      print("you are using seurat v5 with assay option v4")}
+
     color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
                           '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
                           '#9FA3A8', '#E0D4CA', '#5F3D69', '#58A4C3', "#b20000",'#E4C755', '#F7F398',
@@ -84,9 +90,9 @@ large (5.6 GB).
     #mkdir -p ./HLCA_data
     #curl -o ./HLCA_data/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
 
-First we need to specify that we will work with the MCAT conda
+First we need to specify that we will work with the MATK conda
 environment for the anndata package relying on reticulate and for the
-MCAT tool.
+MATK tool.
 
     library(reticulate)
     conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
@@ -137,8 +143,8 @@ the following chunk.
     gc()
 
     ##           used  (Mb) gc trigger  (Mb) max used  (Mb)
-    ## Ncells 3083503 164.7    5504718 294.0  5504718 294.0
-    ## Vcells 5756193  44.0   32320616 246.6 36486909 278.4
+    ## Ncells 3083518 164.7    5491658 293.3  5491658 293.3
+    ## Vcells 5756289  44.0   31167873 237.8 36487015 278.4
 
 ## Constructing supervised metacell
 
@@ -158,7 +164,7 @@ processing the samples (just remove the `-l`) in a slightly longer time.
 This should take around 30 minutes.
 
     for d in ./HLCA_data/datasets/*;
-    do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
+    do ../cli/MATK -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 12 -n 50 -f 2000 -k 30 -g 50 -s adata
     done
 
 ## Load metacell objects
@@ -176,13 +182,14 @@ benefit from all the functions of this framework.
       colnames(countMatrix) <- adata$obs_names
       rownames(countMatrix) <- adata$var_names
       sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+      if(packageVersion("Seurat") >= 5) {sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay")}
       sobj <- RenameCells(sobj, add.cell.id = unique(sobj$sample)) # we give unique name to metacells
       return(sobj)
     })
 
 ## Merging objects and basic quality control
 
-Given the single-cell metadata, the MCAT tool automatically assign
+Given the single-cell metadata, the MATK tool automatically assign
 annotations to metacells and computes purities for all the categorical
 variables present in the metadata of the input single-cell object.
 
@@ -418,7 +425,7 @@ original study
 
     DefaultAssay(combined.mc) <- "RNA"
     Idents(combined.mc) <- "ann"
-    markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T)
+    markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T, logfc.threshold = 0.25,test.use =  wilcox.test)
 
     ## For a more efficient implementation of the Wilcoxon Rank Sum Test,
     ## (default method for FindMarkers) please install the limma package
@@ -433,19 +440,19 @@ original study
     head(markersSmoothMuscle)
 
     ##               p_val avg_log2FC pct.1 pct.2     p_val_adj
-    ## MYOCD 1.889342e-175  1.3869594 0.758 0.022 5.294693e-171
-    ## ASB5  1.754802e-130  0.2913375 0.303 0.004 4.917658e-126
-    ## NMRK2 1.103717e-129  0.4245135 0.273 0.003 3.093057e-125
-    ## PLN   1.568445e-124  3.1280687 0.879 0.044 4.395411e-120
-    ## HSPB3 7.379856e-121  1.0364463 0.545 0.016 2.068131e-116
-    ## CASQ2 4.376973e-117  1.1063584 0.636 0.023 1.226603e-112
+    ## MYOCD 4.887974e-176  1.3879478 0.758 0.022 1.369806e-171
+    ## NMRK2 1.092465e-129  0.4261093 0.273 0.003 3.061523e-125
+    ## PLN   4.060884e-124  3.1234102 0.879 0.044 1.138022e-119
+    ## HSPB3 7.779955e-121  1.0321301 0.545 0.016 2.180255e-116
+    ## CASQ2 9.830136e-117  1.1149403 0.636 0.023 2.754797e-112
+    ## ASB5  2.233460e-107  0.2845419 0.273 0.004 6.259049e-103
 
     markersSmoothMuscle[c("MYH11","CNN1","FAM83D"),]
 
     ##               p_val avg_log2FC pct.1 pct.2    p_val_adj
-    ## MYH11  2.596787e-32   4.248523 0.970 0.287 7.277236e-28
-    ## CNN1   7.220235e-71   4.623057 0.970 0.106 2.023399e-66
-    ## FAM83D 3.585247e-11   2.186457 0.636 0.285 1.004730e-06
+    ## MYH11  2.456769e-32   4.250920 0.970 0.286 6.884850e-28
+    ## CNN1   6.519506e-71   4.627323 0.970 0.106 1.827026e-66
+    ## FAM83D 3.418146e-11   2.189558 0.636 0.284 9.579012e-07
 
     # Many classical smooth muscles cells are not annotated at the 3rd level of annotation (labelled None)
     VlnPlot(combined.mc,features = c("MYH11","CNN1","FAM83D"),group.by = "ann",ncol = 2,cols = color.celltypes.ann) 

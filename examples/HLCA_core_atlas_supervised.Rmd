@@ -60,7 +60,7 @@ First we need to specify that we will work with the MATK conda environment for t
 
 ```{r}
 library(reticulate)
-conda_env <-  conda_list()[reticulate::conda_list()$name == "MCAT_seurat_v5","python"]
+conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
 
 Sys.setenv(RETICULATE_PYTHON = conda_env)
 ```
