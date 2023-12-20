@@ -23,7 +23,7 @@
 # head(CD34_mc@meta.data)
 
 
-# diffusion_comp <- get_dim_reduc(sc.obj = CD34_sc, n.components = 30)
+# diffusion_comp <- get_diffusion_comp(sc.obj = CD34_sc, dims = 1:30)
 # CD34_mc@meta.data["separation"] <- mc_separation(cell.membership = CD34_mc@misc$cell_membership,
 #                                                    sc.obj = CD34_sc,
 #                                                    sc.reduction = diffusion_comp, nth.nbr = 1)
@@ -77,6 +77,7 @@ mc_separation <- function(cell.membership, sc.obj = NULL, sc.reduction = "pca", 
                                 by = list(metacell = membership_vector),
                                 FUN = mean)
   dist_matrix <- as.matrix(dist(centroids[-1]))
+  rownames(dist_matrix) <- centroids[,1]
   separation_distances <- apply(dist_matrix, 1, function(x) {
     x[order(x)[nth.nbr + 1]]  
   })

@@ -31,8 +31,9 @@ mc_INV <- function(sc.obj,
   membership_vector <- memberships_without_outliers[, group.label]
   names(membership_vector) <- rownames(memberships_without_outliers)
   
+  sc.obj <- sc.obj[,names(membership_vector)]
 
-  INV_val <- stats::aggregate(MatrixExtra::t_shallow(Seurat::GetAssayData(sc.obj, slot = "data")),
+  INV_val <- stats::aggregate(Matrix::t(Seurat::GetAssayData(sc.obj, slot = "data")),
                               by = list(metacell = membership_vector),
                               FUN = function(x) (1 / mean(x)) * var(x))
   rownames(INV_val) <- INV_val[, 1]

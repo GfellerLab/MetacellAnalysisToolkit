@@ -31,9 +31,9 @@
 # 
 # head(CD34_mc@meta.data)
 
-# diffusion_comp <- get_dim_reduc(sc.obj = CD34_sc, n.components = 30)
-# CD34_mc@meta.data["compactaness"] <- mc_compactness(cell.membership = CD34_mc@misc$cell_membership, 
-#                                                     sc.obj = CD34_sc, 
+# diffusion_comp <- get_diffusion_comp(sc.obj = CD34_sc, dims = 1:30)
+# CD34_mc@meta.data["compactaness"] <- mc_compactness(cell.membership = CD34_mc@misc$cell_membership,
+#                                                     sc.obj = CD34_sc,
 #                                                     sc.reduction = diffusion_comp)
 
 # add option to provide a MC seurat and if provided add the compactness to the MC_seurat
