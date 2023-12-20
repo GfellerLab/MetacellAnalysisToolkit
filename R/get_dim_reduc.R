@@ -13,6 +13,7 @@
 #' 
 
 # add option to provide a MC seurat and if provided add the diff components to the MC_seurat
+# change n.components to dims!!!!
 get_dim_reduc <- function(sc.obj, sc.reduction = "pca", n.components = 10){
   
   reticulate::source_python(system.file("python/QC_functions.py", package = "MetacellAnalysisToolkit"))
