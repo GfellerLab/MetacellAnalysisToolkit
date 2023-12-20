@@ -7,7 +7,7 @@
 mc_projection(
   sc.obj,
   mc.obj = NULL,
-  membership = NULL,
+  cell.membership = NULL,
   metacell.label = NULL,
   sc.label = NULL,
   dims = c(1, 2),
@@ -17,26 +17,27 @@ mc_projection(
   alpha = 1,
   pt_size = 0,
   metric = "size",
-  continuous_metric = F,
-  seed = 1234
+  continuous_metric = F
 )
 }
 \arguments{
 \item{sc.obj}{A Seurat object containing the single-cell data from which the metacells were built.}
 
-\item{mc.obj}{A Seurat object containing the metacells data.}
+\item{mc.obj}{A Seurat object containing the metacells data. If NULL, memberhsip should be provided as a data frame.}
 
-\item{membership}{(optional, default is NULL) A vector containing the assignment of each single-cell to a metacell. 
-If *membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
-was generated using the MetacellToolkit command lines (see format of the *MetacellToolkit::CD34_mc* object).}
+\item{cell.membership}{A data frame containing at least one column assigning each single-cell to a metacell (named "membership" if no other label is provided in group.label)
+and single-cell IDs as rownames. 
+If *cell.membership* is NULL, the membership information will be retrieved from the *misc* slot in the *mc.obj* under the assumption that the metacell Seurat object
+was generated using the MetacellAnalysisToolkit command lines (see format of the *MetacellAnalysisToolkit::CD34_mc* object).}
 
-\item{metacell.label}{String corresponding to the name of the metadata column in mc.obj that should be used to color metacells.}
+\item{metacell.label}{String corresponding to the name of the metadata column in mc.obj that should be used to color metacells. 
+If mc.obj is NULL, this parameter will be ignored.}
 
 \item{sc.label}{String corresponding to the name of the metadata column in sc.obj that should be used to color single cells.}
 
 \item{dims}{Numerical vector (of length 2) indicating which components should be used in the 2D visualization of the data.}
 
-\item{sc.reduction}{(optional, default is "umap") A string indicating which low embedding from sc.obj should be used for the 2D visualization of the data
+\item{sc.reduction}{(optional, default is "umap") Either a string indicating which low embedding from sc.obj should be used for the 2D visualization of the data
 or a data frame containing a pre-computed embedding of the single-cell data. If *sc.reduction* is a string which does not correspond to any embedding from sc.obj
 PCA will be performed on the single-cell data and UMAP will be run to obtain the 2D representation.}
 
@@ -48,7 +49,7 @@ PCA will be performed on the single-cell data and UMAP will be run to obtain the
 
 \item{pt_size}{Size the single-cell points}
 
-\item{metric}{Column name of a continuous metric to use either to color the metacells (if continuous_metric is TRUE) or to define metacells sizes (if continuous_metric is TRUE).}
+\item{metric}{Column name of a continuous metric to use either to color the metacells (if continuous_metric is TRUE) or to define metacells sizes (if continuous_metric is FALSE).}
 
 \item{continuous_metric}{Bolean indicating if the metric variable is continuous or not. If TRUE a continuous color scale will be used for the metacell colors.}
 }
@@ -57,7 +58,7 @@ A plot of metacells projected in the single cell space.
 }
 \description{
 \code{mc_projection} 
-This function plots metacells in a single-cell space (pca, umap,..) taking the average coordinates of single cells in each metacell
+This function plots metacells in a single-cell space (pca, umap,..) taking the average coordinates of single cells in each metacell.
 }
 \examples{
 mc_projection(sc.obj = CD34_sc, mc.obj = CD34_mc)

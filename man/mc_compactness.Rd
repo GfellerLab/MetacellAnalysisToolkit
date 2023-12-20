@@ -7,38 +7,33 @@
 mc_compactness(
   cell.membership,
   sc.obj,
-  sc.reduction = "pca",
+  sc.reduction,
   group.label = "membership",
-  diffusion.components = TRUE,
-  n.components = 30,
-  n.features = 2000
+  dims = NULL
 )
 }
 \arguments{
-\item{cell.membership}{A data frame containing at least one column assigning each single-cell to a metacell (or other cell grouping) and 
-single-cell IDs as rownames.}
+\item{cell.membership}{A data frame containing at least one column assigning each single-cell to a metacell (named "membership" if no other label is provided in group.label)
+and single-cell IDs as rownames.}
 
 \item{sc.obj}{A Seurat object containing the single-cell data from which the metacells were built.}
 
 \item{sc.reduction}{(optional, default is "pca") A string indicating which low embedding from sc.obj should be used to compute compactness or
-a data frame containing a pre-computed embedding of the single-cell data. If sc.reduction is a string and sc.reduction is not found in the sc.obj embeddings
-used to run PCA.}
+a data frame containing a pre-computed embedding of the single-cell data.}
 
-\item{group.label}{(optional, default is "membership") A string indicating the column name from *cell.membership* that should be used to compute the compactness metric.}
+\item{group.label}{(optional, default is "membership") A string indicating the column name from *cell.membership* that should be used to compute 
+the compactness metric.}
 
-\item{diffusion.components}{(optional, default is TRUE) A boolean indicating if compactness should be computed on diffusion components computed based on the low dimensionnal embedding provided in *sc.reduction*.}
-
-\item{n.components}{(optional, default is 30) Number of embedding components that should be used to compute the compactness.}
-
-\item{n.features}{(optional, default is 2000) Number of features that should be used to run PCA if sc.reduction is not found.}
+\item{dims}{(optional, default is NULL) Vector indicating the embedding components that should be used to compute the compactness. 
+If NULL, components 1 to max number of components in the embedded space will be used.}
 }
 \value{
-An updated metacell Seurat object with an additional column in the *meta.data* slot containing the compactness of each metacell.
+A vector containing the compactness of each metacell.
 }
 \description{
 \code{mc_compactness} 
-This function computes the compactness of metacells.
+This function computes the compactness of metacells (relies on python functions adapted from https://github.com/dpeerlab/SEACells/blob/main/SEACells/evaluate.py).
 }
 \examples{
-mc_compactness(cell.membership = CD34_mc@misc$cell_membership, sc.obj = CD34_sc)
+mc_compactness(cell.membership = CD34_mc@misc$cell_membership$membership, sc.obj = CD34_sc, sc.reduction = "pca")
 }

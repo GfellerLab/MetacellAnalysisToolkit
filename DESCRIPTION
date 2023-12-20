@@ -35,7 +35,8 @@ Imports:
   RColorBrewer,
   dplyr,
   stats,
-  igraph
+  igraph,
+  MatrixExtra
 Suggests:
   testthat,
   knitr,

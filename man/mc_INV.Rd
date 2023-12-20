@@ -9,8 +9,8 @@ mc_INV(sc.obj, cell.membership, assay = "RNA", group.label = "membership")
 \arguments{
 \item{sc.obj}{A Seurat object containing the single-cell data from which the metacells were built.}
 
-\item{cell.membership}{A data frame containing at least one column assigning each single-cell to a metacell (or other cell grouping) and 
-single-cell IDs as rownames.}
+\item{cell.membership}{A data frame containing at least one column assigning each single-cell to a metacell (named "membership" if no other label is provided in group.label)
+and single-cell IDs as rownames.}
 
 \item{assay}{(optional, default is "RNA") A string indicating the assay from *sc.obj* that should be used to compute the INV metric. 
 Waning: if counts and data slots are identical, the counts data will be normalized using Seurat ("LogNormalize" method) and the normalized data will 
@@ -23,8 +23,8 @@ A vector containing the INV value of each metacell.
 }
 \description{
 \code{mc_INV} 
-This function computes the inner-normalized variance (INV) of metacells.
+This function computes the inner-normalized variance (INV) of metacells (relies on python functions inspired from https://github.com/tanaylab/metacells/blob/master/metacells/tools/quality.py).
 }
 \examples{
-mc_INV(sc.obj = MetacellToolkit::CD34_sc, cell.membership = CD34_mc@misc$cell_membership)
+mc_INV(sc.obj = MetacellAnalysisToolkit::CD34_sc, cell.membership = MetacellAnalysisToolkit::CD34_mc@misc$cell_membership)
 }
