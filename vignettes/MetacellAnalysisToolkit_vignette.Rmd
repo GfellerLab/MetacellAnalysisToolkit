@@ -52,10 +52,13 @@ sc_data <- RunUMAP(sc_data, reduction = "pca", dims = c(1:50), n.neighbors = 15,
 UMAPPlot(sc_data, group.by = "celltype", reduction = "umap")
 ```
 
+We compute these metrics in a diffusion map obtained from the pca.
 ```{r compute_compactness}
 membership_df <- mc_data@misc$cell_membership
-mc_data$compactness <- mc_compactness(cell.membership = membership_df, sc.obj = sc_data,
-                                      sc.reduction = "pca", n.components = 30, diffusion.components = T)
+diffusion_comp <- get_diffusion_comp(sc.obj = sc_data, dims = 1:30)
+mc_data$compactness <- mc_compactness(cell.membership = membership_df,
+                                      sc.obj = sc_data,
+                                      sc.reduction = diffusion_comp)
 qc_boxplot(mc.obj = mc_data, qc.metrics = "compactness")
 qc_boxplot(mc.obj = mc_data, qc.metrics = "compactness", split.by = "celltype")
 ```
@@ -65,7 +68,9 @@ The **separation** of a metacell is the distance to the closest metacell [@SEACe
 The higher the separation value the better.
 
 ```{r compute_separation}
-mc_data$separation <- mc_separation(cell.membership = membership_df, sc.obj = sc_data, sc.reduction = "pca", diffusion.components = T)
+mc_data$separation <- mc_separation(cell.membership = membership_df, 
+                                    sc.obj = sc_data, 
+                                    sc.reduction = diffusion_comp)
 qc_boxplot(mc.obj = mc_data, qc.metrics = "separation")
 qc_boxplot(mc.obj = mc_data, qc.metrics = "separation", split.by = "celltype")
 ```
