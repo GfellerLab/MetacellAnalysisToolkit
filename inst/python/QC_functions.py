@@ -9,7 +9,8 @@ import scipy
 def get_diffusion_map(
     ad,
     low_dim_embedding='X_pca',
-    n_comp = None
+    n_comp = None,
+    n_diff_comp = None
 ):
     components = pd.DataFrame(ad.obsm[low_dim_embedding]).set_index(ad.obs_names)
     
@@ -23,7 +24,7 @@ def get_diffusion_map(
     components = components.iloc[:,:n_comp]
     
     dm_res = palantir.utils.run_diffusion_maps(components, n_components=n_comp)
-    dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=10)
+    dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=n_diff_comp)
     dc.index=components.index
   
     return(dc)
