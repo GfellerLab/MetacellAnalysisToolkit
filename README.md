@@ -23,6 +23,11 @@ Then you have to install in this environment additional required R packages not 
     conda activate MetacellAnalysisToolkit
     Rscript env/install.R
 
+#### Seurat v5 compatibility
+
+This toolkit has been developped under seurat version 4 which is the Seurat version installed with the MetacellAnalysisToolkit environment.
+We recommand using Seurat v4 and this environment to use MATK. However, this toolkit is also compatible with Seurat v5 installed by using the v4 assay [option](https://satijalab.org/seurat/articles/seurat5_essential_commands#create-seurat-or-assay-objects).
+
 ### 1.4 Make command line scripts executable
 
     chmod a+x cli/MATK
