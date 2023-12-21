@@ -37,7 +37,7 @@ around 580,000 cells from 107 individuals distributed in 166 samples.
 
 The aim of this tutorial is to show how you can use metacells to analyze
 a very large dataset using a reasonable amount of time and memory. For
-this we will use here **SuperCell** via the **MCAT** command line tool.
+this we will use here **SuperCell** via the **MATK** command line tool.
 
 Be sure to be in the **MetacellAnalysisToolkit** environment when you
 are running this Rmarkdown.
@@ -56,6 +56,11 @@ are running this Rmarkdown.
     library(anndata)
     library(SuperCell)
     library(ggplot2)
+    wilcox.test <- "wilcox"
+    if(packageVersion("Seurat") >= 5) {
+      options(Seurat.object.assay.version = "v4") 
+      wilcox.test <- "wilcox_limma"
+      print("you are using seurat v5 with assay option v4")}
 
     color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
                           '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
@@ -85,7 +90,7 @@ GB)
 
 First we need to specify that we will work with the
 MetacellAnalysisToolkit conda environment (needed for anndata relying on
-reticulate and the MCAT tool).
+reticulate and the MATK tool).
 
     library(reticulate)
     conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
@@ -131,7 +136,7 @@ dataset.
 
 ## Building metacell
 
-We build metacells with the MCAT command line using SuperCell
+We build metacells with the MATK command line using SuperCell
 (`-t SuperCell`). To facilitate downstream analysis of the donors we
 build metacells for each sample in each dataset (`-a sample`). Here we
 will use 2000 highly variable genes (`-f 2000`) to compute the PCA from
@@ -150,7 +155,7 @@ samples by reducing the number of cores (e.g. `-l 3`) or by sequentially
 processing the samples (just remove the `-l`) in a slightly longer time.
 
     for d in ./HLCA_data/datasets/*;
-    do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
+    do ../cli/MATK -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
     done
 
 ## Loading metacell objects
@@ -166,13 +171,14 @@ benefit from all the functions of this framework.
       colnames(countMatrix) <- adata$obs_names
       rownames(countMatrix) <- adata$var_names
       sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+      if(packageVersion("Seurat") >= 5){sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay")}
       sobj <- RenameCells(sobj, add.cell.id = unique(sobj$sample)) # we give unique name to metacells
       return(sobj)
     })
 
 ## Merging objects and basic quality control
 
-Given the single-cell metadata, the MCAT tool automatically assign
+Given the single-cell metadata, the MATK tool automatically assign
 annotations to metacells and computes purities for all the categorical
 variables present in the metadata of the input single-cell object.
 
@@ -184,6 +190,7 @@ To do so we merge the object together and use the Seurat `VlnPlot`
 function.
 
     unintegrated.mc <- merge(metacell.objs[[1]],metacell.objs[-1])
+
 
     VlnPlot(unintegrated.mc,features = c("size","ann_level_1_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
 
@@ -311,43 +318,43 @@ downstream analysis.
     combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
     combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
 
-    ## 15:05:12 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 14:15:30 UMAP embedding parameters a = 0.9922 b = 1.112
 
-    ## 15:05:12 Read 11706 rows and found 30 numeric columns
+    ## 14:15:30 Read 11706 rows and found 30 numeric columns
 
-    ## 15:05:12 Using Annoy for neighbor search, n_neighbors = 30
+    ## 14:15:30 Using Annoy for neighbor search, n_neighbors = 30
 
-    ## 15:05:12 Building Annoy index with metric = cosine, n_trees = 50
+    ## 14:15:30 Building Annoy index with metric = cosine, n_trees = 50
 
     ## 0%   10   20   30   40   50   60   70   80   90   100%
 
     ## [----|----|----|----|----|----|----|----|----|----|
 
     ## **************************************************|
-    ## 15:05:13 Writing NN index file to temp file /tmp/35418471/RtmpEK6kr0/file539d15bd5e511
-    ## 15:05:13 Searching Annoy index using 1 thread, search_k = 3000
-    ## 15:05:16 Annoy recall = 100%
-    ## 15:05:16 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 15:05:17 Initializing from normalized Laplacian + noise (using irlba)
-    ## 15:05:18 Commencing optimization for 200 epochs, with 479450 positive edges
-    ## 15:05:23 Optimization finished
+    ## 14:15:31 Writing NN index file to temp file /tmp/36193772/RtmpPXbIbY/file3056b790959bc
+    ## 14:15:31 Searching Annoy index using 1 thread, search_k = 3000
+    ## 14:15:34 Annoy recall = 100%
+    ## 14:15:35 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 14:15:35 Initializing from normalized Laplacian + noise (using irlba)
+    ## 14:15:36 Commencing optimization for 200 epochs, with 480248 positive edges
+    ## 14:15:42 Optimization finished
 
     combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
-    ## 15:05:24 UMAP embedding parameters a = 0.9922 b = 1.112
-    ## 15:05:24 Read 11706 rows and found 30 numeric columns
-    ## 15:05:24 Using Annoy for neighbor search, n_neighbors = 30
-    ## 15:05:24 Building Annoy index with metric = cosine, n_trees = 50
+    ## 14:15:42 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 14:15:42 Read 11706 rows and found 30 numeric columns
+    ## 14:15:42 Using Annoy for neighbor search, n_neighbors = 30
+    ## 14:15:42 Building Annoy index with metric = cosine, n_trees = 50
     ## 0%   10   20   30   40   50   60   70   80   90   100%
     ## [----|----|----|----|----|----|----|----|----|----|
     ## **************************************************|
-    ## 15:05:25 Writing NN index file to temp file /tmp/35418471/RtmpEK6kr0/file539d1623d915b
-    ## 15:05:25 Searching Annoy index using 1 thread, search_k = 3000
-    ## 15:05:28 Annoy recall = 100%
-    ## 15:05:28 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 15:05:29 Initializing from normalized Laplacian + noise (using irlba)
-    ## 15:05:30 Commencing optimization for 200 epochs, with 479450 positive edges
-    ## 15:05:36 Optimization finished
+    ## 14:15:43 Writing NN index file to temp file /tmp/36193772/RtmpPXbIbY/file3056b76323819e
+    ## 14:15:43 Searching Annoy index using 1 thread, search_k = 3000
+    ## 14:15:46 Annoy recall = 100%
+    ## 14:15:46 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 14:15:47 Initializing from normalized Laplacian + noise (using irlba)
+    ## 14:15:48 Commencing optimization for 200 epochs, with 480248 positive edges
+    ## 14:15:53 Optimization finished
 
 Now we can make the plots and visually compare the results with the
 unintegrated analysis.
@@ -401,10 +408,20 @@ We cluster the metacells based on the corrected PCA space by Seurat.
 
 ### Differently expressed gene (DEG) analysis.
 
-Now let’s found the markers of the cluster 23 we’ve just identified.
+We can find which of the obtained clusters correspond to the B cells
+annotated in the original study (4th level of annotation)
+
+    b.clust <- names(which.max(table(combined.mc$ann_level_4,combined.mc$integrated_snn_res.0.5)["B cells",]))
+    b.clust
+
+    ## [1] "23"
+
+Now let’s found the markers of this cluster.
 
     DefaultAssay(combined.mc) <- "RNA"
-    markers23 <- FindMarkers(combined.mc,ident.1 = 23,only.pos = T)
+
+
+    markersB<- FindMarkers(combined.mc,ident.1 = b.clust,only.pos = T,logfc.threshold = 0.25,test.use =  wilcox.test)
 
     ## For a more efficient implementation of the Wilcoxon Rank Sum Test,
     ## (default method for FindMarkers) please install the limma package
@@ -416,37 +433,37 @@ Now let’s found the markers of the cluster 23 we’ve just identified.
     ## efficient implementation (no further action necessary).
     ## This message will be shown once per session
 
-    head(markers23)
+    head(markersB)
 
     ##       p_val avg_log2FC pct.1 pct.2 p_val_adj
-    ## TCL1A     0  1.3939674 0.695 0.020         0
-    ## FCRLA     0  1.0703400 0.962 0.022         0
-    ## BLK       0  1.2192942 0.990 0.058         0
-    ## FCRL5     0  0.7934100 0.895 0.026         0
-    ## PNOC      0  0.5477793 0.924 0.050         0
-    ## PAX5      0  0.6089985 0.886 0.024         0
+    ## TCL1A     0  1.3939363 0.695 0.020         0
+    ## FCRLA     0  1.0706003 0.962 0.022         0
+    ## BLK       0  1.2209493 0.990 0.058         0
+    ## FCRL5     0  0.7922142 0.886 0.027         0
+    ## PNOC      0  0.5425023 0.924 0.050         0
+    ## PAX5      0  0.6124840 0.895 0.023         0
 
 This cluster clearly present a B cell signature with marker genes such
 as CD19 and PAX5
 
     genes <-c("CD19","PAX5") # knwon mast cells markers 
-    markers23[genes,]
+    markersB[genes,]
 
     ##              p_val avg_log2FC pct.1 pct.2     p_val_adj
-    ## CD19 1.599543e-207  1.1037564 0.990 0.114 4.482558e-203
-    ## PAX5  0.000000e+00  0.6089985 0.886 0.024  0.000000e+00
+    ## CD19 6.500657e-208   1.104315 0.990 0.113 1.821744e-203
+    ## PAX5  0.000000e+00   0.612484 0.895 0.023  0.000000e+00
 
     VlnPlot(combined.mc,genes,ncol = 1)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-18-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 
 By looking at the metacell annotation (assigned from the original
-single-cell metadata by MCAT), we can verify that we correctly retrieved
+single-cell metadata by MATK), we can verify that we correctly retrieved
 the B cell lineage cluster
 
-    DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == 23],group.by = c("ann_level_3","integrated_snn_res.0.5"),ncol = 2)
+    DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == b.clust],group.by = c("ann_level_4","integrated_snn_res.0.5"),ncol = 2)
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-19-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
 
 ### Cell type abundances analyses.
 
@@ -469,7 +486,7 @@ the smoking status.
 
     ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
 
-![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-20-1.png)
+![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-21-1.png)
 
 Samples from smokers seem to present more AT2 cells but this quick
 analysis is for illustrative purposes only. In practice it’s far more

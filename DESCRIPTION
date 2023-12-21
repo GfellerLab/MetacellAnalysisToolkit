@@ -33,7 +33,9 @@ Imports:
   Matrix,
   ggplot2,
   RColorBrewer,
-  dplyr
+  dplyr,
+  stats,
+  igraph
 Suggests:
   testthat,
   knitr,

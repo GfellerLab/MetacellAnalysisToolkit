@@ -28,6 +28,12 @@ library(anndata)
 library(SuperCell)
 library(ggplot2)
 
+wilcox.test <- "wilcox"
+if(packageVersion("Seurat") >= 5) {
+  options(Seurat.object.assay.version = "v4") 
+  wilcox.test <- "wilcox_limma"
+  print("you are using seurat v5 with assay option v4")}
+
 color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
                       '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
                       '#9FA3A8', '#E0D4CA', '#5F3D69', '#58A4C3', "#b20000",'#E4C755', '#F7F398',
@@ -50,7 +56,7 @@ Please note that this may take some time (\~45 mins) as the file is quite large 
 #curl -o ./HLCA_data/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
 ```
 
-First we need to specify that we will work with the MCAT conda environment for the anndata package relying on reticulate and for the MCAT tool.
+First we need to specify that we will work with the MATK conda environment for the anndata package relying on reticulate and for the MATK tool.
 
 ```{r}
 library(reticulate)
@@ -120,7 +126,7 @@ This should take around 30 minutes.
 
 ```{bash results = FALSE, message=FALSE, warning=FALSE}
 for d in ./HLCA_data/datasets/*;
-do ../cli/MCAT -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
+do ../cli/MATK -t SuperCell -i $d/sc_adata.h5ad -o $d/sup_mc -a ann_sample -l 12 -n 50 -f 2000 -k 30 -g 50 -s adata
 done
 ```
 
@@ -139,6 +145,7 @@ metacell.objs <- lapply(X = metacell.files, function(X){
   colnames(countMatrix) <- adata$obs_names
   rownames(countMatrix) <- adata$var_names
   sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+  if(packageVersion("Seurat") >= 5) {sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay")}
   sobj <- RenameCells(sobj, add.cell.id = unique(sobj$sample)) # we give unique name to metacells
   return(sobj)
 })
@@ -146,7 +153,7 @@ metacell.objs <- lapply(X = metacell.files, function(X){
 
 ## Merging objects and basic quality control
 
-Given the single-cell metadata, the MCAT tool automatically assign annotations to metacells and computes purities for all the categorical variables present in the metadata of the input single-cell object.
+Given the single-cell metadata, the MATK tool automatically assign annotations to metacells and computes purities for all the categorical variables present in the metadata of the input single-cell object.
 
 Thus, let's check the purity of our metacells at different level of annotations, as well as their size (number of single cells they contain).
 
@@ -337,7 +344,7 @@ Using a DEG analysis we can check if we retrieve their markers. MYH11 and CNN1 g
 ```{r fig.height=8,fig.width=12}
 DefaultAssay(combined.mc) <- "RNA"
 Idents(combined.mc) <- "ann"
-markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T)
+markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T, logfc.threshold = 0.25,test.use =  wilcox.test)
 
 head(markersSmoothMuscle)
 
