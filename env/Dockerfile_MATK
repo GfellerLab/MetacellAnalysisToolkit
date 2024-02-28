@@ -1,0 +1,17 @@
+FROM continuumio/miniconda3
+# install mamba
+RUN conda install -c conda-forge mamba
+# Copy your Conda environment file
+COPY env/MATK.yml /tmp/MATK.yml
+
+# Create the environment using Mamba
+RUN mamba env create -f /tmp/MATK.yml
+
+ENV PATH /opt/conda/envs/MetacellAnalysisToolkit/bin:$PATH
+
+RUN echo "Installing SuperCell " && Rscript -e "remotes::install_github('GfellerLab/SuperCell', upgrade = 'never')"
+RUN Rscript -e "install.packages('Seurat', repos = 'https://cran.rstudio.com/')"
+RUN Rscript -e "remotes::install_github('rstudio/reticulate', upgrade = 'never')"
+RUN Rscript -e "BiocManager::install('limma',update = F)"
+RUN  echo "Install MetacellAnalysisToolkit" && Rscript -e "remotes::install_github('GfellerLab/MetacellAnalysisToolkit', upgrade = 'never')"
+
