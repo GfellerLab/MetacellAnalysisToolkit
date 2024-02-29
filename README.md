@@ -43,13 +43,25 @@ If you want, you can finally add the value of the path to the `cli` directory (o
 
 Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS) after.
 
+### Use of MATK within a Docker container
+
+We also provide a Docker file to build an environment with all the requirements to run MATK. You can build the docker environment using the following command line:
+
+    docker build -t matk:latest -f env/Dockerfile_MATK .
+    
+On MAC, if you are encountering issues, try the following command line:
+
+    docker build --platform linux/amd64 -t matk:latest -f env/Dockerfile_MATK .
+
+To run MATK on a test dataset (downloaded in section 2) please refer to section 3.5.
+
 ## 2. Download test data
 
 MATK takes as input/output either an Anndata .h5ad objects or Seurat .rds object.
 
 ### 2.1 CD34+ scRNA-seq dataset (6,900 cells) from Dana's Peer lab (.h5ad file).
 
-    wget https://dp-lab-data-public.s3.amazonaws.com/SEACells-multiome/cd34_multiome_rna.h5ad -O get_data/cd34_multiome_rna.h5ad
+    wget https://dp-lab-data-public.s3.amazonaws.com/SEACells-multiome/cd34_multiome_rna.h5ad -O data/cd34_multiome_rna.h5ad
 
 ### 2.2 PBMC scRNA-seq (6,900 cells) dataset from scanpy datasets
 
@@ -139,7 +151,18 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
     #SuperCell parallel metacell identification in each cell type
     Rscript cli/SuperCellCL.R -i data/cd34_multiome_rna.adata -o testCLI/SuperCell_per_celltype/cd34_multiome_rna/input_raw_adata/ -n 50 -f 2000 -k 30 -g 75 -s adata -a celltype -l 6
+    
+### 3.5 Run MATK within the docker container.
 
+To run MATK on the CD34 within the docker container, use the following command line:
+
+    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:latest /workspace/cli/MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+
+You can also download our prebuilt image and use it with singularity, for example to use MATK on a cluster :
+
+    singularity pull docker://agabriel/matk:latest 
+    singularity run --bind $(pwd) matk_latest.sif cli/MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    
 ## Quality control visualization
 
 [Perform quality controls on metacells using MetacellAnalysisToolkit R package](https://github.com/GfellerLab/MetacellAnalysisToolkit/blob/main/vignettes/MetacellAnalysisToolkit_vignette.md)
@@ -148,3 +171,6 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 -   [Analysis](/examples/HLCA_core_atlas.md) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and Seurat-rpca integration.
 -   [Supervised Analysis](/examples/HLCA_core_atlas_supervised.md) of the core HLCA atlas comprising 500'000 cells at the metacell level using SuperCell in command line and [STACAS](https://github.com/carmonalab/STACAS) integration.
+
+    
+
