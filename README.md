@@ -51,9 +51,13 @@ We also provide a Docker file to build an environment with all the requirements 
     
 On MAC, if you are encountering issues, try the following command line:
 
-    docker build --platform linux/amd64 -t matk:latest -f env/Dockerfile_MATK .
+    docker build --platform linux/amd64 -t matk:v1.0 -f env/Dockerfile_MATK .
 
-To run MATK on a test dataset (downloaded in section 2) please refer to section 3.5.
+You can also pull our prebuilt image using: 
+
+    docker pull agabriel/matk:v1.0
+
+To run MATK on a test dataset (downloaded in section 2) within this docker container with docker or singularity please refer to section 3.5.
 
 ## 2. Download test data
 
@@ -154,14 +158,14 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
     
 ### 3.5 Run MATK within the docker container.
 
-To run MATK on the CD34 within the docker container, use the following command line:
+To run MATK on the CD34 dataset within the docker container, use the following command line:
 
-    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:latest /workspace/cli/MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:v1.0 /workspace/cli/MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
 
-You can also download our prebuilt image and use it with singularity, for example to use MATK on a cluster :
+You can also use the container with singularity, for example to use MATK on a cluster :
 
-    singularity pull docker://agabriel/matk:latest 
-    singularity run --bind $(pwd) matk_latest.sif cli/MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    singularity pull docker://agabriel/matk:v1.0 
+    singularity run --bind $(pwd) matk_v1.0.sif cli/MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
     
 ## Quality control visualization
 
