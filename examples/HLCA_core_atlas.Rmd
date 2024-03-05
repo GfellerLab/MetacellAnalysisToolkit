@@ -338,10 +338,19 @@ smpCounts <- aggregate(combined.mc.epith$size, by=list(sample = combined.mc.epit
                                                         smoking_status = combined.mc.epith$smoking_status),
                                                         FUN=sum)
 
+
+contingencyTable <- xtabs(x ~ major_type+smoking_status,data = smpCounts)
+
+freqMatrix <- apply(contingencyTable,1,FUN = function(x){x/colSums(contingencyTable)})
+# res <- chisq.test(contingencyTable)
+# Roe <- res$observed/res$expected
+
+freqMatrix_df <- melt(freqMatrix)
+
 remove(combined.mc.epith)
 gc()
 
-ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
+ggplot(freqMatrix_df,aes(y=value,x = smoking_status,fill=major_type))  + geom_bar(stat="identity", position="fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
 ```
 
 Samples from smokers seem to present more AT2 cells but this quick analysis is for illustrative purposes only. In practice it's far more complex to draw conclusion as we should have considered the variations between samples/donors as well as many other technical (tissue dissociation protocol, tissue sampling method, single-cell platform, ... ) and biological (BMI, sex, Age, ...) variables.

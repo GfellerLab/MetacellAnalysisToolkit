@@ -318,43 +318,43 @@ downstream analysis.
     combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
     combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
 
-    ## 14:15:30 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 18:00:20 UMAP embedding parameters a = 0.9922 b = 1.112
 
-    ## 14:15:30 Read 11706 rows and found 30 numeric columns
+    ## 18:00:20 Read 11706 rows and found 30 numeric columns
 
-    ## 14:15:30 Using Annoy for neighbor search, n_neighbors = 30
+    ## 18:00:20 Using Annoy for neighbor search, n_neighbors = 30
 
-    ## 14:15:30 Building Annoy index with metric = cosine, n_trees = 50
+    ## 18:00:20 Building Annoy index with metric = cosine, n_trees = 50
 
     ## 0%   10   20   30   40   50   60   70   80   90   100%
 
     ## [----|----|----|----|----|----|----|----|----|----|
 
     ## **************************************************|
-    ## 14:15:31 Writing NN index file to temp file /tmp/36193772/RtmpPXbIbY/file3056b790959bc
-    ## 14:15:31 Searching Annoy index using 1 thread, search_k = 3000
-    ## 14:15:34 Annoy recall = 100%
-    ## 14:15:35 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 14:15:35 Initializing from normalized Laplacian + noise (using irlba)
-    ## 14:15:36 Commencing optimization for 200 epochs, with 480248 positive edges
-    ## 14:15:42 Optimization finished
+    ## 18:00:21 Writing NN index file to temp file /tmp/39640025/RtmpTB8dcq/file3645457b341dad
+    ## 18:00:21 Searching Annoy index using 1 thread, search_k = 3000
+    ## 18:00:24 Annoy recall = 100%
+    ## 18:00:24 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 18:00:25 Initializing from normalized Laplacian + noise (using irlba)
+    ## 18:00:26 Commencing optimization for 200 epochs, with 480248 positive edges
+    ## 18:00:30 Optimization finished
 
     combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
-    ## 14:15:42 UMAP embedding parameters a = 0.9922 b = 1.112
-    ## 14:15:42 Read 11706 rows and found 30 numeric columns
-    ## 14:15:42 Using Annoy for neighbor search, n_neighbors = 30
-    ## 14:15:42 Building Annoy index with metric = cosine, n_trees = 50
+    ## 18:00:30 UMAP embedding parameters a = 0.9922 b = 1.112
+    ## 18:00:30 Read 11706 rows and found 30 numeric columns
+    ## 18:00:30 Using Annoy for neighbor search, n_neighbors = 30
+    ## 18:00:30 Building Annoy index with metric = cosine, n_trees = 50
     ## 0%   10   20   30   40   50   60   70   80   90   100%
     ## [----|----|----|----|----|----|----|----|----|----|
     ## **************************************************|
-    ## 14:15:43 Writing NN index file to temp file /tmp/36193772/RtmpPXbIbY/file3056b76323819e
-    ## 14:15:43 Searching Annoy index using 1 thread, search_k = 3000
-    ## 14:15:46 Annoy recall = 100%
-    ## 14:15:46 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-    ## 14:15:47 Initializing from normalized Laplacian + noise (using irlba)
-    ## 14:15:48 Commencing optimization for 200 epochs, with 480248 positive edges
-    ## 14:15:53 Optimization finished
+    ## 18:00:31 Writing NN index file to temp file /tmp/39640025/RtmpTB8dcq/file36454540153459
+    ## 18:00:31 Searching Annoy index using 1 thread, search_k = 3000
+    ## 18:00:33 Annoy recall = 100%
+    ## 18:00:34 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+    ## 18:00:34 Initializing from normalized Laplacian + noise (using irlba)
+    ## 18:00:35 Commencing optimization for 200 epochs, with 480248 positive edges
+    ## 18:00:39 Optimization finished
 
 Now we can make the plots and visually compare the results with the
 unintegrated analysis.
@@ -481,10 +481,19 @@ the smoking status.
                                                             smoking_status = combined.mc.epith$smoking_status),
                                                             FUN=sum)
 
+
+    contingencyTable <- xtabs(x ~ major_type+smoking_status,data = smpCounts)
+
+    freqMatrix <- apply(contingencyTable,1,FUN = function(x){x/colSums(contingencyTable)})
+    # res <- chisq.test(contingencyTable)
+    # Roe <- res$observed/res$expected
+
+    freqMatrix_df <- melt(freqMatrix)
+
     remove(combined.mc.epith)
     gc()
 
-    ggplot(smpCounts,aes(x = smoking_status,fill=major_type)) + geom_bar(position = "fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
+    ggplot(freqMatrix_df,aes(y=value,x = smoking_status,fill=major_type))  + geom_bar(stat="identity", position="fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
 
 ![](HLCA_core_atlas_files/figure-markdown_strict/unnamed-chunk-21-1.png)
 
