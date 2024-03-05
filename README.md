@@ -39,7 +39,7 @@ We recommand using Seurat v4 and this environment to use MATK. However, this too
 
 If you want, you can finally add the value of the path to the `cli` directory (of this repository) to your PATH environment variable so that you can use the MATK command line tool directly. On Linux, using bash, You can do this by adding this line to your `~/.bashrc` (or `~/.bash_profile` on macOS):
 
-    export PATH="/path/to/MetacellToolkitAnalysis/cli/:$PATH"
+    export PATH="/path/to/MetacellAnalysisToolkit/cli/:$PATH"
 
 Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS) after.
 
@@ -59,7 +59,7 @@ You can also pull our prebuilt image using:
 
 To run MATK on a test dataset (downloaded in section 2) within this docker container with docker or singularity please refer to section 3.5.
 
-Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V4, if you want to use Seurat V5, uncomment the commented lines in the Docker file or use the following prebuilt image: `agabriel/matk:v1.1`
+Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V4, if you want to use Seurat V5, uncomment the commented code lines in the Docker file or use the following prebuilt image: `agabriel/matk:v1.1`
 
 ## 2. Download test data
 
@@ -83,7 +83,7 @@ Using MATK tool you can easily identify metacells with either SEACells, SuperCel
 ### 3.1 Print help
 
     $MATK -h
-    usage: /path/to/MetacellToolkitAnalysis/cli/MATK options
+    usage: /path/to/MetacellAnalysisToolkit/cli/MATK options
 
     Constructing metacell from single cell data with SEACells (0.3.3) 'MetaCell2 (0.9.0) or SuperCell (1.0)
     Expect a filtered (low quality cells removed) Seurat or Anndata object  
@@ -162,12 +162,12 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 To run MATK on the CD34 dataset within the docker container, use the following command line:
 
-    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:v1.0 /workspace/cli/MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:v1.0 MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
 
 You can also use the container with singularity, for example to use MATK on a cluster :
 
     singularity pull docker://agabriel/matk:v1.0 
-    singularity run --bind $(pwd) matk_v1.0.sif cli/MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    singularity run --bind $(pwd) matk_v1.0.sif MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
     
 ## Quality control visualization
 
