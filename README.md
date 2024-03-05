@@ -59,6 +59,8 @@ You can also pull our prebuilt image using:
 
 To run MATK on a test dataset (downloaded in section 2) within this docker container with docker or singularity please refer to section 3.5.
 
+Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V4, if you want to use Seurat V5, uncomment the commented lines in the Docker file or use the following prebuilt image: `agabriel/matk:v1.1`
+
 ## 2. Download test data
 
 MATK takes as input/output either an Anndata .h5ad objects or Seurat .rds object.
