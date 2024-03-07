@@ -86,7 +86,8 @@ def main(argv):
     
         ro.r(f'sobj <- readRDS("{input_file}")')
         adata = ro.r("as.SingleCellExperiment(sobj)")
-        del adata.layers['logcounts']  # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
+        if "logcounts" in adata.layers:
+            del adata.layers['logcounts']  # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
     
         anndata2ri.deactivate()
     
