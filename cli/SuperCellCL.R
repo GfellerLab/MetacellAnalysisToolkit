@@ -282,13 +282,15 @@ if (opt$output != "SC") {
     }
   }
   
-  #Store size
-  sobjMC$size <- SC$supercell_size
+  
   
   #Store membership in sobjMC
   membershipDF <- data.frame(SC$membership)
   colnames(membershipDF) <- "membership"
   sobjMC@misc$cell_membership <- membershipDF
+  
+  #Store size
+  sobjMC$size <- as.numeric(table(sobjMC@misc$cell_membership))
   
   
   if (opt$output == "adata") {
