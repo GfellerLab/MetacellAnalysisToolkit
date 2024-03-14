@@ -61,6 +61,7 @@ def main(argv):
     print('gamma is "', gamma)
     print('dims are "', dim_str)
     print('reduction_key is"', reduction_key)
+    print('k knn is"', k_knn)
     
     os.makedirs(outdir,exist_ok = True)
     

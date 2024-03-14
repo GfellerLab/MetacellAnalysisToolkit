@@ -25,7 +25,7 @@ OPTIONS:
    
    -f     n_features, number of highly variable genes use to compute the initial PCA (only for SEACells and SuperCell, default 2000) 
    
-   -k     k_knn, number of neighbors to construct the knn graph (only for SEACells and SuperCell, default 30)
+   -k     k_knn, number of neighbors to construct the knn graph (only for SEACells and SuperCell, default 15 for SEACells, 30 for SuperCell)
    
    -g     gamma, 	graining level of data 
           Proportion of number of single cells in the initial dataset to the number of metacells in the final dataset
@@ -121,11 +121,11 @@ fi
 
 echo "Identifying metacells..."
 if [ "$TOOL" == "SEACells" ]; then
-  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${REDUCTION_KEY} ${ANNOTATION} 
+  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} -k ${K_KNN} ${REDUCTION_KEY} ${ANNOTATION} 
 elif [ "$TOOL" == "MetaCell" ]; then
   python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
 elif [ "$TOOL" == "SuperCell" ]; then
-  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} ${ANNOTATION} ${N_CORES} ${NORMALISED_DATA}
+  Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} -k ${K_KNN} ${ANNOTATION} ${N_CORES} ${NORMALISED_DATA}
 fi
 
 echo "Done."
