@@ -6,3 +6,6 @@ examples/
 install.R
 MetacellToolkit_env.yml
 data_raw/
+env/
+README.md
+get_data/

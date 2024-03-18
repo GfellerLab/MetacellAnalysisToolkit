@@ -1,279 +1,368 @@
 ---
 title: "Integration of the human lung cell atlas with metacells"
-author: "Leonard Herault"
-date: '2023-07-18'
-output: html_document
+author: "Leonard Herault, Aurelie Gabriel, Mariia Bilous, David Gfeller"
+date: "`r Sys.Date()`"
+output:
+  md_document:
+    toc: true # table of content true
 ---
+Integration of the human lung cell atlas with metacells
+=======================================================
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{bash}
-<!-- curl -o local.rds "https://corpora-data-prod.s3.amazonaws.com/4e08dac3-2ecb-4906-a7a9-21c980c97e61/local.rds?AWSAccessKeyId=ASIATLYQ5N5X3DHC3JUT&Signature=01nSR0u3FCRBDAvLLMlbiHv4yZQ%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDylUsdmowl%2BHEvEDfO%2BNyUt4A%2Bwcr8izE%2B2o2vhLmLEgIhAIcoiESy%2BuzwyglXBg2NWD58xoewsrkSt1ViXxkCPxykKusDCGwQARoMMjMxNDI2ODQ2NTc1IgxuQ7O%2FbDC650ECvPMqyAPYlfzq20p2%2Ba3eC7weaURlQWt7Av%2B4715bhRKykcXA7j2fMACLtpYfF31NxkgWn71F%2BGznKL%2F%2FMPnU1D0yjGlcqeIGaURgvwqaFUdtBbSxlpAVB7yJZPQr4FcmZBStgXw3cnK87d8OX13kBzxi2Y0MTytM1w3bMOe%2F2othusWa02VNHN%2FQdv20rEPcxfZ0OmjoPLx4DRyOT1H40EHHCVWfdfrnpR9FMPuWgr8dmRUXzhQB4BFYMsgv%2B8SXnLfiU10TCeIvDIJREHFaqwv9eTqIi2j0qmDVHk1DjfitUiltgQGFArw6gmo6fVo7Cinwpn5K3KF92t7b%2B99Obpu1YjnhoiXKA08AZ8qpUm8tO0CfuGkMNAW%2Fyt0v4svpaLJwkq1e4Rn3icHo%2BtliecQVE2YkbnBLoHvzdLAP9IYqNqPxMMIJnUCtr%2BAJAoqxnCD3Uh62S703JZd2VnVULkyaCPEwnv74FuAAbZ2CoSFOQnJyxQ7sDGQInT8w3I5QSK6Nnn3iDCfXDWMJMXAF%2F0a%2BpnPZYn%2F4ubv%2FZARxRgneL8emyMrtSajX1v3%2Bfb14PcPqUd8HvT3juoJQaagZNlC67xAskue3Dc1rlHIw4f3XpQY6pAFNXTeQy7dvl3TH3S5byqkpo2rHfusUgOORqnNvcSkKvyXu5sEkpFtZn1wXw8ebbOUwly3MwnHtJEp4yp0IFGpH0dG6Cag3T0Eu3LdswlbpbBh3Ue99XlAs5SFr70QdDETmBiIaAz82MKx6oz8Zkzotttud3uFR9SAukbClWiKCHoxSNVuAscl3%2FiPRdI3DTrIyue%2FGb2NgacDWWQ2FHhgkORtt7Q%3D%3D&Expires=1690272618" -->
-```
+In this example we will work with the Human Cell Lung Atlas core [HLCA](https://www.nature.com/articles/s41591-023-02327-2) gathering around 580,000 cells from 107 individuals distributed in 166 samples.
+
+The aim of this tutorial is to show how you can use metacells to analyze a very large dataset using a reasonable amount of time and memory. For this we will use here **SuperCell** via the **MATK** command line tool.
+
+Be sure to be in the **MetacellAnalysisToolkit** environment when you are running this Rmarkdown.
+
+## Setting up the environment
 
 ```{r}
 library(Seurat)
 library(anndata)
 library(SuperCell)
+library(ggplot2)
+wilcox.test <- "wilcox"
+if(packageVersion("Seurat") >= 5) {
+  options(Seurat.object.assay.version = "v4") 
+  wilcox.test <- "wilcox_limma"
+  print("you are using seurat v5 with assay option v4")}
+
+color.celltypes  <- c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
+                      '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
+                      '#9FA3A8', '#E0D4CA', '#5F3D69', '#58A4C3', "#b20000",'#E4C755', '#F7F398',
+                      '#AA9A59', '#E63863', '#E39A35', '#C1E6F3', '#6778AE', '#91D0BE', '#B53E2B',
+                      '#712820', '#DCC1DD', '#CCE0F5', '#CCC9E6', '#625D9E', '#68A180', '#3A6963',
+                      '#968175')
+```
+
+## Downloading the data
+
+You can download the annotated data from [cellxgene](https://cellxgene.cziscience.com/collections/6f6d381a-7701-4781-935c-db10d30de293). Choose the `.h5ad` option after clicking on the download button for the core atlas (3 tissues, 584,944 cells).
+
+You can use a bash command line of this form to download the data directly in the `./HLCA_data` directory. You will have to update the link (obtained by clicking on download, .h5ad selection) as links are temporary.
+
+Please note that this may take some time as the file is quite large (~6 GB)
+
+```{bash results = FALSE, message=FALSE, warning=FALSE, class.source='.terminal', class.output='.terminal'}
+#Uncomment to download the data in the ./HLCA_data/ directory after updating the link
+#mkdir -p ./HLCA_data
+#curl -o ./HLCA_data/local.h5ad "https://corpora-data-prod.s3.amazonaws.com/7bcad396-49c3-40d9-80c1-16d74e7b88bd/local.h5ad?AWSAccessKeyId=ASIATLYQ5N5XZ2V3CYXW&Signature=CI8hgXdSO2ewDXpP%2FCb7ouxW6R8%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEC0aCXVzLXdlc3QtMiJGMEQCIGoOTAGVxanApGEIeRVOL%2BRK7silMZiTtgLE%2BXguyjPjAiARoOLhXmQwzwHgme2Ll0OIZK0VIrBLaH3bSbFzRzBfuSrrAwh2EAEaDDIzMTQyNjg0NjU3NSIMbCRmBRpD%2BT0U5T8%2BKsgDcLw0fAhlIgdEjdOw%2FvUOo36uXvDClcBPXmosjNUDGVIYy67gprxvikZ%2FZHqtu%2BnodejEEIIxGJw2kv0l7dcjmGgP9IFLP6WBmsGekfI7kFCkFypmZtKXqggx9stp2K3MZCrsfcEcWttsV62c690lzdiQ4UI4lUqGqXq8C7Ah1RnxfXPQJsa3YKmHs39c3mX%2BHG5Nv4rydgzhkWE7qTkGxZvqV1cLuPMz2X78zBq5GXY0HTaGvGMgAzE5OcKbqF50sxmh0pE7PGmvz1wLYN8LB6YpMbD8qCXMdP7e4uBk2yjkK23m5m%2FrMVrCWEarSh5QqrzDR347XTg%2BkVDY301ygqy3GpCTq342sTKmUZH0PRhkliGyKvakNQU4QBy6meSQORvRX1WEhn0cRYPygyD9ugK2sDqtBl0JXUlEfqSDmE%2BXGDoRFGnKiTDSvnHhVgj64h4eTUcutZFdTILwMaYGEIl1ItElCptqvYS3rmrzdvAr5nSjx%2BnK9tKt6linyh%2Bau7zc6IfQSTzZoMut%2Fw1fOuCQ%2BQmxCaEyBXzfTTrx4%2FuxyiYAkPN0vLTtSvtuklZH7O1axMTQIonnFDsnKeVnUzl3ZEgdUbxhMLL20qoGOqYBdtJOXqTiQUDX4ZH0ReubHpog%2BorDorDJ0B08Edu6k36SwuSNu6Hv8MW%2BdWFVfqs0X%2Fx74oMs8yQC8T1gSG2HrlCfLoWIBep9lA9EHq4vUBhYB4mmJ7Fsc2MdhOtof%2BzrE8b1ILxU%2Fdeliek9Aqz0uBWcfJsEu%2FlHrC1sX4P5F8nytcLxvzCTGB43mPHeqB5DZaAKC%2FY8SmSa9CJ1Njfz8n%2FIuTLv8w%3D%3D&Expires=1700662555"
+```
+
+First we need to specify that we will work with the MetacellAnalysisToolkit conda environment (needed for anndata relying on reticulate and the MATK tool).
+
+```{r}
 library(reticulate)
-use_condaenv("~/bin/miniconda3/envs/MetacellToolkit/bin/python")
-#library(STACAS)
+conda_env <-  conda_list()[reticulate::conda_list()$name == "MetacellAnalysisToolkit","python"]
+
+Sys.setenv(RETICULATE_PYTHON = conda_env)
 ```
 
-## Splitting atlas per datasets
+## Splitting atlas by datasets
 
-Around 10 mins
+First we will use anndata to read in backed mode (saving a lot of memory) the whole atlas and write one h5ad file for each dataset. This should take less than 10 minutes.
 
-```{python}
-import scanpy as sc
-import os
+If you are limited in time feel free to process only a subset of the dataset.
 
-os.makedirs("data/HCLA/datasets",exist_ok=True)
-adata = sc.read_h5ad("data/HCLA/local.h5ad",backed = True)
-datasets =  adata.obs['dataset'].unique()
-for d in datasets:
-  adata = sc.read_h5ad("data/HCLA/local.h5ad",backed = True)
-  # adata.var_names = adata.var['feature_name'].to_list()
-  adataDataset = adata[adata.obs['dataset']==d,]
-  os.makedirs("data/HCLA/datasets/"+d,exist_ok=True)
-  adataDataset.write_h5ad("data/HCLA/datasets/"+d+"/sc_adata.h5ad")
+```{r results = FALSE, message=FALSE, warning=FALSE}
+adata <- read_h5ad("./HLCA_data/local.h5ad",backed = "r")
+adata$var_names <- adata$var$feature_name # We will use gene short name for downstream analyses
+datasets <- unique(adata$obs$dat)
 
+# If you are limited in time you can process on half of the datasets (uncomment th following line)
+# datasets <- datasets[1:7]
+
+
+print(dim(adata))
+
+lapply(datasets,FUN =  function(x) {
+  dir.create(paste0("./HLCA_data/datasets/",x),recursive = T)
+  adata.dataset <- AnnData(X = adata[adata$obs$dataset == x]$raw$X,
+                           var = adata[adata$obs$dataset == x]$var,
+                           obs = adata[adata$obs$dataset == x]$obs)
+  #This will allow us to construct supervised metacell for each cell type in each sample later in the second example
+  adata.dataset$obs$ann <- as.character(adata.dataset$obs$ann_level_3)
+  # For cell without an annotation at the 3rd level we will use the second level of annotation
+  adata.dataset$obs$ann[adata.dataset$obs$ann_level_3 == 'None'] = as.character(adata.dataset$obs$ann_level_2[adata.dataset$obs$ann_level_3 == 'None'])
+  adata.dataset$obs$ann_sample <- paste0(adata.dataset$obs$ann,"_",adata.dataset$obs$sample)
+  
+  write_h5ad(adata.dataset,paste0("./HLCA_data/datasets/",x,"/sc_adata.h5ad"))
+}
+)
+
+remove(adata)
+gc()
 ```
 
-# Identify metacell 
+## Building metacell
 
-We identify metacells per sample in each dataset with SuperCell through MetacellToolkit command line.
-We use .h5ad adata output format as it is faster to wright and lighter to store than .rds Seurat object.
+We build metacells with the MATK command line using SuperCell (`-t SuperCell`). To facilitate downstream analysis of the donors we build metacells for each sample in each dataset (`-a sample`). Here we will use 2000 highly variable genes (`-f 2000`) to compute the PCA from which we used 50 principal components (`-m 50`) to build a k = 30 (`-k 30`) nearest neighbor graph on which the metacells are identified using a graining level of 50 (`-g 50`). We use an adata .h5ad output format (`-s adata`) as it is faster to write and lighter to store than a Seurat .rds object.
 
-This step takes around 17 min with multiple cores (32 GB of memory required for 6 cores).
+This step takes around 20 min with multiple cores (`-l 6`). Be aware that parallel processing requires more memory (32 GB of memory required for 6 cores).
 
-```{bash}
-for d in data/HCLA/datasets/*;
-do Rscript MetacellToolkit/cli/SuperCellCL_light.R -i $d/sc_adata.h5ad -o $d -a sample -l 6 -m 50 -n 30 -f 2000 -k 30 -g 50 -s adata;
+If you are limited in memory you should still be able to process the samples by reducing the number of cores (e.g. `-l 3`) or by sequentially processing the samples (just remove the `-l`) in a slightly longer time.
+
+```{bash  results = FALSE, message=FALSE, warning=FALSE, class.source='.terminal', class.output='.terminal'}
+for d in ./HLCA_data/datasets/*;
+do ../cli/MATK -t SuperCell -i $d/sc_adata.h5ad -o $d -a sample -l 6 -n 50 -f 2000 -k 30 -g 50 -s adata
 done
 ```
 
-# Load metacell objects
+## Loading metacell objects
 
-We load .h5ad object and directly convert them in Seurat object to use them with STACAS.
+We load the .h5ad objects and directly convert them in Seurat objects to benefit from all the functions of this framework.
 
-```{r}
-metacellFiles <- list.files("../../data/HCLA/datasets/",recursive = T,pattern = "mc_adata.h5ad",full.names = T) 
-#metacellFiles <- list.files("data/HCLA/datasets/",recursive = T,pattern = "mc_adata.h5ad",full.names = T) 
+```{r warning=FALSE}
+metacell.files <- sapply(datasets, FUN = function(x){paste0("./HLCA_data/datasets/",x,"/mc_adata.h5ad")})
 
-metacells <- lapply(X = metacellFiles, function(X){
-  adata <- anndata::read_h5ad(X)
+metacell.objs <- lapply(X = metacell.files, function(X){
+  adata <- read_h5ad(X)
   countMatrix <- Matrix::t(adata$X)
   colnames(countMatrix) <- adata$obs_names
   rownames(countMatrix) <- adata$var_names
   sobj <- Seurat::CreateSeuratObject(counts = countMatrix,meta.data = adata$obs)
+  if(packageVersion("Seurat") >= 5){sobj[["RNA"]] <- as(object = sobj[["RNA"]], Class = "Assay")}
+  sobj <- RenameCells(sobj, add.cell.id = unique(sobj$sample)) # we give unique name to metacells
   return(sobj)
-  })
-
-```
-
-## STACAS integration
-
-In the original study, datasets were integrated using SCANVI semi-supervised integration with the `"original_anno_level_3"` level of annotation. Here we propose to use STACAS semi-supervised integration using the final level 3 of annotation provided in the metadata.
-
-```{r}
-if (!requireNamespace("STACAS")) remotes::install_github("carmonalab/STACAS")
-```
-
-```{r}
-library(STACAS)
-
-t0_integration <- Sys.time()
-
-# normalize and identify variable features for each dataset independently
-allMetacellDatasets <- lapply(X = metacells, FUN = function(x) {
-  DefaultAssay(x) <- "RNA";
-  x <- RenameCells(x, add.cell.id = unique(x$sample))
-  x <- NormalizeData(x)
-  return(x)})
-gc()
-# select features that are repeatedly variable across datasets for integration run PCA on each
-# dataset using these features
-features <- SelectIntegrationFeatures(object.list = allMetacellDatasets)
-allMetacellDatasets <- lapply(X = allMetacellDatasets, FUN = function(x) {
-  x <- ScaleData(x,features = features,verbose =F);
-  x <- RunPCA(x,features = features,verbose =F)
 })
 
-rna.anchors <- FindAnchors.STACAS(object.list = allMetacellDatasets, 
-                                  anchor.features = features,
-                                  cell.labels = "ann_level_3",
-                                  reference = c(1,2,5,9,11), # the 5 biggest datasets are used as reference
-                                  dims = 1:30)
 ```
+
+## Merging objects and basic quality control
+
+Given the single-cell metadata, the MATK tool automatically assign annotations to metacells and computes purities for all the categorical variables present in the metadata of the input single-cell object.
+
+Thus, we can check the purity of our metacells at different levels of annotations, as well as their size (number of single cells they contain).
+
+To do so we merge the object together and use the Seurat `VlnPlot` function.
+
+```{r fig.height=6,fig.width=8, results = FALSE, message=FALSE, warning=FALSE}
+unintegrated.mc <- merge(metacell.objs[[1]],metacell.objs[-1])
+
+
+VlnPlot(unintegrated.mc,features = c("size","ann_level_1_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
+VlnPlot(unintegrated.mc,features = c("ann_level_2_purity","ann_level_3_purity"),group.by = 'dataset',pt.size = 0.001,ncol=2)
+```
+
+We can also use box plots.
+
+```{r fig.height=6,fig.width=8, results = FALSE, message=FALSE, warning=FALSE}
+ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_2_purity,fill = dataset)) + geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(angle = 45)) 
+
+ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_3_purity,fill = dataset)) + geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(angle = 45)) 
+
+ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_level_4_purity,fill = dataset)) + geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(angle = 45)) 
+
+ggplot(unintegrated.mc@meta.data,aes(x=dataset,y=ann_finest_level_purity,fill = dataset)) + geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(angle = 45)) 
+```
+
+Overall metacells from the different datasets present a good purity until the third level of annotation.
+
+## Unintegrated analysis
+
+Let's first do a standard dimensionality reduction without batch correction.
+
+```{r fig.height=8,fig.width=14, results = FALSE, message=FALSE, warning=FALSE}
+DefaultAssay(unintegrated.mc) <- "RNA"
+unintegrated.mc <- NormalizeData(unintegrated.mc)
+unintegrated.mc <- FindVariableFeatures(unintegrated.mc)
+unintegrated.mc <- ScaleData(unintegrated.mc)
+unintegrated.mc <- RunPCA(unintegrated.mc)
+unintegrated.mc <- RunUMAP(unintegrated.mc,dims = 1:30)
+
+umap.unintegrated.datasets <- DimPlot(unintegrated.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("unintegrated datasets")
+umap.unintegrated.types <- DimPlot(unintegrated.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes)+ NoLegend() + ggtitle("unintegrated cell types")
+
+umap.unintegrated.datasets + umap.unintegrated.types
+
+remove(unintegrated.mc) # we won't use the unintegrated object anymore
+gc()
+```
+
+You can see on the plots that a batch effect is clearly present at the metacell level with metacells clustering by datasets inside the major cell types. Let's correct it.
+
+## Seurat integration
+
+Here we will use the standard Seurat_v4 batch correction [workflow](https://satijalab.org/seurat/archive/v4.3/integration_rpca). As in the original study, we use the dataset rather than the donor as the batch parameter. See method section "Data integration benchmarking" of the [original study](https://www.nature.com/articles/s41591-023-02327-2) for more details.
+
+This should take less than 5 minutes.
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
+
+n.metacells <- sapply(metacell.objs,FUN = function(x){ncol(x)})
+names(n.metacells) <- datasets
+ref.names <- sort(n.metacells,decreasing = T)[1:5]
+ref.index <- which(datasets %in% names(ref.names))
+
+# normalize each dataset 
+metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
+  DefaultAssay(x) <- "RNA";
+  x <- RenameCells(x, add.cell.id = unique(x$sample)) # we give unique name to metacells
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  return(x)})
+
+features <- SelectIntegrationFeatures(object.list = metacell.objs)
+
+metacell.objs <- lapply(X = metacell.objs, FUN = function(x) {
+    x <- ScaleData(x, features = features, verbose = FALSE)
+    x <- RunPCA(x, features = features, verbose = FALSE)
+})
+
+anchors <- FindIntegrationAnchors(object.list = metacell.objs, 
+                                       anchor.features = features, 
+                                       reduction = "rpca",
+                                       reference = ref.index, # the 5 biggest datasets (in term of metacell number) are used as reference
+                                       dims = 1:30)
+
+remove(metacell.objs) # We don't need the object list anymore
+gc()
+
+combined.mc <- IntegrateData(anchorset = anchors,k.weight = 40) # we have to update the k.weight parameters because the smallest dataset contain less than 100 metacells
+```
+
+Check the obtained object.
 
 ```{r}
-remove(allMetacellDatasets)
-gc()
-
-combined.mc <- IntegrateData.STACAS(anchorset = rna.anchors)
-
-remove(rna.anchors)
-gc()
-
+combined.mc
 ```
+
+We can verify that the sum of metacell sizes correspond to the original number of single-cells.
 
 ```{r}
 sum(combined.mc$size)
 ```
-We can now use the classical Seurat workflow on the integrated object
+
+Seurat returns the slot `"integrated"` that we can use for the downstream analysis.
 
 ```{r}
 DefaultAssay(combined.mc) = "integrated"
-combined.mc <- ScaleData(combined.mc, verbose = T)
-combined.mc <- RunPCA(combined.mc, verbose = FALSE,reduction.name = "pca.stacas")
-combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca.stacas",reduction.name = "umap")
+combined.mc <- ScaleData(combined.mc, verbose = FALSE)
+combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE)
+combined.mc <- RunUMAP(combined.mc, reduction = "pca", dims = 1:30)
+combined.mc <- RunUMAP(combined.mc, dims = 1:30,reduction =  "pca",reduction.name = "umap")
 
 ```
 
-We check that our integration correctly mixed the different samples in the reduced space by preserving differences between the different cell types.
+Now we can make the plots and visually compare the results with the unintegrated analysis.
 
-```{r}
+```{r fig.height=12,fig.width=14}
+umap.integrated.datasets <- DimPlot(combined.mc,reduction = "umap",group.by = "dataset") + NoLegend() + ggtitle("integrated datasets")
+umap.integrated.celltypes <- DimPlot(combined.mc,reduction = "umap",group.by = "ann_level_2",label = T,repel = T,cols = color.celltypes) + NoLegend() + ggtitle("integrated cell types")
+
+umap.integrated.datasets + umap.integrated.celltypes + umap.unintegrated.datasets + umap.unintegrated.types
+```
+
+Seurat efficiently corrected the batch effect in the data while keeping the cell type separated, but other batch correction methods such as harmony would have also done the job.
+
+Note that In the original study, datasets were integrated using SCANVI semi-supervised integration using partial annotation obtained for each dataset prior integration. If you are interested in such supervised approach at the metacell level in R you can have a look to our second [example](./HLCA_core_atlas_supervised.md) using the [STACAS](https://github.com/carmonalab/STACAS) package.
+
+We can navigate in the different annotation levels.
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
 library(ggplot2)
-UMAPPlot(combined.mc,group.by = "ann_level_1")
 
-UMAPPlot(combined.mc,group.by = "ann_level_2",label = T)
+DimPlot(combined.mc,group.by = "ann_level_1",reduction = "umap",label = T,repel = T,cols= color.celltypes) + NoLegend()
 
-UMAPPlot(combined.mc,group.by = "ann_level_3",label = T) + NoLegend()
+DimPlot(combined.mc,group.by = "ann_level_2",reduction = "umap",label = T,repel = T,cols= color.celltypes) + NoLegend()
+
+DimPlot(combined.mc,group.by = "ann_level_3",reduction = "umap",label = T, repel = T,cols= color.celltypes) + NoLegend()
 ```
 
-```{r fig.height=4,fig.width=4}
-UMAPPlot(combined.mc,group.by = "ann_finest_level",label = T) + NoLegend()
+## Downstream analysis
+
+### Clustering
+
+We cluster the metacells based on the corrected PCA space by Seurat.
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
+DefaultAssay(combined.mc) <- "integrated"
+combined.mc <- FindNeighbors(combined.mc,reduction = "pca",dims = 1:30)
+combined.mc <- FindClusters(combined.mc,resolution = 0.5) 
+UMAPPlot(combined.mc,label=T) + NoLegend()
 ```
+
+### Differently expressed gene (DEG) analysis.
+
+
+We can find which of the obtained clusters correspond to the B cells annotated in the original study (4th level of annotation)
+```{r}
+b.clust <- names(which.max(table(combined.mc$ann_level_4,combined.mc$integrated_snn_res.0.5)["B cells",]))
+b.clust
+```
+
+
+Now let's found the markers of this cluster.
 
 ```{r}
-UMAPPlot(combined.mc,group.by = "dataset")
-
-```
-
-```{r}
-ggplot(combined.mc@meta.data,aes(y = ann_level_1_purity)) + geom_boxplot()
-ggplot(combined.mc@meta.data,aes(y = ann_level_2_purity)) + geom_boxplot()
-ggplot(combined.mc@meta.data,aes(y = ann_level_3_purity)) + geom_boxplot()
-ggplot(combined.mc@meta.data,aes(y = ann_finest_level_purity)) + geom_boxplot()
-```
-
-```{r}
-Idents(combined.mc) <- "Metacells"
-VlnPlot(combined.mc,features = c("size","ann_finest_level_purity"),ncol = 2,pt.size = 0)
-
-VlnPlot(combined.mc,features = c("nCount_RNA","nFeature_RNA"),ncol = 2,pt.size = 0)
-
-```
-
-## Marker analysis at the metacell level
-
-We identify at the metacell level the markers for the rare cell type Smooth muscle FAM83D+ and Migratory DCs and check if we correctly retrieve the genes highlighted in the original study.
-
-```{r fig.height=4,fig.width=6}
 DefaultAssay(combined.mc) <- "RNA"
-Idents(combined.mc) <- "ann_level_3"
-markersSmoothMuscle <- FindMarkers(combined.mc,ident.1 = "Smooth muscle FAM83D+",only.pos = T)
 
-head(markersSmoothMuscle)
 
-markersSmoothMuscle[c("MYH11","CNN1","FAM83D"),]
-
-VlnPlot(combined.mc,features = c("MYH11","CNN1","FAM83D"),ncol = 2)
+markersB<- FindMarkers(combined.mc,ident.1 = b.clust,only.pos = T,logfc.threshold = 0.25,test.use =  wilcox.test)
+head(markersB)
 ```
 
-```{r fig.width=5,fig.height=4}
-DCs <- combined.mc$ann_finest_level %in% c("Interstitial Mph perivascular","DC1","DC2","Migratory DCs")
-combined.mc$DC_type <- "other cells"
-combined.mc$DC_type[DCs] <- combined.mc$ann_finest_level[DCs]
-
-Idents(combined.mc) <- "DC_type"
-MigratoryDCmarkers <- FindMarkers(combined.mc,ident.1 = "Migratory DCs",only.pos = T)
-
-head(MigratoryDCmarkers)
-
-MigratoryDCmarkers[c("CCR7", "LAD1", "CCL19"),]
-
-VlnPlot(combined.mc,features = c("CCR7", "LAD1", "CCL19"),ncol = 2)
-```
+This cluster clearly present a B cell signature with marker genes such as CD19 and PAX5
 
 ```{r}
-DendriticCells <- combined.mc[,combined.mc$DC_type != "other cells"]
-DefaultAssay(DendriticCells) <- "integrated"
-DendriticCells <- ScaleData(DendriticCells, verbose = T)
-DendriticCells <- RunPCA(DendriticCells, verbose = FALSE)
-DendriticCells <- RunUMAP(DendriticCells, dims = 1:30)
-
-UMAPPlot(DendriticCells)
-FeaturePlot(DendriticCells,"MKI67")
+genes <-c("CD19","PAX5") # knwon mast cells markers 
+markersB[genes,]
+VlnPlot(combined.mc,genes,ncol = 1)
 ```
 
-Now we will use [Harmony](https://www.nature.com/articles/s41592-019-0619-0), an other integration method. We will use it inside the [Seurat framework](https://htmlpreview.github.io/?https://github.com/satijalab/seurat.wrappers/blob/master/docs/harmony.html).
+By looking at the metacell annotation (assigned from the original single-cell metadata by MATK), we can verify that we correctly retrieved the B cell lineage cluster
+
+```{r fig.height=5,fig.width=12}
+DimPlot(combined.mc[,combined.mc$integrated_snn_res.0.5 == b.clust],group.by = c("ann_level_4","integrated_snn_res.0.5"),ncol = 2)
+```
+
+### Cell type abundances analyses.
+
+We can easily make analysis of cell type abundances for different clinical variables as we construct metacell by sample. We have to take metacell size into account for these analyses. For instance we can analyse the proportion of different epithelial cell types depending on the smoking status.
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
+library(reshape2)
+combined.mc.epith <- combined.mc[,combined.mc$ann_level_1 == "Epithelial"] 
+#combined.metacells$major_type <- droplevels(combined.metacells$major_type)
+smpCounts <- aggregate(combined.mc.epith$size, by=list(sample = combined.mc.epith$sample,
+                                                        major_type = combined.mc.epith$ann_level_3,
+                                                        smoking_status = combined.mc.epith$smoking_status),
+                                                        FUN=sum)
+
+
+contingencyTable <- xtabs(x ~ major_type+smoking_status,data = smpCounts)
+
+freqMatrix <- apply(contingencyTable,1,FUN = function(x){x/colSums(contingencyTable)})
+# res <- chisq.test(contingencyTable)
+# Roe <- res$observed/res$expected
+
+freqMatrix_df <- melt(freqMatrix)
+
+remove(combined.mc.epith)
+gc()
+
+ggplot(freqMatrix_df,aes(y=value,x = smoking_status,fill=major_type))  + geom_bar(stat="identity", position="fill") + scale_fill_manual(values = color.celltypes) + scale_y_continuous(labels = scales::percent) + ylab("% epithelial cells")
+```
+
+Samples from smokers seem to present more AT2 cells but this quick analysis is for illustrative purposes only. In practice it's far more complex to draw conclusion as we should have considered the variations between samples/donors as well as many other technical (tissue dissociation protocol, tissue sampling method, single-cell platform, ... ) and biological (BMI, sex, Age, ...) variables.
+
+## Conclusion
+
+Overall we made a precise simplification of the original atlas using metacells built from each sample separately. By reducing the size of the original atlas by a factor of 50 we could load the data, make an integration to correct batch effect and recapitulate the main different cell types using a reasonable amount of time and memory. In contrast, simply loading the original single-cell data in R using Seurat is extremely time-consuming and challenging even for the most powerful computers.
+
+In this first example we used a fully unsupervised workflow and did not use any prior biological knowledge. Authors of the original study made a remarkable work annotating the hundreds of thousands cells of the atlas. In the second [example](./HLCA_core_atlas_supervised.md) we propose a supervised workflow using this annotation to guide both the metacell identification and the batch correction.
+
+We can save the results for comparison with the second example.
 
 ```{r}
-if (!requireNamespace("harmony")) install.packages("harmony")
-```
-
-
-```{r message=FALSE}
-library(harmony)
-DefaultAssay(combined.mc) <- "RNA"
-combined.mc <- NormalizeData(combined.mc,features = features)
-combined.mc <- ScaleData(combined.mc,features = features)
-combined.mc <- RunPCA(combined.mc, npcs = 30, verbose = FALSE,features = features)
-
-# harmony requires the batch column to be defined as factor
-combined.mc@meta.data$dataset <- as.factor(combined.mc@meta.data$dataset)
-combined.mc <- RunHarmony(combined.mc,group.by.vars = c("dataset"))
-
-combined.mc <- RunUMAP(combined.mc,reduction = "harmony",
-                      reduction.name = "umap.harmony",
-                      dims = 1:30)
-```
-
-```{r fig.height=4,fig.width=4}
-DimPlot(combined.mc,group.by = "ann_finest_level",label = T,reduction = "umap.harmony") + NoLegend()
-```
-
-```{r}
-DimPlot(combined.mc,group.by = "dataset",reduction = "umap.harmony")
-
-```
-
-# Unintegrated analysis
-
-```{r}
-combined.mc <- RunUMAP(combined.mc,reduction = "pca",
-                      reduction.name = "umap.unintegrated",
-                      dims = 1:30)
-
-DimPlot(combined.mc,group.by = "ann_finest_level",label = T,reduction = "umap.unintegrated") + NoLegend()
-DimPlot(combined.mc,group.by = "dataset",reduction = "umap.unintegrated")
-
-```
-
-```{r}
-# library(scIntegrationMetrics)
-# 
-# integrationMetrics <- list()
-# integrationMetrics[["STACAS"]] <- getIntegrationMetrics(object=combined.mc,
-#                                                       metrics = c("CiLISI","celltype_ASW"),
-#                                                       meta.label = "ann_level_3",
-#                                                       meta.batch = "dataset",
-#                                                       method.reduction = "pca")
-# 
-# integrationMetrics[["harmony"]] <- getIntegrationMetrics(object=object_integrated,
-#                                                       metrics = c("CiLISI","celltype_ASW"),
-#                                                       meta.label = "ann_level_3",
-#                                                       meta.batch = "dataset",
-#                                                       method.reduction = "harmony")
-# 
-# integrationMetrics[["unintegrated"]] <- getIntegrationMetrics(object=object_integrated_ss,
-#                                                       metrics = c("CiLISI","celltype_ASW"),
-#                                                       meta.label = "ann_level_3",
-#                                                       meta.batch = "dataset",
-#                                                       method.reduction = "pca")
-
+saveRDS(combined.mc,"./HLCA_data/combined.mc.unsup.rds")
 ```

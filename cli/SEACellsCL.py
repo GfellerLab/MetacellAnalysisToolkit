@@ -61,6 +61,7 @@ def main(argv):
     print('gamma is "', gamma)
     print('dims are "', dim_str)
     print('reduction_key is"', reduction_key)
+    print('k knn is"', k_knn)
     
     os.makedirs(outdir,exist_ok = True)
     
@@ -86,7 +87,8 @@ def main(argv):
     
         ro.r(f'sobj <- readRDS("{input_file}")')
         adata = ro.r("as.SingleCellExperiment(sobj)")
-        del adata.layers['logcounts']  # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
+        if "logcounts" in adata.layers:
+            del adata.layers['logcounts']  # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
     
         anndata2ri.deactivate()
     
@@ -257,7 +259,7 @@ def main(argv):
     
         ro.r('''
         sobj.mc <- CreateSeuratObject(counts = assay(adata_mc),meta.data = data.frame(colData(adata_mc)))
-        sobj.mc@misc$membership <- membership  
+        sobj.mc@misc$cell_membership <- membership  
         ''')
     
         ro.r(f'saveRDS(sobj.mc, file="{seurat_out}")')

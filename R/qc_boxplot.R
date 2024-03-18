@@ -1,10 +1,10 @@
 #' Generate boxplot to visualize QC metrics distributions.
 #'
 #' \code{qc_boxplot} 
-#' This function generate boxplot to visualize QC metrics distributions across metacells.
-#' @param mc.obj A Seurat object containing the metacells data .
+#' This function generate boxplots to visualize QC metrics distributions across metacells.
+#' @param mc.obj A Seurat object containing the metacells data.
 #' @param qc.metrics Vector of strings indicating which QC metric should be considered in the mc.obj metadata. 
-#' @param split.by (optional): String indicating if the boxplot should be splitted based a metacell annotation available in the mc.obj metadata dataframe. 
+#' @param split.by (optional): String indicating if the boxplot should be splitted based on a metacell annotation available in the mc.obj metadata dataframe. 
 #' @param y.lim (optional): Y axis limit. 
 #' By default, the orig.ident variable is used.
 #' @return Boxplots representing the distribution of the qc.metrics.
@@ -36,7 +36,6 @@ qc_boxplot <- function(mc.obj, qc.metrics = NULL, split.by = "orig.ident", y.lim
       tidyr::gather(na.rm = TRUE) %>%
       ggplot2::ggplot(ggplot2::aes(y = value, x = 0)) +
       ggplot2::geom_boxplot() +
-      # geom_density(aes(x = value, y = stat(scaled)), inherit.aes = FALSE) +
       ggplot2::facet_wrap(~key, scales = 'free') + ggplot2::theme(axis.title.x = ggplot2::element_blank(), 
                                                                   axis.text.x = ggplot2::element_blank(), 
                                                                   axis.ticks = ggplot2::element_blank())

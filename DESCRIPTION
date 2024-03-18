@@ -1,4 +1,4 @@
-Package: MetacellToolkit
+Package: MetacellAnalysisToolkit
 Type: Package
 Title: Visualize metacells and evaluate their quality
 Version: 1.0
@@ -33,7 +33,9 @@ Imports:
   Matrix,
   ggplot2,
   RColorBrewer,
-  dplyr
+  dplyr,
+  stats,
+  igraph
 Suggests:
   testthat,
   knitr,

@@ -174,7 +174,8 @@ def main(argv):
     
         ro.r(f'sobj <- readRDS("{input_file}")')
         adata = ro.r("as.SingleCellExperiment(sobj)")
-        del adata.layers['logcounts']  # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
+        if "logcounts" in adata.layers:
+            del adata.layers['logcounts'] # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
     
         anndata2ri.deactivate()
     
@@ -237,7 +238,7 @@ def main(argv):
     # Store it in adata_mc
     adata_mc.uns["cell_membership"] = clean.obs[["membership","metacell_name"]]
     # Rename metacells size column
-    adata_mc.obs.rename(columns={'grouped':'size'})
+    adata_mc.obs = adata_mc.obs.rename(columns={'grouped':'size'})
     
     print("Assign metadata to metacells and compute purities...")
     #We use SEACells function for this
@@ -298,7 +299,7 @@ def main(argv):
     
         ro.r('''
         sobj.mc <- CreateSeuratObject(counts = assay(adata_mc),meta.data = data.frame(colData(adata_mc)))
-        sobj.mc@misc$membership <- membership  
+        sobj.mc@misc$cell_membership <- membership  
         ''')
     
         ro.r(f'saveRDS(sobj.mc, file="{seurat_out}")')

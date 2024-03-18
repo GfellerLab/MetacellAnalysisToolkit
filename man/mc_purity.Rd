@@ -23,5 +23,5 @@ A vector containing the purity of each metacell.
 This function computes the purity of metacells. (code has been retrieved from the SuperCell::supercell_purity function).
 }
 \examples{
-mc_purity(membership = CD34_mc@misc$cell_membership$membership, annotation = CD34_sc[['celltype']])
+mc_purity(membership = CD34_mc@misc$cell_membership$membership, annotation = CD34_sc$celltype)
 }
