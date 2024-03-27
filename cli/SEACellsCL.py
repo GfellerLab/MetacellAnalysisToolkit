@@ -6,6 +6,10 @@ import scanpy as sc
 import os
 import sys, getopt
 from pathlib import Path
+from numba import cuda
+import cupy as cp
+import cupyx
+# np.random.seed(123)
 
 def main(argv):
     # Default setting
@@ -23,15 +27,16 @@ def main(argv):
     min_iter=10
     max_iter=100
     k_knn = 15
-    
+    use_gpu = False
+
     try:
-        opts, args = getopt.getopt(argv,"i:o:pr:n:f:k:g:s:a:m:",["input_file=","outdir=","pre_pro=","reduction_key=","dims=","n_features=","k_knn","gamma=","output=","annotations=","min_metacells="])
+        opts, args = getopt.getopt(argv,"i:o:pr:n:f:k:g:s:a:m:u",["input_file=","outdir=","pre_pro=","reduction_key=","dims=","n_features=","k_knn","gamma=","output=","annotations=","min_metacells=","use_gpu="])
     except getopt.GetoptError:
-        print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells>')
+        print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells> -u <use_gpu>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells>')
+            print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells> -u <use_gpu>')
             sys.exit()
         elif opt in ("-i", "--input_file"):
             input_file = arg
@@ -55,6 +60,8 @@ def main(argv):
             annotations = arg
         elif opt in ("-m", "--min_metacells"):
             min_metacells = int(arg)
+        elif opt in ("-u", "--use_gpu"):
+            use_gpu = True
 
     print('input is "', input_file)
     print('Output dir is "', outdir)
@@ -62,9 +69,9 @@ def main(argv):
     print('dims are "', dim_str)
     print('reduction_key is"', reduction_key)
     print('k knn is"', k_knn)
-    
+
     os.makedirs(outdir,exist_ok = True)
-    
+
     if input_file.endswith(".rds"):
         try:
             import logging
@@ -72,45 +79,45 @@ def main(argv):
             import rpy2.rinterface_lib.callbacks
             import rpy2.rinterface_lib.embedded
             import rpy2.robjects as ro
-        
+
             rpy2.rinterface_lib.callbacks.logger.setLevel(logging.ERROR)
         except ModuleNotFoundError as e:
             raise OptionalDependencyNotInstalled(e)
-    
+
         try:
             ro.r("library(Seurat)")
             ro.r("library(scater)")
         except rpy2.rinterface_lib.embedded.RRuntimeError as ex:
             RLibraryNotFound(ex)
-        
+
         anndata2ri.activate()
-    
+
         ro.r(f'sobj <- readRDS("{input_file}")')
         adata = ro.r("as.SingleCellExperiment(sobj)")
         if "logcounts" in adata.layers:
             del adata.layers['logcounts']  # we only load raw counts stored in adata.X when using as.SingleCellExperiment and annadata2ri
-    
+
         anndata2ri.deactivate()
-    
+
     else:
         adata = sc.read_h5ad(input_file)
-        
+
         if adata.raw is not None:
-            adata.X = adata.raw  # we only load raw counts, We always normalize .X prior to compute PCA if prePro is asked or reduction_key absent  
+            adata.X = adata.raw  # we only load raw counts, We always normalize .X prior to compute PCA if prePro is asked or reduction_key absent
             del adata.raw
 
-    # The dtype of X is no longer set to float32 in scampy. 
+    # The dtype of X is no longer set to float32 in scampy.
     # While anndata2ri produces float64, the majority of h5ad objects available online are float32.
     # We choose to set the type to float32
-    
+
     adata.X = adata.X.astype("float32")
-    
+
     dim_str_list = dim_str.split(":") # range input is interesting when using SEACells for ATAC data for which 1 component is often discarded
     # 1 to given components are used when only one number is given to dim
     if (len(dim_str_list)<2):
         dim_str_list += "1"
         dim_str_list.reverse()
-    
+
     # Copy the counts to ".raw" attribute of the anndata since it is necessary for downstream analysis
     # This step should be performed after filtering
     raw_ad = sc.AnnData(adata.X)
@@ -124,10 +131,10 @@ def main(argv):
     for anno in adata.obs[annotations].unique():
         adata_label = adata[adata.obs[annotations] == anno,]
         n_SEACells = round(len(adata_label)/gamma)
-        
+
         if n_SEACells < min_metacells:
             n_SEACells = min_metacells
-            
+
         if n_SEACells == 1:
             adata_label.obs['SEACell'] = "SEACell-1_"+ anno
             if anno == adata.obs[annotations].unique()[0]:
@@ -135,62 +142,63 @@ def main(argv):
             else:
                 seacells_res = pd.concat([seacells_res,adata_label.obs["SEACell"]])
             continue
-        
+
         print("Identify "+ str(n_SEACells) + " metacells using SEACells...")
-    
+
         if (prePro or reduction_key not in adata_label.obsm.keys()):
             print("Preprocess the data...")
             print("Normalize cells and compute highly variable genes...")
             sc.pp.normalize_per_cell(adata_label)
             sc.pp.log1p(adata_label)
             sc.pp.highly_variable_genes(adata_label, n_top_genes=n_features)
-        
+
             print("Compute principal components")
             sc.tl.pca(adata_label, n_comps=int(dim_str_list[1]), use_highly_variable=True)
             reduction_key = "X_pca"
-        
+
         build_kernel_on = reduction_key
         adata_label.obsm[build_kernel_on] = adata_label.obsm[build_kernel_on][:,range(int(dim_str_list[0])-1, int(dim_str_list[1]))]
-        
-    
+
+
         min_metacells = min(min_metacells,adata_label.n_obs)
-    
-        
-        
+
+
+
         if n_SEACells < n_waypoint_eigs:
             n_waypoint_eigs_label = n_SEACells
         else:
             n_waypoint_eigs_label = n_waypoint_eigs
-      
-    
-        model = SEACells.core.SEACells(adata_label, 
-        build_kernel_on=build_kernel_on, 
-        n_SEACells=n_SEACells, 
+
+
+        model = SEACells.core.SEACells(adata_label,
+        build_kernel_on=build_kernel_on,
+        n_SEACells=n_SEACells,
         n_neighbors = k_knn,
         n_waypoint_eigs=n_waypoint_eigs_label,
-        convergence_epsilon = 1e-5)
-        
+        convergence_epsilon = 1e-5,
+        use_gpu=use_gpu)
+
         model.construct_kernel_matrix()
         # M = model.kernel_matrix
         model.initialize_archetypes()
         #SEACells.plot.plot_initialization(ad, model)
         model.fit(min_iter=min_iter, max_iter=max_iter)
         #model.plot_convergence()
-        adata_label.obs['SEACell'] = adata_label.obs['SEACell'] +"_"+ anno 
-        
+        adata_label.obs['SEACell'] = adata_label.obs['SEACell'] +"_"+ anno
+
         if anno == adata.obs[annotations].unique()[0]:
             seacells_res = adata_label.obs["SEACell"]
         else:
             seacells_res = pd.concat([seacells_res,adata_label.obs["SEACell"]])
-        
+
 
     adata.obs['SEACell'] = seacells_res.reindex(adata.obs_names)
     adata_mc = SEACells.core.summarize_by_SEACell(adata, SEACells_label='SEACell', summarize_layer='raw')
-        
+
     # Store metacells size
     label_df = adata.obs[['SEACell']].reset_index()
     adata_mc.obs = adata_mc.obs.join(pd.DataFrame(label_df.groupby('SEACell').count().iloc[:, 0]).rename(columns={'index':'size'}))
-        
+
     #Store membership
     d = {x: i+1 for i, x in enumerate(adata_mc.obs_names)}
     # make a membership (as in SCimplify() from SuperCell) vector
@@ -207,73 +215,66 @@ def main(argv):
 
     # writing membership dataframe
     # adata.obs[["SEACell","membership"]].to_csv(outdir + "SEACells_memberships.csv",index_label= "cell")
-    
+
     #iterative merging of adata per cell annotation
     #loop end
 
     if output == "adata":
-        
+
         print("Save results as adata...")
         adata_out = outdir+"/mc_adata.h5ad"
         adata_mc.write_h5ad(adata_out)
 
 
     if output == "seurat":
-        
+
         print("Save results as seurat...")
         seurat_out = outdir+"/mc_Seurat.rds"
-    
+
         try:
             import logging
-            from scipy import sparse 
+            from scipy import sparse
             import anndata2ri
             import rpy2.rinterface_lib.callbacks
             import rpy2.rinterface_lib.embedded
             import rpy2.robjects as ro
-        
+
             rpy2.rinterface_lib.callbacks.logger.setLevel(logging.ERROR)
-    
+
         except ModuleNotFoundError as e:
             raise OptionalDependencyNotInstalled(e)
-      
+
         try:
             ro.r("library(Seurat)")
             ro.r("library(scater)")
         except rpy2.rinterface_lib.embedded.RRuntimeError as ex:
             RLibraryNotFound(ex)
-        
+
         anndata2ri.activate()
-    
+
         if sparse.issparse(adata_mc.X):
             if not adata_mc.X.has_sorted_indices:
                 adata_mc.X.sort_indices()
-        
-        #Would be needed if other layers are summarized    
+
+        #Would be needed if other layers are summarized
         #for key in adataMC.layers:
         #    if sparse.issparse(adataMC.layers[key]):
         #        if not adataMC.layers[key].has_sorted_indices:
         #            adataMC.layers[key].sort_indices()
-                
+
         ro.globalenv["adata_mc"] = adata_mc
         ro.globalenv["membership"] = adata_mc.uns['cell_membership']
-    
+
         ro.r('''
         sobj.mc <- CreateSeuratObject(counts = assay(adata_mc),meta.data = data.frame(colData(adata_mc)))
-        sobj.mc@misc$cell_membership <- membership  
+        sobj.mc@misc$cell_membership <- membership
         ''')
-    
+
         ro.r(f'saveRDS(sobj.mc, file="{seurat_out}")')
-    
+
         anndata2ri.deactivate()
 
 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-    
-
-
-
-
-
-
