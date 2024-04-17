@@ -51,6 +51,8 @@ OPTIONS:
 
    -x     ADD -x to use the do.approx option in SCimplify() to use approximate kNN in case of a large dataset (only for SuperCell, default is FALSE)
 
+   -e     Convergence threshold for Franke-Wolfe algorithm (only for SEACells, default is 1e-5)
+
 EOF
 }
 
@@ -63,7 +65,7 @@ PREPRO=""
 REDUCTION_KEY=""
 YAML_FILE=""
 
-while getopts "hr:t:i:a:o:dn:f:k:g:s:r:a:l:y:c:xu" OPTION; do
+while getopts "hr:t:i:a:o:dn:f:k:g:s:r:a:l:y:c:xue:" OPTION; do
   case $OPTION in
   h)
     usage
@@ -117,6 +119,9 @@ while getopts "hr:t:i:a:o:dn:f:k:g:s:r:a:l:y:c:xu" OPTION; do
   x)
     DO_APPROX="-x"
     ;;
+  e)
+    EPSILON="-e ${OPTARG}"
+    ;;
   ?)
     usage
     exit
@@ -137,7 +142,7 @@ fi
 
 echo "Identifying metacells..."
 if [ "$TOOL" == "SEACells" ]; then
-  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} -k ${K_KNN} ${REDUCTION_KEY} ${ANNOTATION} ${USE_GPU}
+  python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} -k ${K_KNN} ${REDUCTION_KEY} ${ANNOTATION} ${USE_GPU} ${EPSILON}
 elif [ "$TOOL" == "MetaCell" ]; then
   python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
 elif [ "$TOOL" == "SuperCell" ]; then
