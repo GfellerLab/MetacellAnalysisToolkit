@@ -7,8 +7,6 @@ import os
 import sys, getopt
 from pathlib import Path
 from numba import cuda
-import cupy as cp
-import cupyx
 # np.random.seed(123)
 
 def main(argv):
@@ -28,15 +26,16 @@ def main(argv):
     max_iter=100
     k_knn = 15
     use_gpu = False
+    conv_epsilon = 1e-5
 
     try:
-        opts, args = getopt.getopt(argv,"i:o:pr:n:f:k:g:s:a:m:u",["input_file=","outdir=","pre_pro=","reduction_key=","dims=","n_features=","k_knn","gamma=","output=","annotations=","min_metacells=","use_gpu="])
+        opts, args = getopt.getopt(argv,"i:o:pr:n:f:k:g:s:a:m:ue:",["input_file=","outdir=","pre_pro=","reduction_key=","dims=","n_features=","k_knn","gamma=","output=","annotations=","min_metacells=","use_gpu=","conv_epsilon="])
     except getopt.GetoptError:
-        print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells> -u <use_gpu>')
+        print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells> -u <use_gpu> -e <conv_epsilon>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells> -u <use_gpu>')
+            print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells> -u <use_gpu> -e <conv_epsilon>')
             sys.exit()
         elif opt in ("-i", "--input_file"):
             input_file = arg
@@ -62,6 +61,8 @@ def main(argv):
             min_metacells = int(arg)
         elif opt in ("-u", "--use_gpu"):
             use_gpu = True
+        elif opt in ("-e", "--conv_epsilon"):
+            conv_epsilon = float(arg)
 
     print('input is "', input_file)
     print('Output dir is "', outdir)
@@ -175,7 +176,7 @@ def main(argv):
         n_SEACells=n_SEACells,
         n_neighbors = k_knn,
         n_waypoint_eigs=n_waypoint_eigs_label,
-        convergence_epsilon = 1e-5,
+        convergence_epsilon = conv_epsilon,
         use_gpu=use_gpu)
 
         model.construct_kernel_matrix()
