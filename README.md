@@ -47,19 +47,19 @@ Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS) after.
 
 We also provide a Docker file to build an environment with all the requirements to run MATK. You can build the docker environment using the following command line:
 
-    docker build -t matk:latest -f env/Dockerfile_MATK .
+    docker build -t matk:v1.1 -f env/Dockerfile_MATK .
     
 On MAC, if you are encountering issues, try the following command line:
 
-    docker build --platform linux/amd64 -t matk:v1.0 -f env/Dockerfile_MATK .
+    docker build --platform linux/amd64 -t matk:v1.1 -f env/Dockerfile_MATK .
 
 You can also pull our prebuilt image using: 
 
-    docker pull agabriel/matk:v1.0
+    docker pull agabriel/matk:v1.1
 
 To run MATK on a test dataset (downloaded in section 2) within this docker container with docker or singularity please refer to section 3.5.
 
-Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V4, if you want to use Seurat V5, uncomment the commented code lines in the Docker file or use the following prebuilt image: `agabriel/matk:v1.1`
+Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V5, if you want to use Seurat V4, use `env/Dockerfile_MATK_SeuratV4` or use the following prebuilt image: `agabriel/matk:v1.0`
 
 ## 2. Download test data
 
@@ -67,7 +67,7 @@ MATK takes as input/output either an Anndata .h5ad objects or Seurat .rds object
 
 ### 2.1 CD34+ scRNA-seq dataset (6,900 cells) from Dana's Peer lab (.h5ad file).
 
-    wget https://dp-lab-data-public.s3.amazonaws.com/SEACells-multiome/cd34_multiome_rna.h5ad -O data/cd34_multiome_rna.h5ad
+    wget https://zenodo.org/records/6383269/files/cd34_multiome_rna.h5ad?download=1 -O data/cd34_multiome_rna.h5ad
 
 ### 2.2 PBMC scRNA-seq (6,900 cells) dataset from scanpy datasets
 
@@ -162,12 +162,12 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 To run MATK on the CD34 dataset within the docker container, use the following command line:
 
-    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:v1.0 MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:v1.1 MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
 
 You can also use the container with singularity, for example to use MATK on a cluster :
 
-    singularity pull docker://agabriel/matk:v1.0 
-    singularity run --bind $(pwd) matk_v1.0.sif MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    singularity pull docker://agabriel/matk:v1.1 
+    singularity run --bind $(pwd) matk_v1.1.sif MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
     
 ## Quality control visualization
 
