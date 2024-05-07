@@ -9,11 +9,11 @@ RUN mamba env create -f /tmp/MetacellAnalysisToolkit_env.yml
 
 ENV PATH /opt/conda/envs/MetacellAnalysisToolkit/bin:$PATH
 
-#RUN Rscript -e "install.packages('Seurat', repos = 'https://cran.rstudio.com/')"
+RUN Rscript -e "install.packages('Seurat', repos = 'https://cran.rstudio.com/')"
 RUN Rscript -e "remotes::install_github('GfellerLab/SuperCell', upgrade = 'never')"
 RUN Rscript -e "remotes::install_github('GfellerLab/MetacellAnalysisToolkit', upgrade = 'never')"
 RUN Rscript -e "remotes::install_github('rstudio/reticulate', upgrade = 'never')"
-#RUN Rscript -e "BiocManager::install('limma',update = F)"
+RUN Rscript -e "BiocManager::install('limma',update = F)"
 
 
 RUN git clone https://github.com/GfellerLab/MetacellAnalysisToolkit && \

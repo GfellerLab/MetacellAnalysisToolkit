@@ -1,0 +1,22 @@
+FROM continuumio/miniconda3
+# install mamba
+RUN conda install -c conda-forge mamba
+# Copy your Conda environment file
+COPY env/MetacellAnalysisToolkit_env.yml /tmp/MetacellAnalysisToolkit_env.yml
+
+# Create the environment using Mamba
+RUN mamba env create -f /tmp/MetacellAnalysisToolkit_env.yml
+
+ENV PATH /opt/conda/envs/MetacellAnalysisToolkit/bin:$PATH
+
+RUN Rscript -e "remotes::install_github('GfellerLab/SuperCell', upgrade = 'never')"
+RUN Rscript -e "remotes::install_github('GfellerLab/MetacellAnalysisToolkit', upgrade = 'never')"
+RUN Rscript -e "remotes::install_github('rstudio/reticulate', upgrade = 'never')"
+
+
+RUN git clone https://github.com/GfellerLab/MetacellAnalysisToolkit && \
+    chmod a+x /MetacellAnalysisToolkit/cli/MATK && \
+    chmod a+x /MetacellAnalysisToolkit/cli/SuperCellCL.R && \
+    chmod a+x /MetacellAnalysisToolkit/cli/SEACellsCL.py && \
+    chmod a+x /MetacellAnalysisToolkit/cli/MetaCell2CL.py
+ENV PATH $PATH:/MetacellAnalysisToolkit/cli/
