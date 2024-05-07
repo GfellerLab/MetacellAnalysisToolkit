@@ -25,8 +25,8 @@ if not os.path.exists(directory):
 adata.write_h5ad(os.path.join("get_data", "pbmc.h5ad"))
 
 # We keep only the file with filtered cells and raw counts
-os.remove(os.path.join("get_data", "pbmc3k_raw.h5ad"))
-os.remove(os.path.join("get_data", "pbmc3k_processed.h5ad"))
+#os.remove(os.path.join("get_data", "pbmc3k_raw.h5ad"))
+#os.remove(os.path.join("get_data", "pbmc3k_processed.h5ad"))
 
 
 
