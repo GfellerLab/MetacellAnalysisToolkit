@@ -183,7 +183,7 @@ def main(argv):
         adata = sc.read_h5ad(input_file)
         
         if adata.raw is not None:
-            adata.X = adata.raw  # we only load raw counts, We always normalize .X prior to compute PCA if prePro is asked or reduction_key absent  
+            adata.X = adata.raw.X # we only load raw counts, We always normalize .X prior to compute PCA if prePro is asked or reduction_key absent  
             del adata.raw
 
     # The dtype of X is no longer set to float32 in scampy. 

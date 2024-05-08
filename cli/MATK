@@ -36,9 +36,11 @@ OPTIONS:
           
    -d     normalized data in input (only for SuperCell). ADD -d to specify that data are already normalized in the data slot of the Seurat object or in .X for a adata object (default FALSE).
           Note that in this case raw count data have to be provided in the count slot for a Seurat object or in .raw.X for an anndata object. 
-   
+
+   -p     Use MetaCell prefilering of the cells (only for MetaCell)
+
    -r     reduction_key (only for SEACells, default none and a PCA reduction is computed using standard scanpy workflow and stored in "X_pca")
-   
+
    -y     yaml_file (only for MetaCell2, default None and use default options and gene lists)
    
    -a     annotation, to make supervised metacells according to an annotation present in the metadata of the object (only for SEACells and SuperCell, default none)
@@ -92,6 +94,9 @@ while getopts "hr:t:i:a:o:pn:f:k:g:s:r:a:l:y:" OPTION; do
   d)
     NORMALISED_DATA="-d"
     ;;
+  p)
+    PREFILTER_CELL="-p"
+    ;;
   a)
     ANNOTATION="-a ${OPTARG}"
     ;;
@@ -123,7 +128,7 @@ echo "Identifying metacells..."
 if [ "$TOOL" == "SEACells" ]; then
   python  "${SCRIPT_DIR}/SEACellsCL.py" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} -k ${K_KNN} ${REDUCTION_KEY} ${ANNOTATION} 
 elif [ "$TOOL" == "MetaCell" ]; then
-  python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE}
+  python  "${SCRIPT_DIR}/MetaCell2CL.py" -i ${INPUT_FILE} -o ${OUTDIR} -g ${GAMMA} -s ${OUTPUT} ${YAML_FILE} ${PREFILTER_CELL}
 elif [ "$TOOL" == "SuperCell" ]; then
   Rscript "${SCRIPT_DIR}/SuperCellCL.R" -i ${INPUT_FILE} -o ${OUTDIR} -n ${DIMS} -f ${N_FEATURES} -g ${GAMMA} -s ${OUTPUT} -k ${K_KNN} ${ANNOTATION} ${N_CORES} ${NORMALISED_DATA}
 fi

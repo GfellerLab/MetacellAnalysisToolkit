@@ -10,11 +10,10 @@ from pathlib import Path
 def main(argv):
     # Default setting
     outdir = '.'
-    prePro = False
-    reduction_key = "X_pca"
     dim_str = "1:50"
     gamma = 75
     n_features = 2000
+    reduction_key = None
     annotations = None
     min_metacells = 1
     output = "adata"
@@ -25,22 +24,21 @@ def main(argv):
     k_knn = 15
     
     try:
-        opts, args = getopt.getopt(argv,"i:o:pr:n:f:k:g:s:a:m:",["input_file=","outdir=","pre_pro=","reduction_key=","dims=","n_features=","k_knn","gamma=","output=","annotations=","min_metacells="])
+        opts, args = getopt.getopt(argv,"i:o:r:n:f:k:g:s:a:m:",["input_file=","outdir=","reduction_key=","dims=","n_features=","k_knn","gamma=","output=","annotations=","min_metacells="])
     except getopt.GetoptError:
-        print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells>')
+        print('SEACellsCL.py -i <input_file> -o <outdir> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('SEACellsCL.py -i <input_file> -o <outdir> -p <pre_pro> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells>')
+            print('SEACellsCL.py -i <input_file> -o <outdir> -r <reduction_key> -n <dims> -f <n_features> -k <k_knn> -g <gamma> -s <output> -a <annotations> -m <min_metacells>')
             sys.exit()
         elif opt in ("-i", "--input_file"):
             input_file = arg
         elif opt in ("-o", "--outdir"):
             outdir = arg
-        elif opt in ("-p", "--prePro"):
-            prePro = True
         elif opt in ("-r", "--reduction_key"):
             reduction_key= arg
+            print('reduction_key is"', reduction_key)
         elif opt in ("-n", "--dims"):
             dim_str= arg
         elif opt in ("-f", "--n_features"):
@@ -60,7 +58,6 @@ def main(argv):
     print('Output dir is "', outdir)
     print('gamma is "', gamma)
     print('dims are "', dim_str)
-    print('reduction_key is"', reduction_key)
     print('k knn is"', k_knn)
     
     os.makedirs(outdir,exist_ok = True)
@@ -96,7 +93,7 @@ def main(argv):
         adata = sc.read_h5ad(input_file)
         
         if adata.raw is not None:
-            adata.X = adata.raw  # we only load raw counts, We always normalize .X prior to compute PCA if prePro is asked or reduction_key absent  
+            adata.X = adata.raw.X  # we only load raw counts, We always normalize .X prior to compute PCA if reduction_key absent or not in the object  
             del adata.raw
 
     # The dtype of X is no longer set to float32 in scampy. 
@@ -137,8 +134,8 @@ def main(argv):
             continue
         
         print("Identify "+ str(n_SEACells) + " metacells using SEACells...")
-    
-        if (prePro or reduction_key not in adata_label.obsm.keys()):
+        
+        if (reduction_key is None or reduction_key not in adata_label.obsm.keys()):
             print("Preprocess the data...")
             print("Normalize cells and compute highly variable genes...")
             sc.pp.normalize_per_cell(adata_label)
@@ -148,8 +145,15 @@ def main(argv):
             print("Compute principal components")
             sc.tl.pca(adata_label, n_comps=int(dim_str_list[1]), use_highly_variable=True)
             reduction_key = "X_pca"
+        else:
+            print("using pre-computed dimension reduction "+ reduction_key)
         
         build_kernel_on = reduction_key
+        
+        if int(dim_str_list[1]) > len(adata.obsm[reduction_key][0]):
+            print("number of PCs requested superior to PCs available setting last PC number to the number of available PCs")
+            dim_str_list[1] = len(adata.obsm[reduction_key][0])
+
         adata_label.obsm[build_kernel_on] = adata_label.obsm[build_kernel_on][:,range(int(dim_str_list[0])-1, int(dim_str_list[1]))]
         
     
