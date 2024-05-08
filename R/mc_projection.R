@@ -100,6 +100,8 @@ mc_projection <- function(sc.obj,
   scCoordMetacell <-  cbind(scCoord, membership)
   
   centroids <- stats::aggregate(scCoord~membership, scCoord, mean) #should be taken from object slot
+  rownames(centroids) <- centroids[,1]
+  centroids <- centroids[colnames(mc.obj),]
   
   # if metacell.label and metric provided, mc.obj is mandatory if mc.obj not found membership mandatory and metric set to size which we compute from membership 
   # just add a message to warn the user 
