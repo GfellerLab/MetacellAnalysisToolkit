@@ -6,7 +6,7 @@ executors:
   seurat_v5:
     docker:
       - image: agabriel/matk:v1.1
-    working_directory: /tmp
+    working_directory: /tmp/workspace
 
 jobs:
   build:
@@ -26,13 +26,15 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/get_data/
+          at: /tmp/workspace
       - run:
           name: Run tests
           command: |
               Rscript -e "reticulate::py_config(); .libPaths()"
-              MATK -t SuperCell -i /tmp/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t MetaCell -i /tmp/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              ls /tmp/workspace
+              ls /tmp/workspace/get_data/
+              MATK -t SuperCell -i /tmp/workspace/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              MATK -t MetaCell -i /tmp/workspace/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
 workflows:
   example:
     jobs:
