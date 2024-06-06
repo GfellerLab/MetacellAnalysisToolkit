@@ -23,7 +23,7 @@ jobs:
       # Replace this with a real test runner invocation
       - run:
           name: Run tests
-          command:
+          command: |
               Rscript -e "reticulate::py_config(); .libPaths()"
               MATK -t SuperCell -i get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
               MATK -t MetaCell -i get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
