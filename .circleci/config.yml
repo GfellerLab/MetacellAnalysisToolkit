@@ -3,15 +3,6 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 jobs:
-  test:
-    docker:
-      - image: agabriel/matk:v1.1
-    steps:
-      - checkout
-      # Replace this with a real test runner invocation
-      - run:
-          name: Run tests
-          command: Rscript -e "reticulate::py_config(); .libPaths()"
   build:
     docker:
       - image: agabriel/matk:v1.1
@@ -24,6 +15,18 @@ jobs:
             python get_data/get_PBMC_dataset.py
       - store_artifacts:
           path: get_data/pbmc.h5ad
+  test:
+    docker:
+      - image: agabriel/matk:v1.1
+    steps:
+      - checkout
+      # Replace this with a real test runner invocation
+      - run:
+          name: Run tests
+          command: 
+						Rscript -e "reticulate::py_config(); .libPaths()"
+						MATK -t SuperCell -i get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+						MATK -t MetaCell -i get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
 workflows:
   example:
     jobs:
