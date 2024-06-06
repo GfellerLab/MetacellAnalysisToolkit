@@ -32,9 +32,8 @@ jobs:
           command: |
               Rscript -e "reticulate::py_config(); .libPaths()"
               ls /tmp/workspace
-              ls /tmp/workspace/get_data/
-              MATK -t SuperCell -i /tmp/workspace/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t MetaCell -i /tmp/workspace/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              MATK -t MetaCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
 workflows:
   example:
     jobs:
