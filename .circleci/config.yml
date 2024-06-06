@@ -8,15 +8,14 @@ jobs:
       - image: agabriel/matk:v1.1
     steps:
       - checkout
-      # Replace this with steps to build a package, or executable
       - run:
           name: Get anndata input
-          command: 
+          command: |
             python get_data/get_PBMC_dataset.py
       - persist_to_workspace:
-        root: .
+        root: get_data
         paths:
-          - get_data/pbmc.h5ad
+          - pbmc.h5ad
   test:
     docker:
       - image: agabriel/matk:v1.1
@@ -28,8 +27,8 @@ jobs:
           name: Run tests
           command: |
               Rscript -e "reticulate::py_config(); .libPaths()"
-              MATK -t SuperCell -i /workspaceget_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t MetaCell -i /workspaceget_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              MATK -t SuperCell -i /workspace/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              MATK -t MetaCell -i /workspace/get_data/pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
 workflows:
   example:
     jobs:
