@@ -6,11 +6,11 @@ executors:
   seurat_v5:
     docker:
       - image: agabriel/matk:SeuratV5
-    working_directory: /tmp
+    working_directory: /tmp/workspace
   seurat_v4:
     docker:
       - image: agabriel/matk:SeuratV4
-    working_directory: /tmp
+    working_directory: /tmp/workspace
 
 jobs:
   build_adata:
@@ -34,7 +34,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/get_data/
+          at: /tmp/workspace
       - run:
           name: Run tests
           command: |
@@ -53,7 +53,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/get_data/
+          at: /tmp/workspace
       - run:
           name: Run tests
           command: |
