@@ -21,12 +21,12 @@ Alternatively you can use [mamba](https://github.com/conda-forge/miniforge) for 
 Then you have to install in this environment additional required R packages not available through conda.
 
     conda activate MetacellAnalysisToolkit
-    Rscript env/install.R
+    Rscript env/install.R 
 
 #### Seurat v5 compatibility
 
 This toolkit has been developped under seurat version 4 which is the Seurat version installed with the MetacellAnalysisToolkit environment.
-We recommand using Seurat v4 and this environment to use MATK. However, this toolkit is also compatible with Seurat v5 installed by using the v4 assay [option](https://satijalab.org/seurat/articles/seurat5_essential_commands#create-seurat-or-assay-objects).
+We recommand using Seurat v4 and this environment to use MATK. However, this toolkit is also compatible with Seurat v5 installed by using the v4 assay [option](https://satijalab.org/seurat/articles/seurat5_essential_commands#create-seurat-or-assay-objects). To consider Seurat V5 objects replace `env/install.R` by `env/install_seurat_v5.R` in the previous code chunk.
 
 ### 1.4 Make command line scripts executable
 
@@ -47,19 +47,19 @@ Don't forget to source your `~/.bashrc` (or `~/.bash_profile` on macOS) after.
 
 We also provide a Docker file to build an environment with all the requirements to run MATK. You can build the docker environment using the following command line:
 
-    docker build -t matk:v1.1 -f env/Dockerfile_MATK .
+    docker build -t matk:SeuratV5 -f env/Dockerfile_MATK .
     
 On MAC, if you are encountering issues, try the following command line:
 
-    docker build --platform linux/amd64 -t matk:v1.1 -f env/Dockerfile_MATK .
+    docker build --platform linux/amd64 -t matk:SeuratV5 -f env/Dockerfile_MATK .
 
 You can also pull our prebuilt image using: 
 
-    docker pull agabriel/matk:v1.1
+    docker pull agabriel/matk:SeuratV5
 
 To run MATK on a test dataset (downloaded in section 2) within this docker container with docker or singularity please refer to section 3.5.
 
-Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V5, if you want to use Seurat V4, use `env/Dockerfile_MATK_SeuratV4` or use the following prebuilt image: `agabriel/matk:v1.0`
+Note that the container corresponding to the dockerfile `env/Dockerfile_MATK` is based on Seurat V5, if you want to use Seurat V4, use `env/Dockerfile_MATK_SeuratV4` or use the following prebuilt image: `agabriel/matk:SeuratV4`
 
 ## 2. Download test data
 
@@ -162,12 +162,12 @@ With SuperCell it is possible to use parallel processing using the `-l` argument
 
 To run MATK on the CD34 dataset within the docker container, use the following command line:
 
-    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:v1.1 MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    docker run --rm -v $(pwd):/workspace -v $(pwd):/workspace agabriel/matk:SeuratV5 MATK -t SuperCell -i /workspace/data/cd34_multiome_rna.h5ad -o /workspace/MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
 
 You can also use the container with singularity, for example to use MATK on a cluster :
 
-    singularity pull docker://agabriel/matk:v1.1 
-    singularity run --bind $(pwd) matk_v1.1.sif MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
+    singularity pull docker://agabriel/matk:SeuratV5 
+    singularity run --bind $(pwd) matk_SeuratV5.sif MATK -t SuperCell -i  data/cd34_multiome_rna.h5ad -o MATK_output/SuperCell/cd34/ -n 50 -f 2000 -k 30 -g 75 -s adata
     
 ## Quality control visualization
 
