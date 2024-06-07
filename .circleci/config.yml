@@ -73,3 +73,6 @@ workflows:
       - test_adata:
           requires:
             - build_adata
+      - test_rds_V5:
+          requires:
+            - build_adata
