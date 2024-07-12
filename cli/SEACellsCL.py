@@ -150,9 +150,9 @@ def main(argv):
         
         build_kernel_on = reduction_key
         
-        if int(dim_str_list[1]) > len(adata.obsm[reduction_key][0]):
+        if int(dim_str_list[1]) > len(adata_label.obsm[reduction_key][0]):
             print("number of PCs requested superior to PCs available setting last PC number to the number of available PCs")
-            dim_str_list[1] = len(adata.obsm[reduction_key][0])
+            dim_str_list[1] = len(adata_label.obsm[reduction_key][0])
 
         adata_label.obsm[build_kernel_on] = adata_label.obsm[build_kernel_on][:,range(int(dim_str_list[0])-1, int(dim_str_list[1]))]
         
