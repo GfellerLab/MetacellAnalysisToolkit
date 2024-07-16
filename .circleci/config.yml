@@ -40,13 +40,13 @@ jobs:
           command: |
               # seurat output
               ls
-              MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t SEACells -i pbmc.h5ad -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t MetaCell -i pbmc.h5ad -o MATK_output/MetaCell/pbmc/ -g 75 -s seurat
+              cli/MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t SEACells -i pbmc.h5ad -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t MetaCell -i pbmc.h5ad -o MATK_output/MetaCell/pbmc/ -g 75 -s seurat
               # adata output
-              MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s adata
-              MATK -t SEACells -i pbmc.h5ad -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s adata
-              MATK -t MetaCell -i pbmc.h5ad -o MATK_output/MetaCell/pbmc/ -g 75 -s adata
+              cli/MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t SEACells -i pbmc.h5ad -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t MetaCell -i pbmc.h5ad -o MATK_output/MetaCell/pbmc/ -g 75 -s adata
 
   test_rds_V5:
     executor: seurat_v5
@@ -58,13 +58,13 @@ jobs:
           name: Run tests
           command: |
               # seurat output
-              MATK -t SuperCell -i pbmc_V5.rds -o /workspace/MATK_output/SuperCell/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t SEACells -i pbmc_V5.rds -o /workspace/MATK_output/SEACells/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s seurat
-              MATK -t MetaCell -i pbmc_V5.rds -o /workspace/MATK_output/MetaCell/pbmc_V5/ -g 75 -s seurat
+              cli/MATK -t SuperCell -i pbmc_V5.rds -o /workspace/MATK_output/SuperCell/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t SEACells -i pbmc_V5.rds -o /workspace/MATK_output/SEACells/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t MetaCell -i pbmc_V5.rds -o /workspace/MATK_output/MetaCell/pbmc_V5/ -g 75 -s seurat
               # adata output
-              MATK -t SuperCell -i pbmc_V5.rds -o /workspace/MATK_output/SuperCell/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s adata
-              MATK -t SEACells -i pbmc_V5.rds -o /workspace/MATK_output/SEACells/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s adata
-              MATK -t MetaCell -i pbmc_V5.rds -o /workspace/MATK_output/MetaCell/pbmc_V5/ -g 75 -s adata
+              cli/MATK -t SuperCell -i pbmc_V5.rds -o /workspace/MATK_output/SuperCell/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t SEACells -i pbmc_V5.rds -o /workspace/MATK_output/SEACells/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t MetaCell -i pbmc_V5.rds -o /workspace/MATK_output/MetaCell/pbmc_V5/ -g 75 -s adata
 
 workflows:
   example:
