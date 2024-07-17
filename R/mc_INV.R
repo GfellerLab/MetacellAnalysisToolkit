@@ -48,13 +48,13 @@ mc_INV <- function(sc.obj,
   }
   
   data_matrix <- Matrix::t(Seurat::GetAssayData(sc.obj, assay = assay, slot = slot))
-  print("after get matrix")
+
   result_list <- tapply(1:nrow(data_matrix), membership_vector, function(indices) {
     x <- data_matrix[indices, ]
     get_INV_val(x, norm = do.norm)
   })
   INV_val <- do.call(rbind, result_list)
-  print("after do call")
+  
   INV_val[is.na(INV_val)] <- NA_val
   
   # Compute the 95th percentile (quantile)
