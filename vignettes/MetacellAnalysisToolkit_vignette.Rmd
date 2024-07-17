@@ -42,7 +42,7 @@ The lower the compactness value the better.
 This metric, as well as the separation metric, are computed based on a low embedding of the single-cell data, e.g. PCA embedding 
 which we generate in the next chunk.
 
-```{r sc-embessing, evaluate = TRUE}
+```{r sc-embedding, evaluate = TRUE}
 library(Seurat)
 sc_data <- NormalizeData(sc_data, normalization.method = "LogNormalize")
 sc_data <- FindVariableFeatures(sc_data, nfeatures = 2500)
@@ -85,6 +85,7 @@ Note that it is the only metric that is latent-space independent.
 mc_data$INV <- mc_INV(cell.membership = membership_df, sc.obj = sc_data, group.label = "membership")
 qc_boxplot(mc.obj = mc_data, qc.metrics = "INV")
 qc_boxplot(mc.obj = mc_data, qc.metrics = "INV", split.by = "celltype")
+
 ```
 
 ## Representativeness of metacells
