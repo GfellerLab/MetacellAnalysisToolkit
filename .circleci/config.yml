@@ -1,0 +1,78 @@
+# Couldn't automatically generate a config from your source code.
+# This is a generic template to serve as a base for your custom config
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+executors:
+  seurat_v5:
+    docker:
+      - image: agabriel/matk:SeuratV5
+    working_directory: /tmp/workspace
+  seurat_v4:
+    docker:
+      - image: agabriel/matk:SeuratV4
+    working_directory: /tmp/workspace
+
+jobs:
+  build_adata:
+    executor: seurat_v5
+    steps:
+      - checkout
+      - run:
+          name: Get anndata input
+          command: |
+            python get_data/get_PBMC_dataset.py
+            Rscript get_data/get_PBMC_rds.R
+            mv get_data/pbmc.rds get_data/pbmc_V5.rds
+      - persist_to_workspace:
+          root: get_data
+          paths:
+            - pbmc.h5ad
+            - pbmc_V5.rds
+
+  test_adata:
+    executor: seurat_v5
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Run tests
+          command: |
+              # seurat output
+              ls
+              cli/MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t SEACells -i pbmc.h5ad -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t MetaCell -i pbmc.h5ad -o MATK_output/MetaCell/pbmc/ -g 75 -s seurat
+              # adata output
+              cli/MATK -t SuperCell -i pbmc.h5ad -o MATK_output/SuperCell/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t SEACells -i pbmc.h5ad -o MATK_output/SEACells/pbmc/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t MetaCell -i pbmc.h5ad -o MATK_output/MetaCell/pbmc/ -g 75 -s adata
+
+  test_rds_V5:
+    executor: seurat_v5
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Run tests
+          command: |
+              # seurat output
+              cli/MATK -t SuperCell -i pbmc_V5.rds -o /workspace/MATK_output/SuperCell/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t SEACells -i pbmc_V5.rds -o /workspace/MATK_output/SEACells/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s seurat
+              cli/MATK -t MetaCell -i pbmc_V5.rds -o /workspace/MATK_output/MetaCell/pbmc_V5/ -g 75 -s seurat
+              # adata output
+              cli/MATK -t SuperCell -i pbmc_V5.rds -o /workspace/MATK_output/SuperCell/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t SEACells -i pbmc_V5.rds -o /workspace/MATK_output/SEACells/pbmc_v5/ -n 50 -f 2000 -k 30 -g 75 -s adata
+              cli/MATK -t MetaCell -i pbmc_V5.rds -o /workspace/MATK_output/MetaCell/pbmc_V5/ -g 75 -s adata
+
+workflows:
+  example:
+    jobs:
+      - build_adata
+      - test_adata:
+          requires:
+            - build_adata
+      - test_rds_V5:
+          requires:
+            - build_adata

@@ -9,7 +9,7 @@
 #' @param n.diff.comp (optional, default is 10) Number of eigen vectors to use in the determine_multiscale_space function in palantir. 
 #' @return  A data.frame containing the diffusion components.
 #' @examples
-#' get_diffusion_comp(sc.obj = CD34_sc, n.components = 30)
+#' get_diffusion_comp(sc.obj = CD34_sc, dims = 1:30)
 #' @export
 #' 
 
