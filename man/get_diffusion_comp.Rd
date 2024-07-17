@@ -24,5 +24,5 @@ A data.frame containing the diffusion components.
 This function computes diffusion components from palantir starting from a Seurat object (relies on python functions adapted from https://github.com/dpeerlab/SEACells/blob/main/SEACells/evaluate.py).
 }
 \examples{
-get_diffusion_comp(sc.obj = CD34_sc, n.components = 30)
+get_diffusion_comp(sc.obj = CD34_sc, dims = 1:30)
 }
