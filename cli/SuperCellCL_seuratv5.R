@@ -2,157 +2,159 @@ library(Seurat)
 library(getopt)
 #library(doParallel)
 # library(SuperCell)
-if(packageVersion("Seurat") >= 5) {options(Seurat.object.assay.version = "v4"); print("you are using seurat v5 with assay option v4"
-										
-MetacellRawExpression_Seurat_v5 <- function (object, pb.method = "aggregate", assays = NULL, features = NULL, 
-                                             return.seurat = TRUE, group.by = "ident", add.ident = NULL, 
-                                             layer = "counts", verbose = TRUE, ...) 
-{
-  CheckDots(..., fxns = "CreateSeuratObject")
-  if (!is.null(x = add.ident)) {
-    .Deprecated(msg = "'add.ident' is a deprecated argument, please use the 'group.by' argument instead")
-    group.by <- c("ident", add.ident)
-  }
-  if (!(pb.method %in% c("average", "aggregate"))) {
-    stop("'pb.method' must be either 'average' or 'aggregate'")
-  }
-  object.assays <- FilterObjects(object = object, classes.keep = "Assay")
-  assays <- assays %||% object.assays
-  if (!all(assays %in% object.assays)) {
-    assays <- assays[assays %in% object.assays]
-    if (length(x = assays) == 0) {
-      stop("None of the requested assays are present in the object")
+if(packageVersion("Seurat") >= 5) {
+  options(Seurat.object.assay.version = "v4"); 
+  print("you are using seurat v5 with assay option v4")
+  
+  MetacellRawExpression_Seurat_v5 <- function (object, pb.method = "aggregate", assays = NULL, features = NULL, 
+                                               return.seurat = TRUE, group.by = "ident", add.ident = NULL, 
+                                               layer = "counts", verbose = TRUE, ...) 
+  {
+    CheckDots(..., fxns = "CreateSeuratObject")
+    if (!is.null(x = add.ident)) {
+      .Deprecated(msg = "'add.ident' is a deprecated argument, please use the 'group.by' argument instead")
+      group.by <- c("ident", add.ident)
     }
-    else {
-      warning("Requested assays that do not exist in object. Proceeding with existing assays only.")
+    if (!(pb.method %in% c("average", "aggregate"))) {
+      stop("'pb.method' must be either 'average' or 'aggregate'")
     }
-  }
-  if (length(x = layer) == 1) {
-    layer <- rep_len(x = layer, length.out = length(x = assays))
-  }
-  else if (length(x = layer) != length(x = assays)) {
-    stop("Number of layers provided does not match number of assays")
-  }
-  data <- FetchData(object = object, vars = rev(x = group.by))
-  data <- data[which(rowSums(x = is.na(x = data)) == 0), , 
-               drop = F]
-  if (nrow(x = data) < ncol(x = object)) {
-    message("Removing cells with NA for 1 or more grouping variables")
-    object <- subset(x = object, cells = rownames(x = data))
-  }
-  for (i in 1:ncol(x = data)) {
-    data[, i] <- as.factor(x = data[, i])
-  }
-  num.levels <- sapply(X = 1:ncol(x = data), FUN = function(i) {
-    length(x = levels(x = data[, i]))
-  })
-  if (any(num.levels == 1)) {
-    message(paste0("The following grouping variables have 1 value and will be ignored: ", 
-                   paste0(colnames(x = data)[which(num.levels <= 1)], 
-                          collapse = ", ")))
-    group.by <- colnames(x = data)[which(num.levels > 1)]
-    data <- data[, which(num.levels > 1), drop = F]
-  }
-  if (ncol(x = data) == 0) {
-    message("All grouping variables have 1 value only. Computing across all cells.")
-    category.matrix <- matrix(data = 1, nrow = ncol(x = object), 
-                              dimnames = list(Cells(x = object), "all"))
-    if (pb.method == "average") {
-      category.matrix <- category.matrix/sum(category.matrix)
-    }
-  }
-  else {
-    category.matrix <- Matrix::sparse.model.matrix(object = as.formula(object = paste0("~0+", 
-                                                                                       paste0("data[,", 1:length(x = group.by), "]", collapse = ":"))))
-    colsums <- colSums(x = category.matrix)
-    category.matrix <- category.matrix[, colsums > 0]
-    colsums <- colsums[colsums > 0]
-    if (pb.method == "average") {
-      category.matrix <- Sweep(x = category.matrix, MARGIN = 2, 
-                               STATS = colsums, FUN = "/")
-    }
-    colnames(x = category.matrix) <- sapply(X = colnames(x = category.matrix), 
-                                            FUN = function(name) {
-                                              name <- gsub(pattern = "data\\[, [1-9]*\\]", 
-                                                           replacement = "", x = name)
-                                              return(paste0(rev(x = unlist(x = strsplit(x = name, 
-                                                                                        split = ":"))), collapse = "_"))
-                                            })
-  }
-  data.return <- list()
-  for (i in 1:length(x = assays)) {
-    data.use <- GetAssayData(object = object, assay = assays[i], 
-                             layer = layer[i])
-    features.to.avg <- features %||% rownames(x = data.use)
-    if (inherits(x = features, what = "list")) {
-      features.to.avg <- features[i]
-    }
-    if (IsMatrixEmpty(x = data.use)) {
-      warning("The ", layer[i], " layer for the ", assays[i], 
-              " assay is empty. Skipping assay.", immediate. = TRUE, 
-              call. = FALSE)
-      next
-    }
-    bad.features <- setdiff(x = features.to.avg, y = rownames(x = data.use))
-    if (length(x = bad.features) > 0) {
-      warning("The following ", length(x = bad.features), 
-              " features were not found in the ", assays[i], 
-              " assay: ", paste(bad.features, collapse = ", "), 
-              call. = FALSE, immediate. = TRUE)
-    }
-    features.assay <- intersect(x = features.to.avg, y = rownames(x = data.use))
-    if (length(x = features.assay) > 0) {
-      data.use <- data.use[features.assay, ]
-    }
-    else {
-      warning("None of the features specified were found in the ", 
-              assays[i], " assay.", call. = FALSE, immediate. = TRUE)
-      next
-    }
-    
-    data.return[[i]] <- as.sparse(x = (data.use %*% category.matrix))
-    colnames(data.return[[i]]) <- paste0("Metacell_",c(1:ncol(data.return[[i]])))
-    
-    names(x = data.return)[i] <- assays[[i]]
-  }
-  if (return.seurat) {
-    toRet <- CreateSeuratObject(counts = data.return[[1]], 
-                                project = if (pb.method == "average") 
-                                  "Average"
-                                else "Aggregate", assay = names(x = data.return)[1], 
-                                ...)
-    # toRet <- SetAssayData(object = toRet, assay = names(x = data.return)[1], 
-    #                       layer = "data", new.data = log1p(x = as.matrix(x = data.return[[1]])))
-    
-    if (length(x = data.return) > 1) {
-      for (i in 2:length(x = data.return)) {
-        
-        toRet[[names(x = data.return)[i]]] <- CreateAssay5Object(counts = data.return[[i]])
-        # toRet <- SetAssayData(object = toRet, assay = names(x = data.return)[i], 
-        #                       layer = "data", new.data = log1p(x = as.matrix(x = data.return[[i]])))
-        
+    object.assays <- FilterObjects(object = object, classes.keep = "Assay")
+    assays <- assays %||% object.assays
+    if (!all(assays %in% object.assays)) {
+      assays <- assays[assays %in% object.assays]
+      if (length(x = assays) == 0) {
+        stop("None of the requested assays are present in the object")
+      }
+      else {
+        warning("Requested assays that do not exist in object. Proceeding with existing assays only.")
       }
     }
-    if (DefaultAssay(object = object) %in% names(x = data.return)) {
-      DefaultAssay(object = toRet) <- DefaultAssay(object = object)
+    if (length(x = layer) == 1) {
+      layer <- rep_len(x = layer, length.out = length(x = assays))
     }
-    if ("ident" %in% group.by) {
-      first.cells <- c()
-      for (i in 1:ncol(x = category.matrix)) {
-        first.cells <- c(first.cells, Position(x = category.matrix[, 
-                                                                   i], f = function(x) {
-                                                                     x > 0
-                                                                   }))
+    else if (length(x = layer) != length(x = assays)) {
+      stop("Number of layers provided does not match number of assays")
+    }
+    data <- FetchData(object = object, vars = rev(x = group.by))
+    data <- data[which(rowSums(x = is.na(x = data)) == 0), , 
+                 drop = F]
+    if (nrow(x = data) < ncol(x = object)) {
+      message("Removing cells with NA for 1 or more grouping variables")
+      object <- subset(x = object, cells = rownames(x = data))
+    }
+    for (i in 1:ncol(x = data)) {
+      data[, i] <- as.factor(x = data[, i])
+    }
+    num.levels <- sapply(X = 1:ncol(x = data), FUN = function(i) {
+      length(x = levels(x = data[, i]))
+    })
+    if (any(num.levels == 1)) {
+      message(paste0("The following grouping variables have 1 value and will be ignored: ", 
+                     paste0(colnames(x = data)[which(num.levels <= 1)], 
+                            collapse = ", ")))
+      group.by <- colnames(x = data)[which(num.levels > 1)]
+      data <- data[, which(num.levels > 1), drop = F]
+    }
+    if (ncol(x = data) == 0) {
+      message("All grouping variables have 1 value only. Computing across all cells.")
+      category.matrix <- matrix(data = 1, nrow = ncol(x = object), 
+                                dimnames = list(Cells(x = object), "all"))
+      if (pb.method == "average") {
+        category.matrix <- category.matrix/sum(category.matrix)
       }
-      Idents(object = toRet) <- Idents(object = object)[first.cells]
     }
-    return(toRet)
-  }
-  else {
-    return(data.return)
-  }
-}      
-)}
+    else {
+      category.matrix <- Matrix::sparse.model.matrix(object = as.formula(object = paste0("~0+", 
+                                                                                         paste0("data[,", 1:length(x = group.by), "]", collapse = ":"))))
+      colsums <- colSums(x = category.matrix)
+      category.matrix <- category.matrix[, colsums > 0]
+      colsums <- colsums[colsums > 0]
+      if (pb.method == "average") {
+        category.matrix <- Sweep(x = category.matrix, MARGIN = 2, 
+                                 STATS = colsums, FUN = "/")
+      }
+      colnames(x = category.matrix) <- sapply(X = colnames(x = category.matrix), 
+                                              FUN = function(name) {
+                                                name <- gsub(pattern = "data\\[, [1-9]*\\]", 
+                                                             replacement = "", x = name)
+                                                return(paste0(rev(x = unlist(x = strsplit(x = name, 
+                                                                                          split = ":"))), collapse = "_"))
+                                              })
+    }
+    data.return <- list()
+    for (i in 1:length(x = assays)) {
+      data.use <- GetAssayData(object = object, assay = assays[i], 
+                               layer = layer[i])
+      features.to.avg <- features %||% rownames(x = data.use)
+      if (inherits(x = features, what = "list")) {
+        features.to.avg <- features[i]
+      }
+      if (IsMatrixEmpty(x = data.use)) {
+        warning("The ", layer[i], " layer for the ", assays[i], 
+                " assay is empty. Skipping assay.", immediate. = TRUE, 
+                call. = FALSE)
+        next
+      }
+      bad.features <- setdiff(x = features.to.avg, y = rownames(x = data.use))
+      if (length(x = bad.features) > 0) {
+        warning("The following ", length(x = bad.features), 
+                " features were not found in the ", assays[i], 
+                " assay: ", paste(bad.features, collapse = ", "), 
+                call. = FALSE, immediate. = TRUE)
+      }
+      features.assay <- intersect(x = features.to.avg, y = rownames(x = data.use))
+      if (length(x = features.assay) > 0) {
+        data.use <- data.use[features.assay, ]
+      }
+      else {
+        warning("None of the features specified were found in the ", 
+                assays[i], " assay.", call. = FALSE, immediate. = TRUE)
+        next
+      }
+      
+      data.return[[i]] <- as.sparse(x = (data.use %*% category.matrix))
+      colnames(data.return[[i]]) <- paste0("Metacell_",c(1:ncol(data.return[[i]])))
+      
+      names(x = data.return)[i] <- assays[[i]]
+    }
+    if (return.seurat) {
+      toRet <- CreateSeuratObject(counts = data.return[[1]], 
+                                  project = if (pb.method == "average") 
+                                    "Average"
+                                  else "Aggregate", assay = names(x = data.return)[1], 
+                                  ...)
+      # toRet <- SetAssayData(object = toRet, assay = names(x = data.return)[1], 
+      #                       layer = "data", new.data = log1p(x = as.matrix(x = data.return[[1]])))
+      
+      if (length(x = data.return) > 1) {
+        for (i in 2:length(x = data.return)) {
+          
+          toRet[[names(x = data.return)[i]]] <- CreateAssay5Object(counts = data.return[[i]])
+          # toRet <- SetAssayData(object = toRet, assay = names(x = data.return)[i], 
+          #                       layer = "data", new.data = log1p(x = as.matrix(x = data.return[[i]])))
+          
+        }
+      }
+      if (DefaultAssay(object = object) %in% names(x = data.return)) {
+        DefaultAssay(object = toRet) <- DefaultAssay(object = object)
+      }
+      if ("ident" %in% group.by) {
+        first.cells <- c()
+        for (i in 1:ncol(x = category.matrix)) {
+          first.cells <- c(first.cells, Position(x = category.matrix[, 
+                                                                     i], f = function(x) {
+                                                                       x > 0
+                                                                     }))
+        }
+        Idents(object = toRet) <- Idents(object = object)[first.cells]
+      }
+      return(toRet)
+    }
+    else {
+      return(data.return)
+    }
+  }      
+}
 
 spec = matrix(c(
   'help',        'h', 0, "logical",   "Help about the program",
@@ -287,26 +289,26 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     
     
     if (ncol(sobj.label)>4) { 
-    
-    sobj.label <- FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
-    
-    
-    
-    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
-    
-    SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
-                                     n.pc = n.pc,
-                                     k.knn = k.knn, # number of nearest neighbors to build kNN network
-                                     gamma = targetGamma, # graining level
-                                     genes.use = VariableFeatures(sobj.label))
-  } else {
-    cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
-    membership <- c(rep(1,ncol(sobj.label)))
-    names(membership) <- colnames(sobj.label)
-    SC.label <- list("N.SC" = 1,
-                     "membership" = membership,
-                     "supercell_size" = c(ncol(sobj.label)))
-  }
+      
+      sobj.label <- FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts (as in Seurat workflow) only if is.norm = F 
+      
+      
+      
+      cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
+      
+      SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
+                                       n.pc = n.pc,
+                                       k.knn = k.knn, # number of nearest neighbors to build kNN network
+                                       gamma = targetGamma, # graining level
+                                       genes.use = VariableFeatures(sobj.label))
+    } else {
+      cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
+      membership <- c(rep(1,ncol(sobj.label)))
+      names(membership) <- colnames(sobj.label)
+      SC.label <- list("N.SC" = 1,
+                       "membership" = membership,
+                       "supercell_size" = c(ncol(sobj.label)))
+    }
     
     #SCs[[label]] <- SC.label
   }
@@ -316,7 +318,7 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
   
 } else {
   
-
+  
   
   SCs <- list()
   if (is.null(opt$annotations)) {
@@ -348,30 +350,30 @@ if (opt$cores > 1 & !is.null(opt$annotations)) {
     targetGamma <- min(ncol(sobj.label)/minMetacells,opt$gamma)
     
     if (ncol(sobj.label)>4) { 
-    
-    sobj.label <- FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
-    
-    
-    fields <- sapply(X = colnames(sobj.label@meta.data) , 
-                     FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
-    fields <- names(fields[which(fields)])
-    
-    cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
-    if (!exists("normMatrix")) {
-      SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
-                                       n.pc = n.pc,
-                                       k.knn = k.knn, # number of nearest neighbors to build kNN network
-                                       gamma = targetGamma, # graining level
-                                       genes.use = VariableFeatures(sobj.label))
-    } else {
-      SC.label <- SuperCell::SCimplify(normMatrix,  # normalized gene expression matrix in case of normalized anndata object as input
-                                       n.pc = n.pc,
-                                       k.knn = k.knn, # number of nearest neighbors to build kNN network
-                                       gamma = targetGamma, # graining level
-                                       genes.use = VariableFeatures(sobj.label))
-      remove(normMatrix)
-      gc(verbose = F)
-    }
+      
+      sobj.label <- FindVariableFeatures(sobj.label,nfeatures = opt$nFeatures,verbose = F) #is performed on raw counts in Seurat
+      
+      
+      fields <- sapply(X = colnames(sobj.label@meta.data) , 
+                       FUN = function(X) {is.character(sobj.label[[X]][,1]) | is.factor(sobj.label[[X]][,1])})
+      fields <- names(fields[which(fields)])
+      
+      cat(paste0("Identify ",round(ncol(sobj.label)/targetGamma)," metacells using SuperCell...\n"))
+      if (!exists("normMatrix")) {
+        SC.label <- SuperCell::SCimplify(GetAssayData(sobj.label,slot = "data"),  # normalized gene expression matrix 
+                                         n.pc = n.pc,
+                                         k.knn = k.knn, # number of nearest neighbors to build kNN network
+                                         gamma = targetGamma, # graining level
+                                         genes.use = VariableFeatures(sobj.label))
+      } else {
+        SC.label <- SuperCell::SCimplify(normMatrix,  # normalized gene expression matrix in case of normalized anndata object as input
+                                         n.pc = n.pc,
+                                         k.knn = k.knn, # number of nearest neighbors to build kNN network
+                                         gamma = targetGamma, # graining level
+                                         genes.use = VariableFeatures(sobj.label))
+        remove(normMatrix)
+        gc(verbose = F)
+      }
     } else {
       cat("object contain less than 5 single cells, simplification is not possible\naggregating all single-cells in one metacell.")
       membership <- c(rep(1,ncol(sobj.label)))
@@ -400,18 +402,18 @@ if (opt$output != "SC") {
   
   sobj$Metacell <- SC$membership
   if (packageVersion("Seurat") < 5) {
-  sobjMC <- AggregateExpression(sobj,
-                                        return.seurat = T,
-                                        group.by = "Metacell",
-                                        slot = "counts", 
-                                        verbose  = F)
-  sobjMC@assays$RNA@data <- sobjMC@assays$RNA@counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
+    sobjMC <- AggregateExpression(sobj,
+                                  return.seurat = T,
+                                  group.by = "Metacell",
+                                  slot = "counts", 
+                                  verbose  = F)
+    sobjMC@assays$RNA@data <- sobjMC@assays$RNA@counts # because AggregateExpression with slot = counts set data to log1p(aggregated counts)
   } else {
-      sobjMC <- MetacellRawExpression_Seurat_v5(seurat,
-                                                group.by = "Metacell",
-                                                return.seurat = T)
-      
-      sobjMC[["RNA"]] <- as(object = sobjMC[["RNA"]], Class = "Assay")
+    sobjMC <- MetacellRawExpression_Seurat_v5(seurat,
+                                              group.by = "Metacell",
+                                              return.seurat = T)
+    
+    sobjMC[["RNA"]] <- as(object = sobjMC[["RNA"]], Class = "Assay")
   }
   gc(verbose = F)
   
